@@ -1,0 +1,3 @@
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:0s!important}}
+button:focus-visible,input:focus-visible,select:focus-visible,[role="application"]:focus-visible{outline:3px solid #7db8e7;outline-offset:2px}
+.terminal:focus-visible{outline:3px solid #7db8e7;outline-offset:3px}
