@@ -1,57 +1,112 @@
-# Plan: Recenter WireSim on the Sandbox
+# Wi-Sim: narrow-change product plan
 
-Replace the current multi-page feature dashboard with one dependable, always-live electrical workbench. The canvas becomes the shared source of truth for building, configuring, testing, finding real product equivalents, and completing lessons. The core learning loop is: place a realistic component, connect its documented terminals with sized conductors, change a setting or load, observe measurements and device states, then understand the evidence. Keep the current React/TypeScript/Vite foundation and salvage stable persistence, catalogue metadata, and lesson/scenario content where they fit the new model.
+This replaces the previous broad sandbox-rebuild plan. It is a product plan, not authorization to implement all of these changes at once. Make future work in small, reviewable slices that fit the existing app. Do not replace the editor, simulation engine, or persistence architecture unless a specific change proves that necessary.
 
-## Steps
+## Product goal
 
-1. **Inspect and research before choosing the editor/solver.** Inventory the current editor and data contracts, then research mature open-source electrical editors/simulators and canvas libraries that could reduce risk. Compare terminal-level circuit representation, DC and multi-phase AC behavior, wire routing, React integration, extensibility, performance, maintenance, and license obligations. Specifically evaluate whether an existing solver can be integrated behind this app's model, whether a schematic library can replace the hand-built SVG, or whether the current editor should be rebuilt around a maintained canvas library. Treat projects such as CircuitJS and canvas frameworks such as React Flow as candidates to verify, not automatic choices. Record links, license compatibility, tradeoffs, and a go/no-go recommendation; do not copy code until license and attribution obligations are checked. Reuse only components that preserve the learning/product requirements.
-2. **Define a terminal-aware project and device model.** Replace component-to-component `Wire { from, to }` with stable component/terminal IDs at both ends. Define terminal electrical domains and roles (DC+, DC-, PV, AC L/N/PE or phase terminals, control/data interface), direction/capability, physical position on the component, and compatible connection rules. Define device templates separately from placed instances, with per-model terminal layouts and explicit AC/DC ratings. Represent a MultiPlus-like inverter/charger with distinct DC battery terminals, AC input terminals, AC output terminals, and documented control/data ports; never reduce it to generic in/out ports. Define wire/cable instance properties for conductor size (AWG/mm²), material, length convention, parallel conductors where supported, insulation/colour/label, and endpoint lug/termination size and compatibility. Plan schema migration from existing v1 projects, preserving positions, settings, custom catalogue records, and wires only where a deterministic mapping is defensible; otherwise import them as visibly unresolved connections for user repair.
-3. **Make the Sandbox a fixed workbench shell.** Refactor `App`, `Sandbox`, and the mode pages so there is one central canvas and compact surrounding controls. Use a fixed viewport-height shell: header/navigation remain in place, the canvas owns pan/zoom, and only the left component/scenario rail and right inspector/details panels scroll internally. Remove document-level horizontal scrolling and the current 1120px minimum width. Allow panels to collapse or become drawers at narrower widths. Use a clean white/light canvas with restrained blue interaction highlights and semantic warning/fault colours. Add concise hover/focus tooltips for unfamiliar icons and controls. Keep current project/save/undo actions discoverable without making the UI a dashboard.
-4. **Build precise, comfortable canvas editing and wiring.** Use the chosen/researched open-source editor approach (or a focused custom editor if justified) for stable pan/zoom, grid snapping, component placement/movement, select/multi-select, delete, duplicate, undo/redo, and keyboard operation. Dragging should track smoothly; snapped placement should occur predictably, while attached wires update continuously and settle into clean orthogonal routes. Support visible junctions/buses, editable bends, connection labels, selection/deletion of wires, and clear DC/AC/data visual distinctions. Route around components where practical and flag unavoidable overlaps rather than obscuring terminals. Show cable thickness in a stable scale based on the selected conductor/gauge, with an explicit legend/label so visual width is not misread as measured current. Show endpoints, polarity/phase, cable size/length/material, and lug details on selection or hover. Add connection validation that explains incompatible terminals and permits deliberate invalid wiring only in an explicit learning/fault context.
-5. **Render model-appropriate equipment and real connection layouts.** Give generic templates coherent, legible device shapes, and give sourced real products a hybrid product-like body plus accurately named and positioned connection zones/terminals. Populate terminal geometry from each exact model's manual/product documentation; show model identity, port labels, ratings, and source state. Do not substitute decorative imagery for electrical clarity. Track image/vector asset provenance and licensing; use licensed/generated original product-like silhouettes if no redistributable product art is available. Verify that selecting a device exposes every supported connection and clearly marks unsupported/unverified ports.
-6. **Replace reachability estimates with a tested live circuit engine.** Build or integrate a bounded solver based on the open-source research. Model individual terminals/nodes, branches, common buses, wire resistance and return paths, cable/lug resistance, DC sources and loads, device limits, switches, fuses/breakers, and disconnected/open/fault states. Add distinct AC source, inverter/charger, AC load and transfer paths. The first-release AC configuration must include regional voltage/frequency profiles and supported single-, split-/two-phase, and three-phase arrangements, with phase/neutral/earth terminal semantics, source settings, and compatibility checks. Explicitly document what configurations are supported; no profile may be represented only by a label while the engine assumes another voltage/phase. Use fixed-step/stateful behavior only where needed (SOC, thermal response, protection trip timing); ordinary circuit results update continuously after edits and switching. Remove the global Run/Power On/Pause requirement. Loads, grid/shore sources, inverter modes, isolators, fuses and breakers control whether a path is energized. Report unsupported topologies honestly rather than displaying plausible fabricated readings. Keep the model educational, repeatable, and source-traceable, not a certification tool.
-7. **Make component configuration and product finding contextual.** Selecting a placed generic component opens the inspector for meaningful variables: e.g. inverter DC voltage, continuous/surge VA/W, AC output/input and phase configuration; MPPT battery voltage, PV absolute/operating voltage, current and power; cable gauge, length, material, and lug range. Explain each input and show units/validation. Provide closest real-life equivalents in the same inspector or a compact sidebar section, compared criterion-by-criterion with pass/fail/needs verification and source links. Applying a real model must update only model identity/default ratings/port layout as chosen, preserve connected wires when compatible, and clearly identify incompatible or unresolved connections. Research and source exact specifications deeply; prefer a smaller trustworthy set of useful models over a large catalogue of unverified near-matches. Keep the larger reference catalogue browsable, but stop treating its entry count as the core completion measure.
-8. **Add live instruments and component diagnostics to teach by evidence.** Provide a digital multimeter/probe users can attach to valid terminals or nodes for modeled voltage, current, resistance/continuity, and polarity checks. Measurements must come from the same live solution; define when a measurement is unsupported or unsafe/ambiguous in the simplified model. Give supported device models meaningful indicator/status states (input present, charging/inverting, overload, low voltage, fault) tied to explicit rules and measured thresholds. Show active path, current direction, cable size and measured values, per-device readings, alerts, and concise explanations. Keep event history and remedies tied to the exact rule and current values. Do not imply real device telemetry or certifying test instruments.
-9. **Rebuild Fault Lab and training as sandbox entry flows.** A fault challenge opens an isolated copy of a prebuilt system directly in the shared workbench, explains the symptom/objective without disclosing the fix, and lets the user inspect ports, indicators, live readings, and meter probes. Reset returns to that challenge, never overwrites the normal project, and pass conditions evaluate live circuit evidence rather than a fixed click sequence. System-design lessons start from a requirement (including AC region/profile, load demand, off-grid duration/energy, peak surge, and relevant constraints), let the learner build and run the system in the same canvas, and mark complete only when objective measurements pass. Keep hints, debriefs, and progress, but place them in a compact collapsible challenge/lesson panel. Sandbox experimentation stays unscored.
-10. **Preserve dependable local projects and migrate data safely.** Retain IndexedDB/localStorage fallback and visible save status; extend schema validation/migrations for terminal endpoints, wire specs, AC profiles, device definitions/overrides, probe state where appropriate, and scenario working copies. Keep autosave debounced for edits and avoid saving transient per-frame rendering data. Import errors must be recoverable; unknown models remain visible placeholders; backups include custom component definitions and project data. Add migration tests for existing v1 projects and invalid/future schemas.
-11. **Integrate, tune, and verify the complete learning loop.** Validate representative end-to-end builds: PV → controller → battery → inverter/charger → AC loads; Grid/Shore → AC input → supported inverter/charger → AC output; multiple loads/branches; and DC/AC/data wiring distinctions. Test cable/lug changes, snap/move/reroute, source region/phase changes, breaker trips and reset, inverter overload/low-voltage states, probe measurements, product-equivalent selection, fault repair, design-scenario completion, project reload, and old-project import. Run unit/integration tests, typecheck, catalogue/source validation, production build, browser interaction QA at laptop/tablet/mobile widths, keyboard/focus/reduced-motion checks, and an accessibility pass. Make the educational disclaimer and model boundaries visible without reclaiming workspace area.
+Wi-Sim is an educational solar and electrical wiring sandbox. Learners should be able to assemble a system, understand what each terminal and cable does, observe modeled electrical behavior, make a mistake safely, and learn from a clear explanation of what happened.
 
-## Relevant Files
+**Learning comes before visual effects or feature breadth.** Favor a clean, efficient interface: readable device shapes, restrained colors, clear electrical symbols, concise labels, and direct controls. Avoid visual clutter, oversized iconography, glow effects, and decoration that competes with the wiring.
 
-- `src/main.tsx` — current `App`, `Sandbox`, `ModePage`, `NodeItem`, `Wire`, and `STARTER`; currently combines app shell, editor behavior, modes, component-level wiring, and a global run toggle. Refactor into shared workbench composition and mode entry flows.
-- `src/simulation.ts` — `SimulationNode`, `SimulationProject`, and `calculateSimulation`; currently aggregates by kind and does reachability checks, not terminal-level Kirchhoff circuit solving. Replace/adapter after solver research.
-- `src/catalog.ts` — `CatalogRecord` and model records; expand from broad category fields to exact model ratings, terminal layouts, supported modes, source/revision/verification data, and behavioral capabilities.
-- `src/compatibility.ts` — existing voltage/interface matching helpers; evolve into contextual product-equivalent comparisons using device-specific requirements and explicit unknowns.
-- `src/scenarios.ts`, `src/training.ts` — preserve reusable content, but replace rules that currently evaluate simplified global aggregates with conditions on the shared live circuit model and scenario-owned sandbox copies.
-- `src/persistence.ts` — `PROJECT_SCHEMA_VERSION`, `parseProject`, `loadProject`, and `saveProject`; add versioned migrations to the terminal-aware project format.
-- `src/styles.css` — current dark navy theme, `body` 1120px minimum width, and mixed page/workspace styles; replace with light canvas/blue accents, fixed shell, independently scrolling panels, and responsive breakpoints.
-- `tests/simulation.test.mjs`, `tests/catalog.test.mjs`, `tests/catalog-validation.test.mjs`, `tests/persistence.test.mjs`, `tests/training.test.mjs` — extend with terminal topology, solver, wire routing/property, device port, regional AC, migration, meter, and scenario integration cases.
-- `package.json` — currently React/TypeScript/Vite only; add editor/solver/test dependencies only after research and license/API review.
-- `docs/SIMULATION_LIMITS.md`, `docs/CATALOG_SOURCES.md`, `README.md` — document supported circuit/AC domain, device evidence, project migration, and the simplified educational scope.
+## Existing app: starting point
 
-## Verification
+The current project is a React/TypeScript/Vite app with a custom SVG workbench and a bounded educational simulation. Keep this foundation and extend it incrementally.
 
-1. **Research gate:** document candidate open-source projects, maintenance status, exact license, relevant API integration, domain coverage, and why selected/rejected; do not import code or assets with incompatible/unclear terms.
-2. **Model tests:** reject missing/duplicate terminal IDs and illegal domain joins; preserve distinct inverter/charger AC-in, AC-out, DC, and control terminals; test wire resistance/round-trip conventions, bus branching/current sharing, open/short/reverse polarity handling, and deterministic results.
-3. **AC tests:** for supported 120 V/60 Hz, 230 V/50 Hz, split-phase 120/240 V, and three-phase profiles, verify terminal/phase mapping, voltage/current/power behavior, frequency checks, source-device compatibility, and clear rejection of unsupported arrangements. Adjust regional presets based on verified requirements.
-4. **Canvas checks:** drag and snap components, move connected components without wire detachment, verify orthogonal routes and bend persistence, visible cable thickness/labels/lugs, correct terminal hit targets, and wire selection/deletion; verify the document remains fixed while only the panels/canvas content move.
-5. **Behavioral integration:** build the representative PV/battery/inverter/AC topology, change cable size and source profile, switch a load, observe calculated readings and device indicators update without a global Run action, then create and clear an overload/protection fault with evidence.
-6. **Learning flows:** open a fault challenge into an isolated editable sandbox, use meter probes/indicators to find and resolve a fault, reset without changing the normal project, and complete a build-to-requirements task only when the resulting simulation satisfies its measurable criteria.
-7. **Product equivalence:** vary required inverter/MPPT parameters and verify closest models are ordered by explicit criteria; missing source/model values remain needs-verification; selecting a candidate updates compatible terminals and flags conflicts without dropping wires silently.
-8. **Data/release checks:** test v1 and malformed/future imports, IndexedDB fallback/save failure, custom definitions, `npm run verify`, browser interaction QA across laptop/tablet/mobile layouts, and keyboard/accessibility behavior.
+Already present:
 
-## Decisions
+- A shared workbench with terminal-aware DC, AC, data, and earth connections.
+- Wire properties including gauge, material, length, color/label-related metadata, and persisted orthogonal bend points. A selected bend can be moved.
+- Live, simplified PV, battery, inverter, load, protection, bus, and AC-source behavior, plus project-level solar irradiance and diagnostic evidence.
+- A component catalogue with PV, MPPT, batteries, inverter/chargers, grid/shore sources, transfer switches, loads, fuses/breakers, and buses. Some records are references rather than verified behavioral models.
+- Local autosave and project import/export, plus fault and design-learning flows.
+- Accessible controls and responsive styling, with manual browser interaction QA still identified as an outstanding gate in `docs/BROWSER_QA_CHECKLIST.md`.
 
-- The Sandbox/workbench is the only primary product surface. Catalogue, component matching, fault diagnosis, and system-design training are integrated entry points or side panels using the same project model and simulation.
-- Visual direction is a clean white/light canvas with blue highlights; the app shell stays fixed, with only canvas navigation and compact side panels moving/scrolling.
-- Use hybrid product-like device bodies with model-accurate, visibly labeled terminal positions and sourced layouts. Electrical fidelity of the ports takes priority over decorative realism.
-- Treat the user's AC requirement as all supported voltage/frequency/phase profiles from the first release, including single-phase, split/two-phase, and three-phase. Research/document exact supported profile and terminal semantics; do not fake unimplemented modes.
-- Remove a global simulation start/stop control. The network is live; component states and load/source switching determine energized behavior. Keep reset/retry controls for projects and challenges, not a master power switch.
-- Prioritize correctness, learnability, and source quality over catalogue counts or a broad set of independent dashboard modes. Existing stable persistence, content, and catalogue data are reused only where compatible.
-- The solver is an educational behavioral model, not SPICE or installation approval. Unsupported topology/model behavior must be explicit.
+Important gaps visible in the current implementation:
 
-## Further Considerations
+- A new project starts with a populated example system and a device preselected. Reset restores that starter system rather than an empty canvas, and the reset action currently has no confirmation.
+- The header advertises a “LIVE” mode even though the simulation already updates continuously.
+- Diagnostics are shown in the selected device's inspector; there is no single warning control that lists only currently active issues and navigates to them.
+- The canvas uses a fixed SVG viewBox and scale-based zoom. The requested larger, smoother workspace and controls anchored outside the work area need a focused UX pass, not an infinite-canvas rewrite.
+- Cable specifications and draggable bends exist, but the requested direct cable editing and easy add/remove/move corner controls need verification and completion.
+- Terminal-aware connections exist, but user-adjustable terminal positions and their interaction with routing need a small, explicit design.
+- Component names/labels and status content can overwhelm the device shapes. Add common electrical equipment only when its terminals, behavior, and educational purpose can be represented clearly.
 
-1. The old v1 wire format connects nodes without specifying terminals or cable data. Recommended migration: keep geometry/project values, but convert old wires to provisional terminal matches only when a unique compatible mapping exists; mark ambiguous wires unresolved instead of guessing silently.
-2. First-release three-phase support can expand solver/UI risk substantially. Research may establish a reusable solver/library; if not, maintain the requirement but stage profile coverage behind tested single/split/three-phase acceptance slices without shipping any profile that silently uses incorrect math.
-3. Real product appearance can imply exactness. Keep a clear distinction among documented terminal layout, illustrative enclosure art, and unverified physical details; cite the model manual and avoid copyrighted imagery unless permitted.
+These observations describe the code and project documentation inspected for this plan; they do not claim that the outstanding browser QA has been completed.
+
+## Prioritized implementation plan
+
+### 1. Make the default workflow empty, clear, and saveable
+
+- Rename the user-facing product to **Wi-Sim** consistently in the app title, visible branding, and relevant UI copy. Keep internal package identifiers unchanged unless a separate need is established.
+- Start a new, unsaved sandbox empty and with no device selected. Continue loading a user's saved project normally.
+- Make Reset ask for confirmation, then clear the current sandbox to an empty state. Keep challenge/lesson reset behavior distinct so it continues to restore that challenge rather than erase the normal project.
+- Keep autosave, but make the save state and an explicit way to save/export a named wiring easy to find. Make it clear whether changes are saved locally and how to keep a portable backup.
+- Remove the misleading “LIVE” mode banner; retain a concise explanation that model readings update as the learner edits.
+
+**Acceptance:** first-time use opens an empty canvas; a saved project still reloads; reset cannot silently erase work; challenge reset remains isolated; users can identify saved state and export a wiring.
+
+### 2. Improve cable editing and the work area
+
+- Put zoom and direction/pan controls in a compact, fixed workbench footer or equivalent area outside the drawable canvas. They must not cover wiring or consume canvas space.
+- Improve drag/pan responsiveness and enlarge the bounded work area without requiring an infinite canvas. Preserve keyboard operation, focus, and small-screen usability.
+- Let a learner edit a cable's available properties where it is created or selected: conductor size, material, length, color/label, and supported parallel/insulation details. Keep units and model limits visible; do not imply that a cable's drawn width is an ampacity guarantee.
+- Complete direct bend editing: add, move, and remove 90-degree route corners. Keep the orthogonal route attached to the correct terminals after devices move.
+- Prefer routes that go around device bodies. Make unavoidable route conflicts visible rather than drawing a wire deceptively behind a device.
+- Verify whether selection-scoped terminal position editing can build on the current terminal model. If so, expose a simple position control with a live preview and update connected routes; keep sensible per-device defaults.
+
+**Acceptance:** learners can specify a cable, move its route around equipment, add/remove/move corners, and adjust supported terminal positions without disconnecting wires. Controls remain outside the usable canvas and work at the checklist's target screen sizes.
+
+### 3. Make solar conditions and modeled results understandable
+
+- Expose sunlight/irradiance as an obvious percentage setting on the selected PV array. If multiple arrays are supported, make the scope of the setting explicit rather than silently changing every array.
+- Show relevant modeled output/current at the array and connected equipment, and update it as irradiance, wiring, or device settings change.
+- Explain why a reading changes and mark unsupported calculations honestly. Keep the simulation's documented boundaries; do not present a simplified result as a measured or certified real-world prediction.
+
+**Acceptance:** changing sunlight percentage produces a visible, explainable change in the model where the connected topology supports one; disconnected or unsupported paths do not show fabricated current.
+
+### 4. Replace inspector-only diagnostics with active, navigable warnings
+
+- Add one compact warning button in the sidebar with a severity-based color and an active-warning count. Clicking it expands/collapses the warning list.
+- Show current actionable warnings, not old diagnostic history as if it were still active. Preserve history only as a clearly separate learning/evidence feature if useful.
+- Selecting a warning should pan/scroll to the relevant device, terminal, or wire and highlight it on the canvas. Provide a clear way back to the normal view.
+- Move the primary diagnostic experience out of the selected-component inspector. Keep component-specific settings there; show relevant warning context consistently regardless of selection.
+- Add a small, restrained visual cue (for example, a brief spark token) only when the modeled event justifies it, with a nearby warning. Motion must respect reduced-motion settings and never substitute for the explanation.
+- Research warning rules before implementing them. Use current, credible electrical references and manufacturer documentation for the relevant equipment; distinguish well-supported checks from simplified teaching heuristics. Warnings should explain the condition, evidence, consequence, and a safe learning-oriented next step. Account for topology, polarity, domains/roles, ratings, protection, and cable data only where the model has sufficient inputs. Explicitly label unknown or unsupported cases instead of guessing.
+
+**Acceptance:** only active issues appear in the active list; each warning points to its source and explains why it matters; selecting it locates and highlights that source; visual alerts are restrained and accessible.
+
+### 5. Improve component clarity and add equipment selectively
+
+- Use recognizable, clean electrical symbols in the component palette and as compact identifiers on the canvas. Pair symbols with short readable names; do not rely on icon recognition alone.
+- Simplify canvas device facades so terminals, polarity/phase, and connections remain legible at ordinary zoom. Prevent labels and status text from overlapping the device or one another.
+- Prioritize commonly used solar/electrical equipment that fills a real learning gap, such as fused distribution/fuse holders, DC-DC chargers, disconnects, and busbars. Check existing catalogue entries first.
+- For each addition, define its actual terminal layout, editable/relevant ratings, supported behavior, and source quality before adding it. A multi-branch fuse holder must model its branches and protection meaningfully; do not approximate it as a generic fuse or bus without making the limitation explicit.
+- Clearly distinguish verified device models from illustrative/reference-only catalogue entries. Expand in small batches, preferring a few understandable and source-backed devices over a large unverified catalogue.
+
+**Acceptance:** a learner can identify equipment and connection points without reading overlapping text; new equipment has a distinct purpose, intelligible terminals, and honest behavior/source status.
+
+## Research and safety boundaries
+
+Research is part of the implementation of warning rules and new equipment, not a reason to replace the app architecture. Trace each rule or model claim to credible, current references (including manufacturer documentation where applicable). Record what the simulation can and cannot establish. Do not invent universal wiring rules from incomplete context, imply that a spark animation is a physical prediction, or claim code/standard compliance, installation approval, or certification.
+
+The solver remains an educational bounded model. Unsupported electrical behavior must remain visibly unsupported. The learning experience should explain mistakes without encouraging users to apply an unverified sandbox design to real installations.
+
+## Delivery sequence and verification
+
+Work in this order, one narrow slice at a time:
+
+1. Brand, empty-new-project behavior, confirmed empty reset, and save/export clarity.
+2. Canvas controls and the specific cable/route/terminal editing gaps confirmed in browser testing.
+3. PV irradiance and understandable live readings.
+4. Source-backed active warning list and canvas navigation.
+5. Legibility improvements and individually researched catalogue additions.
+
+For each slice, inspect the existing behavior first, update only directly related code/docs, add focused regression coverage, and verify the affected flow. Before calling the UX complete, perform the interaction checks in `docs/BROWSER_QA_CHECKLIST.md` at laptop, tablet, and phone widths, including keyboard/focus and reduced-motion behavior. Keep `docs/SIMULATION_LIMITS.md` accurate as modeled behavior changes.
+
+## Explicit non-goals
+
+- No broad dashboard rebuild, canvas-library migration, or simulation-engine replacement as part of this refocus.
+- No infinite canvas or wholesale visual redesign.
+- No large catalogue expansion for its own sake, photorealistic product artwork, heavy iconography, or glowy effects.
+- No claim that WireSim is a general-purpose circuit solver, installation tool, or substitute for manufacturer instructions and applicable standards.
+- No implementation of this whole plan in one change. Each future change should have a narrow scope and its own verification.
