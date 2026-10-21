@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { AC_PROFILES, defaultTerminals, validateProjectModel } from '../src/simulation.ts'
+import { AC_PROFILES, calculateSimulation, defaultTerminals, getWireTerminalIssue, validateProjectModel } from '../src/simulation.ts'
 
 const node = (id, kind) => ({ id, kind, name: id, x: 0, y: 0 })
 
@@ -36,6 +36,43 @@ test('terminal validation identifies an AC conductor short explicitly', () => {
   const report = validateProjectModel(project)
   assert.equal(report.valid, false)
   assert.ok(report.errors.some(error => error.includes('AC conductor short')))
+})
+
+test('incompatible wires remain visible for learning but do not create modeled paths', () => {
+  const cases = [
+    {
+      nodes: [node('battery', 'battery'), node('bus', 'bus')],
+      wire: { id: 'polarity-mismatch', from: 'battery', fromTerminal: 'bat+', to: 'bus', toTerminal: 'bus-' },
+      expectedKind: 'polarity',
+    },
+    {
+      nodes: [node('pv', 'pv'), node('load', 'load')],
+      wire: { id: 'domain-mismatch', from: 'pv', fromTerminal: 'pv+', to: 'load', toTerminal: 'earth' },
+      expectedKind: 'domain',
+    },
+    {
+      nodes: [node('source-a', 'ac-source'), node('source-b', 'ac-source')],
+      wire: { id: 'direction-mismatch', from: 'source-a', fromTerminal: 'line', to: 'source-b', toTerminal: 'line' },
+      expectedKind: 'direction',
+    },
+  ]
+
+  for (const { nodes, wire, expectedKind } of cases) {
+    const project = {
+      nodes,
+      wires: [wire],
+      irradiance: 100,
+      temperature: 25,
+    }
+    const issue = getWireTerminalIssue(project, wire)
+    const result = calculateSimulation(project)
+
+    assert.ok(issue)
+    assert.equal(issue?.kind, expectedKind)
+    assert.ok(result.diagnostics.some(event => event.id === `wire-terminal-issue:${wire.id}` && event.evidence.includes(issue.message)))
+    assert.deepEqual(result.network.activePaths, [])
+    assert.equal(result.topologyValid, false)
+  }
 })
 
 test('all four AC profiles have explicit voltage, frequency and phase semantics', () => {

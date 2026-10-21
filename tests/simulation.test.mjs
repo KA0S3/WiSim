@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calculateSimulation } from '../src/simulation.ts'
+import { calculateSimulation, validateProjectModel } from '../src/simulation.ts'
 import { evaluateScenario, SCENARIOS } from '../src/scenarios.ts'
 
 const project = {
@@ -15,6 +15,69 @@ const project = {
   ],
   wires: [],
 }
+
+test('project validation rejects invalid environment and supplied canvas coordinates', () => {
+  assert.equal(validateProjectModel({ ...project, irradiance: 0, temperature: -273.15 }).valid, true)
+  assert.match(validateProjectModel({ ...project, irradiance: 100.1 }).errors.join(' '), /Sunlight percentage/)
+  assert.match(validateProjectModel({ ...project, temperature: Number.NaN }).errors.join(' '), /Panel temperature/)
+  assert.match(validateProjectModel({ ...project, ambientTemperature: -300 }).errors.join(' '), /Ambient temperature/)
+  assert.match(validateProjectModel({ ...project, acSourceFrequency: 0 }).errors.join(' '), /AC source frequency/)
+  assert.match(validateProjectModel({ ...project, nodes: [{ id: 'bad-position', kind: 'pv', name: 'Bad position', x: Number.POSITIVE_INFINITY, y: 0 }] }).errors.join(' '), /canvas position/)
+})
+
+test('project validation rejects malformed device operating states and model selections', () => {
+  const switched = { ...project, nodes: [...project.nodes, { id: 'transfer', kind: 'transfer', name: 'Transfer', x: 0, y: 0, switchState: 'maybe' }] }
+  assert.match(validateProjectModel(switched).errors.join(' '), /switch state must be open or closed/)
+  const tripped = { ...project, nodes: [...project.nodes, { id: 'fuse', kind: 'fuse', name: 'Fuse', x: 0, y: 0, tripped: 'yes' }] }
+  assert.match(validateProjectModel(tripped).errors.join(' '), /tripped state must be true or false/)
+  const chemistry = { ...project, nodes: project.nodes.map(node => node.kind === 'battery' ? { ...node, chemistry: 'unknown' } : node) }
+  assert.match(validateProjectModel(chemistry).errors.join(' '), /battery chemistry must be LiFePO4 or lead-acid/)
+  const profile = { ...project, nodes: project.nodes.map(node => node.kind === 'inverter' ? { ...node, acProfile: 'worldwide' } : node) }
+  assert.match(validateProjectModel(profile).errors.join(' '), /unsupported AC output profile/)
+})
+
+test('device-specific settings cannot be silently attached to a component that ignores them', () => {
+  const enabled = { ...project, nodes: project.nodes.map(node => node.kind === 'load' ? { ...node, enabled: true } : node) }
+  assert.match(validateProjectModel(enabled).errors.join(' '), /enabled flag has no modeled behavior/)
+  const misplacedTrip = { ...project, nodes: project.nodes.map(node => node.kind === 'load' ? { ...node, tripped: false } : node) }
+  assert.match(validateProjectModel(misplacedTrip).errors.join(' '), /tripped state is only modeled for protection devices/)
+  const misplacedChemistry = { ...project, nodes: project.nodes.map(node => node.kind === 'inverter' ? { ...node, chemistry: 'LiFePO4' } : node) }
+  assert.match(validateProjectModel(misplacedChemistry).errors.join(' '), /chemistry is only modeled for batteries/)
+})
+
+test('terminal order is validated even without a side, and placed slots remain unique', () => {
+  const baseTerminalProject = { irradiance: 50, temperature: 20, nodes: [{ id: 'node', kind: 'bus', name: 'Bus', x: 0, y: 0, terminals: [] }], wires: [] }
+  assert.match(validateProjectModel({ ...baseTerminalProject, nodes: [{ ...baseTerminalProject.nodes[0], terminals: [{ id: 'a', label: 'A', domain: 'dc', role: 'positive', order: 0 }] }] }).errors.join(' '), /order must be a positive whole number/)
+  assert.match(validateProjectModel({ ...baseTerminalProject, nodes: [{ ...baseTerminalProject.nodes[0], terminals: [{ id: 'a', label: 'A', domain: 'dc', role: 'positive', side: 'top', order: 1 }, { id: 'b', label: 'B', domain: 'dc', role: 'negative', side: 'top', order: 1 }] }] }).errors.join(' '), /multiple terminals at top order 1/)
+})
+
+test('project validation rejects unknown conductor materials instead of treating them as copper', () => {
+  const invalid = { irradiance: 50, temperature: 20, nodes: [{ id: 'a', kind: 'battery', name: 'Battery' }, { id: 'b', kind: 'inverter', name: 'Inverter' }], wires: [{ id: 'w', from: 'a', to: 'b', material: 'steel' }] }
+  assert.match(validateProjectModel(invalid).errors.join(' '), /material must be copper or aluminium/)
+})
+
+test('unknown component kinds remain diagnosable without crashing the bounded solver', () => {
+  const unknown = { irradiance: 50, temperature: 20, nodes: [{ id: 'mystery', kind: 'mystery-device', name: 'Imported device', x: 0, y: 0 }], wires: [] }
+  assert.match(validateProjectModel(unknown).errors.join(' '), /unsupported component kind mystery-device/)
+  assert.doesNotThrow(() => calculateSimulation(unknown))
+})
+
+test('project validation rejects unsupported terminal directions and wire display values', () => {
+  const baseShape = { irradiance: 50, temperature: 20, nodes: [{ id: 'a', kind: 'battery', name: 'Battery', x: 0, y: 0, terminals: [{ id: 'out', label: 'OUT', domain: 'dc', role: 'positive', direction: 'sideways' }] }, { id: 'b', kind: 'inverter', name: 'Inverter', x: 100, y: 0 }], wires: [{ id: 'w', from: 'a', to: 'b', color: 'purple' }] }
+  const validation = validateProjectModel(baseShape)
+  const errors = validation.errors.join(' ')
+  assert.match(errors, /unsupported direction/)
+  assert.equal(validation.valid, false)
+  assert.match(validation.warnings.join(' '), /saved display color outside the current palette/)
+})
+
+test('legacy display colors warn without invalidating the electrical model', () => {
+  const project = { irradiance: 50, temperature: 20, nodes: [{ id: 'a', kind: 'battery', name: 'Battery' }, { id: 'b', kind: 'inverter', name: 'Inverter' }], wires: [{ id: 'w', from: 'a', to: 'b', color: 'purple' }] }
+  const validation = validateProjectModel(project)
+  assert.equal(validation.valid, true)
+  assert.match(validation.warnings.join(' '), /saved display color outside the current palette/)
+  assert.ok(calculateSimulation(project).diagnostics.some(event => event.title === 'Saved wire display setting needs review'))
+})
 
 test('simulation output is deterministic and includes evidence', () => {
   const first = calculateSimulation(project)
@@ -94,7 +157,13 @@ test('parallel load branches expose current shares and source reachability', () 
   const branchProject = {
     ...project,
     nodes: [...project.nodes, { id: 'load-2', kind: 'load', name: 'Second load', watts: 90 }],
-    wires: [{ id: 'w1', from: 'pv', to: 'battery' }, { id: 'w2', from: 'battery', to: 'inverter' }, { id: 'w3', from: 'inverter', to: 'load' }, { id: 'w4', from: 'inverter', to: 'load-2' }, { id: 'w5', from: 'inverter', to: 'cable' }],
+    wires: [
+      { id: 'w1', from: 'pv', fromTerminal: 'pv+', to: 'battery', toTerminal: 'bat+', domain: 'dc' },
+      { id: 'w2', from: 'battery', fromTerminal: 'bat+', to: 'inverter', toTerminal: 'dc+', domain: 'dc' },
+      { id: 'w3', from: 'inverter', fromTerminal: 'ac-out-l', to: 'load', toTerminal: 'line', domain: 'ac' },
+      { id: 'w4', from: 'inverter', fromTerminal: 'ac-out-l', to: 'load-2', toTerminal: 'line', domain: 'ac' },
+      { id: 'w5', from: 'inverter', fromTerminal: 'dc+', to: 'cable', toTerminal: 'in', domain: 'dc' },
+    ],
   }
   const result = calculateSimulation(branchProject)
   assert.equal(result.topologyValid, true)

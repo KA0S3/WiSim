@@ -1,0 +1,1470 @@
+{
+  "schemaVersion": 1,
+  "lastReviewed": "2026-10-20",
+  "policy": "Keep exact manufacturer model identities in this unified database even while research is incomplete. Use verified only when ratings, colors, terminal layouts, and installation guidance are sourced; otherwise use partially verified or reference only, list missingData, and never infer unknown values.",
+  "installationRuleSets": [
+    {
+      "id": "victron-smartsolar-75-10-to-100-20",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html",
+      "rules": [
+        {
+          "id": "mounting",
+          "text": "Mount vertically on a non-flammable surface with electrical terminals facing down. Keep at least 100 mm clearance above and below for cooling.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "battery-location",
+          "text": "Mount within 3 m of the battery, but not directly above it.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "battery-fuse",
+          "text": "Protect the battery supply with a fuse selected from the exact model's manual table. This database does not substitute a fuse rating.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "pv-array-limits",
+          "text": "Keep array open-circuit voltage at or below the exact model limit and nominal PV voltage at least 5 V above battery voltage. Account for cold-weather Voc rise and the panel voltage temperature coefficient.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "connection-order",
+          "text": "Check polarity, connect the battery first, allow 10 seconds for automatic voltage detection, then connect the DC load and PV. PV-first connection is allowed only when system voltage was manually configured first.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "terminal-torque-and-conductor",
+          "text": "Use flexible multi-stranded copper for screw connections and torque battery, load, and PV terminals to 0.75 N·m.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        },
+        {
+          "id": "limits-and-grounding",
+          "text": "The PV input is not isolated from the battery circuit and the controller has no internal ground-fault protection. Follow the exact manual and applicable local requirements for enclosures, disconnection, grounding, and any required external protection.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/installation.html"
+        }
+      ]
+    },
+    {
+      "id": "victron-lithium-smart-battery",
+      "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html",
+      "rules": [
+        {
+          "id": "mounting-orientation",
+          "text": "Mount upright or on its side, but never with the battery terminals facing down. The 12.8 V/330 Ah model is upright-only.",
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html"
+        },
+        {
+          "id": "cable-protection",
+          "text": "Size battery cables for expected current and fuse every battery cable. The fuse rating must not exceed the lowest applicable cable, battery, or system current rating.",
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html"
+        },
+        {
+          "id": "polarity-and-torque",
+          "text": "Observe battery polarity, prevent terminal short circuits, and tighten connection bolts to the torque specified in the manual using insulated tools.",
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html"
+        },
+        {
+          "id": "battery-bank-matching",
+          "text": "Use matching battery models and capacities in a bank where possible; follow the manual's limits and wiring guidance for series and parallel connections.",
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html"
+        }
+      ]
+    },
+    {
+      "id": "victron-smartsolar-100-30-to-100-50",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html",
+      "rules": [
+        {
+          "id": "mounting",
+          "text": "Mount vertically on a non-flammable surface with electrical terminals facing down. Keep at least 100 mm clearance above and below for cooling.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "battery-location",
+          "text": "Mount within 3 m of the battery, but not directly above it.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "battery-fuse",
+          "text": "Protect the battery supply with a fuse selected from the exact model's manual table. This database does not substitute a fuse rating.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "pv-array-limits",
+          "text": "Keep array open-circuit voltage at or below 100 V and nominal PV voltage at least 5 V above battery voltage. Account for cold-weather Voc rise and the panel voltage temperature coefficient; do not use PV optimizers.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "connection-order",
+          "text": "Check polarity, connect the battery first, allow 10 seconds for automatic voltage detection, then connect PV. PV-first connection is allowed only when system voltage was manually configured first.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "terminal-torque-and-conductor",
+          "text": "Use flexible multi-stranded copper for screw connections and torque battery and PV terminals to 1.6 N·m.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        },
+        {
+          "id": "limits-and-grounding",
+          "text": "The PV input is not isolated from the battery circuit and the controller has no internal ground-fault protection. Follow the exact manual and applicable local requirements for enclosures, disconnection, grounding, and any required external protection.",
+          "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/installation.html"
+        }
+      ]
+    },
+    {
+      "id": "blue-sea-285-series-surface-mount-breaker",
+      "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A",
+      "rules": [
+        {
+          "id": "mounting",
+          "text": "Install as a surface-mounted circuit breaker using its specified mounting arrangement.",
+          "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A"
+        },
+        {
+          "id": "terminal-torque",
+          "text": "Use 1/4-inch ring terminals on the M6 studs and tighten the terminal hardware to 50 in-lb (5.65 N·m).",
+          "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A"
+        },
+        {
+          "id": "switch-use",
+          "text": "Do not use this circuit breaker as a switch where high inrush current is expected.",
+          "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A"
+        }
+      ]
+    },
+    {
+      "id": "renogy-rover-li-40a",
+      "source": "https://www.renogy.com/products/rover-li-40-amp-mppt-solar-charge-controller",
+      "rules": [
+        {
+          "id": "terminal-order",
+          "text": "The six controller terminals are arranged along the bottom in this left-to-right order: PV positive, PV negative, battery positive, battery negative, load positive, load negative.",
+          "source": "https://cdn.shopify.com/s/files/1/0631/0137/0483/files/UM_Rover_20Li_20Series_2020A_2630A_2640A_G2.pdf?v=1752029603#page=17"
+        },
+        {
+          "id": "pv-limits",
+          "text": "Keep PV open-circuit voltage at or below 100 V and maximum array power within the documented battery-voltage limit: 520 W at 12 V or 1040 W at 24 V.",
+          "source": "https://www.renogy.com/products/rover-li-40-amp-mppt-solar-charge-controller"
+        },
+        {
+          "id": "connection-order",
+          "text": "Follow the manual's battery-first wiring sequence and its model-specific cable and fuse sizing guidance; this catalogue does not replace local electrical requirements.",
+          "source": "https://cdn.shopify.com/s/files/1/0631/0137/0483/files/UM_Rover_20Li_20Series_2020A_2630A_2640A_G2.pdf?v=1752029603"
+        }
+      ]
+    },
+    {
+      "id": "morningstar-prostar-mppt",
+      "source": "https://www.morningstarcorp.com/wp-content/uploads/datasheet-prostar-mppt-en.pdf",
+      "rules": [
+        {
+          "id": "limits-and-array-protection",
+          "text": "Keep cold-corrected PV open-circuit voltage within the 120 V controller limit. Size PV over-current protection, battery protection, and conductors to the exact controller model and applicable code.",
+          "source": "https://www.morningstarcorp.com/wp-content/uploads/operation-manual-prostar-mppt-en.pdf"
+        },
+        {
+          "id": "terminal-order",
+          "text": "The main bottom terminals are arranged left to right as Solar +/−, Load +/−, and Battery +/−. The wiring diagram also shows separate voltage-sense and temperature-sensor connections.",
+          "source": "https://www.morningstarcorp.com/wp-content/uploads/operation-manual-prostar-mppt-en.pdf#page=18"
+        },
+        {
+          "id": "model-specific-overcurrent",
+          "text": "The manual specifies PV-input over-current ratings of 40 A for PS-MPPT-25 and 50 A for PS-MPPT-40; do not apply one model's value to another.",
+          "source": "https://www.morningstarcorp.com/wp-content/uploads/operation-manual-prostar-mppt-en.pdf#page=17"
+        }
+      ]
+    },
+    {
+      "id": "epever-tracer-an-g3",
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "rules": [
+        {
+          "id": "pv-voltage-limit",
+          "text": "Keep cold-corrected PV open-circuit voltage within the exact model limit: 60 V for the 06 models and 100 V for the 10 models.",
+          "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf"
+        },
+        {
+          "id": "terminal-order",
+          "text": "The six main terminals are on the bottom. The manual groups them as PV, battery, and load connections; wire them using the labeled polarity on the device and its model manual.",
+          "source": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8"
+        },
+        {
+          "id": "protection-and-installation",
+          "text": "Use the manual's specified external fast-acting protection and installation environment; isolate the PV array and battery before adjustment or wiring.",
+          "source": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf"
+        }
+      ]
+    },
+    {
+      "id": "victron-bluesolar-monocrystalline",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "rules": [
+        {
+          "id": "maximum-system-voltage",
+          "text": "Do not exceed the module's 1000 V maximum system voltage; array design must also account for cold-corrected open-circuit voltage and applicable electrical requirements.",
+          "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf"
+        },
+        {
+          "id": "connector-compatibility",
+          "text": "Use compatible PV-ST01 / MC4-type connectors as identified by the manufacturer and preserve module polarity when connecting the array.",
+          "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf"
+        }
+      ]
+    },
+    {
+      "id": "victron-phoenix-inverter-vedirect",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "rules": [
+        {
+          "id": "battery-cabling",
+          "text": "Use DC battery cables and connections sized for the inverter's current; keep polarity correct and consult the exact model manual for cable and over-current protection sizing.",
+          "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf"
+        },
+        {
+          "id": "ac-output",
+          "text": "Use the correct regional AC output socket and frequency for the exact model; this record represents the 230 V, 50 Hz variant.",
+          "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf"
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "victron-smartsolar-75-10",
+      "name": "SmartSolar MPPT 75/10",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 75/10",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 145,
+      "current": 10,
+      "chargeCurrent": 10,
+      "pvVoc": 75,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 145,
+        "24": 290
+      },
+      "maxPvShortCircuitCurrentA": 10,
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 15, "24": 15 },
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-75-10-to-100-20",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-75-15",
+      "name": "SmartSolar MPPT 75/15",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 75/15",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 220,
+      "current": 15,
+      "chargeCurrent": 15,
+      "pvVoc": 75,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 220,
+        "24": 440
+      },
+      "maxPvShortCircuitCurrentA": 15,
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 15, "24": 15 },
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-75-10-to-100-20",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-100-15",
+      "name": "SmartSolar MPPT 100/15",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 100/15",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 220,
+      "current": 15,
+      "chargeCurrent": 15,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 220,
+        "24": 440
+      },
+      "maxPvShortCircuitCurrentA": 15,
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 20, "24": 20 },
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-75-10-to-100-20",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-100-20",
+      "name": "SmartSolar MPPT 100/20",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 100/20",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 290,
+      "current": 20,
+      "chargeCurrent": 20,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24, 48],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 290,
+        "24": 580,
+        "48": 1160
+      },
+      "maxPvShortCircuitCurrentA": 20,
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 20, "24": 20, "48": 1 },
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-75-10-to-100-20",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/image/img-41f4927cc5d1a7b8a41d6b89b54a6e43.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-100-30",
+      "name": "SmartSolar MPPT 100/30",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/image/img-f63ee0e94a46e80537f4699dd497ec05.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 100/30",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 440,
+      "current": 30,
+      "chargeCurrent": 30,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 440,
+        "24": 880
+      },
+      "maxPvShortCircuitCurrentA": 35,
+      "maximumEfficiencyPercent": 98,
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-100-30-to-100-50",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/image/img-f63ee0e94a46e80537f4699dd497ec05.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-100-50",
+      "name": "SmartSolar MPPT 100/50",
+      "brand": "Victron Energy",
+      "brandColors": {
+        "primary": "#4784C4",
+        "secondary": "#FFFFFF"
+      },
+      "productColorName": "Blue (RAL 5012)",
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/image/img-f63ee0e94a46e80537f4699dd497ec05.png",
+      "family": "Victron solar charge controllers",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 100/50",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "voltage": 12,
+      "power": 700,
+      "current": 50,
+      "chargeCurrent": 50,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 700,
+        "24": 1400
+      },
+      "maxPvShortCircuitCurrentA": 60,
+      "maximumEfficiencyPercent": 98,
+      "interfaces": ["VE.Direct"],
+      "installationRuleSetId": "victron-smartsolar-100-30-to-100-50",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/image/img-f63ee0e94a46e80537f4699dd497ec05.png",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 3 },
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 4 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-lithium-smart-12-8-50",
+      "name": "Lithium Battery Smart 12.8V/50Ah",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/introduction.html",
+      "productColorName": "Blue and grey housing",
+      "family": "Victron lithium batteries",
+      "productFamily": "Lithium Battery Smart",
+      "productModel": "Lithium Battery Smart 12.8V/50Ah",
+      "componentType": "lithium-battery",
+      "kind": "battery",
+      "status": "verified",
+      "voltage": 12.8,
+      "capacityAh": 50,
+      "chemistry": "LiFePO4",
+      "chargeCurrent": 100,
+      "maxChargeCurrentA": 100,
+      "maxDischargeCurrentA": 100,
+      "installationRuleSetId": "victron-lithium-smart-battery",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT + (M8)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "top", "order": 1 },
+        { "id": "bat-", "label": "BAT − (M8)", "domain": "dc", "role": "negative", "direction": "bidirectional", "side": "top", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-lithium-smart-12-8-100",
+      "name": "Lithium Battery Smart 12.8V/100Ah",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/introduction.html",
+      "productColorName": "Blue and grey housing",
+      "family": "Victron lithium batteries",
+      "productFamily": "Lithium Battery Smart",
+      "productModel": "Lithium Battery Smart 12.8V/100Ah",
+      "componentType": "lithium-battery",
+      "kind": "battery",
+      "status": "verified",
+      "voltage": 12.8,
+      "capacityAh": 100,
+      "chemistry": "LiFePO4",
+      "chargeCurrent": 200,
+      "maxChargeCurrentA": 200,
+      "maxDischargeCurrentA": 200,
+      "installationRuleSetId": "victron-lithium-smart-battery",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT + (M8)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "top", "order": 1 },
+        { "id": "bat-", "label": "BAT − (M8)", "domain": "dc", "role": "negative", "direction": "bidirectional", "side": "top", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-lithium-smart-12-8-200",
+      "name": "Lithium Battery Smart 12.8V/200Ah",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/introduction.html",
+      "productColorName": "Blue and grey housing",
+      "family": "Victron lithium batteries",
+      "productFamily": "Lithium Battery Smart",
+      "productModel": "Lithium Battery Smart 12.8V/200Ah",
+      "componentType": "lithium-battery",
+      "kind": "battery",
+      "status": "verified",
+      "voltage": 12.8,
+      "capacityAh": 200,
+      "chemistry": "LiFePO4",
+      "chargeCurrent": 400,
+      "maxChargeCurrentA": 400,
+      "maxDischargeCurrentA": 400,
+      "installationRuleSetId": "victron-lithium-smart-battery",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT + (M10)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "top", "order": 1 },
+        { "id": "bat-", "label": "BAT − (M10)", "domain": "dc", "role": "negative", "direction": "bidirectional", "side": "top", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-lithium-smart-25-6-100",
+      "name": "Lithium Battery Smart 25.6V/100Ah",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/introduction.html",
+      "productColorName": "Blue and grey housing",
+      "family": "Victron lithium batteries",
+      "productFamily": "Lithium Battery Smart",
+      "productModel": "Lithium Battery Smart 25.6V/100Ah",
+      "componentType": "lithium-battery",
+      "kind": "battery",
+      "status": "verified",
+      "voltage": 25.6,
+      "capacityAh": 100,
+      "chemistry": "LiFePO4",
+      "chargeCurrent": 200,
+      "maxChargeCurrentA": 200,
+      "maxDischargeCurrentA": 200,
+      "installationRuleSetId": "victron-lithium-smart-battery",
+      "terminalLayoutSource": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/installation.html",
+      "terminalLayout": [
+        { "id": "bat+", "label": "BAT + (M8)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "top", "order": 1 },
+        { "id": "bat-", "label": "BAT − (M8)", "domain": "dc", "role": "negative", "direction": "bidirectional", "side": "top", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "blue-sea-285-7184-60a",
+      "name": "285-Series Circuit Breaker 60A (7184)",
+      "brand": "Blue Sea Systems",
+      "brandColors": { "primary": "#30343B", "secondary": "#F0D52B" },
+      "brandColorsSource": "https://dh778tpvmt77t.cloudfront.net/images/products/7184.jpg",
+      "productColorName": "Black housing with yellow reset lever",
+      "family": "Blue Sea Systems 285-Series circuit breakers",
+      "productModel": "7184",
+      "componentType": "circuit-breaker",
+      "kind": "fuse",
+      "status": "verified",
+      "current": 60,
+      "maxVoltageDC": 48,
+      "maxInterruptCurrentA": 3000,
+      "installationRuleSetId": "blue-sea-285-series-surface-mount-breaker",
+      "terminalLayoutSource": "https://d2pyqm2yd3fw2i.cloudfront.net/files/resources/dimensioned_drawing/285-Surface.jpg",
+      "terminalLayout": [
+        { "id": "terminal-b", "label": "B (M6 stud)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "top", "order": 1, "x": 126, "y": 20 },
+        { "id": "terminal-a", "label": "A (M6 stud)", "domain": "dc", "role": "positive", "direction": "bidirectional", "side": "bottom", "order": 1, "x": 44, "y": 96 }
+      ],
+      "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "renogy-rover-li-40a",
+      "name": "Rover Li 40A MPPT Solar Charge Controller",
+      "brand": "Renogy",
+      "brandColors": { "primary": "#1B4E9B", "secondary": "#29A8D5" },
+      "brandColorsSource": "https://cdn.shopify.com/s/files/1/0631/0137/0483/files/RNG-CTRL-RVR40-1.jpg?v=1772784945",
+      "productColorName": "Black housing with blue accents",
+      "family": "Renogy Rover Li charge controllers",
+      "productFamily": "Rover Li",
+      "productModel": "RNG-CTRL-RVR40-G2",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 40,
+      "chargeCurrent": 40,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 520,
+        "24": 1040
+      },
+      "maximumEfficiencyPercent": 98,
+      "installationRuleSetId": "renogy-rover-li-40a",
+      "terminalLayoutSource": "https://cdn.shopify.com/s/files/1/0631/0137/0483/files/UM_Rover_20Li_20Series_2020A_2630A_2640A_G2.pdf?v=1752029603#page=17",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.renogy.com/products/rover-li-40-amp-mppt-solar-charge-controller",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "morningstar-prostar-mppt-25",
+      "name": "ProStar MPPT 25A (PS-MPPT-25)",
+      "brand": "Morningstar",
+      "brandColors": { "primary": "#F36A21", "secondary": "#343434" },
+      "brandColorsSource": "https://www.morningstarcorp.com/wp-content/uploads/datasheet-prostar-mppt-en.pdf",
+      "productColorName": "Light gray enclosure with dark gray front panel",
+      "family": "Morningstar ProStar MPPT",
+      "productFamily": "ProStar MPPT",
+      "productModel": "PS-MPPT-25",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 25,
+      "chargeCurrent": 25,
+      "pvVoc": 120,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 440, "24": 880 },
+      "maxOutputPowerWByBatteryVoltage": { "12": 350, "24": 700 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 25, "24": 25 },
+      "installationRuleSetId": "morningstar-prostar-mppt",
+      "terminalLayoutSource": "https://www.morningstarcorp.com/wp-content/uploads/operation-manual-prostar-mppt-en.pdf#page=18",
+      "terminalLayout": [
+        { "id": "pv+", "label": "SOLAR +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "SOLAR −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "bat+", "label": "BATTERY +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "bat-", "label": "BATTERY −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.morningstarcorp.com/wp-content/uploads/datasheet-prostar-mppt-en.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "morningstar-prostar-mppt-40",
+      "name": "ProStar MPPT 40A (PS-MPPT-40)",
+      "brand": "Morningstar",
+      "brandColors": { "primary": "#F36A21", "secondary": "#343434" },
+      "brandColorsSource": "https://www.morningstarcorp.com/wp-content/uploads/datasheet-prostar-mppt-en.pdf",
+      "productColorName": "Light gray enclosure with dark gray front panel",
+      "family": "Morningstar ProStar MPPT",
+      "productFamily": "ProStar MPPT",
+      "productModel": "PS-MPPT-40",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 40,
+      "chargeCurrent": 40,
+      "pvVoc": 120,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 700, "24": 1400 },
+      "maxOutputPowerWByBatteryVoltage": { "12": 550, "24": 1100 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 30, "24": 30 },
+      "installationRuleSetId": "morningstar-prostar-mppt",
+      "terminalLayoutSource": "https://www.morningstarcorp.com/wp-content/uploads/operation-manual-prostar-mppt-en.pdf#page=18",
+      "terminalLayout": [
+        { "id": "pv+", "label": "SOLAR +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "SOLAR −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "bat+", "label": "BATTERY +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "bat-", "label": "BATTERY −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.morningstarcorp.com/wp-content/uploads/datasheet-prostar-mppt-en.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer2210an-g3",
+      "name": "Tracer2210AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer2210AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 20,
+      "chargeCurrent": 20,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 260, "24": 520 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 20, "24": 20 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer3210an-g3",
+      "name": "Tracer3210AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer3210AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 30,
+      "chargeCurrent": 30,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 390, "24": 780 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 30, "24": 30 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer4210an-g3",
+      "name": "Tracer4210AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer4210AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 40,
+      "chargeCurrent": 40,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 520, "24": 1040 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 40, "24": 40 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer1206an-g3",
+      "name": "Tracer1206AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer1206AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 10,
+      "chargeCurrent": 10,
+      "pvVoc": 60,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 130, "24": 260 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 10, "24": 10 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer2206an-g3",
+      "name": "Tracer2206AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer2206AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 20,
+      "chargeCurrent": 20,
+      "pvVoc": 60,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 260, "24": 520 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 20, "24": 20 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "epever-tracer1210an-g3",
+      "name": "Tracer1210AN G3 MPPT Controller",
+      "brand": "EPEVER",
+      "brandColors": { "primary": "#1688C7", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer_AN_G3-MPPT-Charge_Controller-1.jpg",
+      "productColorName": "Light gray enclosure with dark display panel",
+      "family": "EPEVER Tracer AN G3",
+      "productFamily": "Tracer AN G3",
+      "productModel": "Tracer1210AN G3",
+      "componentType": "solar-charge-controller",
+      "kind": "mppt",
+      "status": "verified",
+      "current": 10,
+      "chargeCurrent": 10,
+      "pvVoc": 100,
+      "supportedBatteryVoltages": [12, 24],
+      "nominalPvPowerWByBatteryVoltage": { "12": 130, "24": 260 },
+      "maximumEfficiencyPercent": 98,
+      "continuousLoadCurrentAByBatteryVoltage": { "12": 10, "24": 10 },
+      "installationRuleSetId": "epever-tracer-an-g3",
+      "terminalLayoutSource": "https://www.epever.com/wp-content/uploads/2024/08/Tracer-AN-G3-Manual-EN-V2.4.pdf#page=8",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "sink", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "sink", "side": "bottom", "order": 2 },
+        { "id": "bat+", "label": "BAT +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 3 },
+        { "id": "bat-", "label": "BAT −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 4 },
+        { "id": "load+", "label": "LOAD +", "domain": "dc", "role": "positive", "direction": "source", "side": "bottom", "order": 5 },
+        { "id": "load-", "label": "LOAD −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 6 }
+      ],
+      "source": "https://www.epever.com/wp-content/uploads/2024/08/EPEVER-DataSheet-Tracer-AN-G31.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-bluesolar-175w-12v",
+      "name": "BlueSolar Monocrystalline 175W-12V",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "productColorName": "Black monocrystalline cells with a silver frame",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline",
+      "productModel": "SPM041751200",
+      "componentType": "photovoltaic-module",
+      "kind": "pv",
+      "status": "verified",
+      "power": 175,
+      "moduleVoc": 23.7,
+      "moduleVmp": 18.5,
+      "moduleIsc": 9.89,
+      "moduleImp": 9.03,
+      "connectorType": "PV-ST01 / MC4-compatible quick-connect",
+      "installationRuleSetId": "victron-bluesolar-monocrystalline",
+      "terminalLayoutSource": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-bluesolar-215w-24v",
+      "name": "BlueSolar Monocrystalline 215W-24V",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "productColorName": "Black monocrystalline cells with a silver frame",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline",
+      "productModel": "SPM042151200",
+      "componentType": "photovoltaic-module",
+      "kind": "pv",
+      "status": "verified",
+      "power": 215,
+      "moduleVoc": 30.11,
+      "moduleVmp": 24.11,
+      "moduleIsc": 9.91,
+      "moduleImp": 9.41,
+      "connectorType": "PV-ST01 / MC4-compatible quick-connect",
+      "installationRuleSetId": "victron-bluesolar-monocrystalline",
+      "terminalLayoutSource": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "terminalLayout": [
+        { "id": "pv+", "label": "PV +", "domain": "dc", "role": "pv", "direction": "source", "side": "bottom", "order": 1 },
+        { "id": "pv-", "label": "PV −", "domain": "dc", "role": "negative", "direction": "source", "side": "bottom", "order": 2 }
+      ],
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-phoenix-12-1200-230v",
+      "name": "Phoenix Inverter 12/1200 230V VE.Direct",
+      "brand": "Victron Energy",
+      "brandColors": { "primary": "#4784C4", "secondary": "#FFFFFF" },
+      "brandColorsSource": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "productColorName": "Blue metal enclosure",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 12/1200 230V VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "verified",
+      "voltage": 12,
+      "power": 1000,
+      "surge": 2200,
+      "acVoltage": 230,
+      "acFrequency": 50,
+      "waveform": "Pure sine wave",
+      "installationRuleSetId": "victron-phoenix-inverter-vedirect",
+      "terminalLayoutSource": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "terminalLayout": [
+        { "id": "dc+", "label": "DC +", "domain": "dc", "role": "positive", "direction": "sink", "side": "left", "order": 1 },
+        { "id": "dc-", "label": "DC −", "domain": "dc", "role": "negative", "direction": "sink", "side": "left", "order": 2 },
+        { "id": "ac-out-l", "label": "AC OUT L", "domain": "ac", "role": "ac-line", "direction": "source", "side": "right", "order": 1 },
+        { "id": "ac-out-n", "label": "AC OUT N", "domain": "ac", "role": "ac-neutral", "direction": "source", "side": "right", "order": 2 },
+        { "id": "pe", "label": "PE", "domain": "earth", "role": "ac-earth", "direction": "source", "side": "right", "order": 3 }
+      ],
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "sourceChecked": "2026-10-20"
+    },
+    {
+      "id": "victron-smartsolar-150-60",
+      "name": "SmartSolar MPPT 150/60",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 150/60",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-150-70",
+      "name": "SmartSolar MPPT 150/70",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 150/70",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-150-85",
+      "name": "SmartSolar MPPT 150/85",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 150/85",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-150-100",
+      "name": "SmartSolar MPPT 150/100",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 150/100",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-250-60",
+      "name": "SmartSolar MPPT 250/60",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 250/60",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-250-70",
+      "name": "SmartSolar MPPT 250/70",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 250/70",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-250-85",
+      "name": "SmartSolar MPPT 250/85",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 250/85",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-smartsolar-250-100",
+      "name": "SmartSolar MPPT 250/100",
+      "brand": "Victron Energy",
+      "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
+      "productFamily": "SmartSolar MPPT",
+      "productModel": "SmartSolar MPPT 250/100",
+      "componentType": "mppt solar charge controller",
+      "kind": "mppt",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "missingData": ["Exact electrical ratings", "Brand and product colors", "Terminal positions and order", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-20w",
+      "name": "BlueSolar Monocrystalline Panel 20W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM040201200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 20,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-30w",
+      "name": "BlueSolar Monocrystalline Panel 30W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM040301200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 30,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-40w",
+      "name": "BlueSolar Monocrystalline Panel 40W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM040401200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 40,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-55w",
+      "name": "BlueSolar Monocrystalline Panel 55W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM040551200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 55,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-90w",
+      "name": "BlueSolar Monocrystalline Panel 90W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM040901200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 90,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-115w",
+      "name": "BlueSolar Monocrystalline Panel 115W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM041151200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 115,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-130w",
+      "name": "BlueSolar Monocrystalline Panel 130W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM041301200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 130,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-140w",
+      "name": "BlueSolar Monocrystalline Panel 140W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM041401200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 140,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-150w",
+      "name": "BlueSolar Monocrystalline Panel 150W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM041501200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 150,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-185w",
+      "name": "BlueSolar Monocrystalline Panel 185W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM041851200",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 185,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-305w",
+      "name": "BlueSolar Monocrystalline Panel 305W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM043052002",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 305,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-bluesolar-360w",
+      "name": "BlueSolar Monocrystalline Panel 360W",
+      "brand": "Victron Energy",
+      "family": "Victron BlueSolar Monocrystalline Panels",
+      "productFamily": "BlueSolar Monocrystalline Panel",
+      "productModel": "SPM043602402",
+      "componentType": "photovoltaic module",
+      "kind": "pv",
+      "status": "partially verified",
+      "power": 360,
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+      "missingData": ["Exact electrical ratings beyond nominal power", "Brand and product colors", "Connector and terminal layout", "Model-specific installation guidance"]
+    },
+    {
+      "id": "battle-born-bb10012",
+      "name": "Battle Born 12V 100Ah LiFePO4 Battery",
+      "brand": "Battle Born Batteries",
+      "family": "Battle Born 12V 100Ah",
+      "productFamily": "BB10012",
+      "productModel": "BB10012",
+      "componentType": "lithium battery",
+      "kind": "battery",
+      "status": "reference only",
+      "source": "https://cdn.shopify.com/s/files/1/0981/3924/2777/files/BB10012_Data_Sheet.pdf?v=1786988701",
+      "missingData": ["Electrical ratings and limits", "Chemistry details", "Brand/product colors", "Terminal type and location", "Installation guidance"]
+    },
+    {
+      "id": "renogy-core-mini-rbt12100lfp-m-us",
+      "name": "Renogy 12V 100Ah Core Mini Battery",
+      "brand": "Renogy",
+      "family": "Renogy Core Mini",
+      "productFamily": "Core Mini LiFePO4 Battery",
+      "productModel": "RBT12100LFP-M-US",
+      "componentType": "lithium battery",
+      "kind": "battery",
+      "status": "reference only",
+      "source": "https://www.renogy.com/12v-100ah-core-mini-lithium-iron-phosphate-battery/",
+      "missingData": ["Electrical ratings and limits", "Chemistry details", "Brand/product colors", "Terminal type and location", "Installation guidance"]
+    },
+    {
+      "id": "victron-lithium-superpack-12v-100ah",
+      "name": "Victron Lithium SuperPack 12.8V 100Ah",
+      "brand": "Victron Energy",
+      "family": "Victron Lithium SuperPack",
+      "productFamily": "Lithium SuperPack",
+      "productModel": "Lithium SuperPack 12.8V/100Ah",
+      "componentType": "lithium battery",
+      "kind": "battery",
+      "status": "partially verified",
+      "source": "https://www.victronenergy.com/batteries/lithium-superpack",
+      "missingData": ["Model-specific electrical ratings and limits", "Brand/product colors", "Terminal type and location", "Model-specific installation guidance"]
+    },
+    {
+      "id": "samlex-evo-2212",
+      "name": "Samlex EVO-2212",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-2212",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "partially verified",
+      "voltage": 12,
+      "power": 2200,
+      "acVoltage": 120,
+      "acFrequency": 60,
+      "maxTransferCurrentA": 40,
+      "chargeCurrent": 100,
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Exact continuous and surge ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    },
+    {
+      "id": "samlex-evo-2224",
+      "name": "Samlex EVO-2224",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-2224",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Model-specific electrical ratings", "Brand/product colors", "Terminal types and positions", "Installation guidance"]
+    },
+    {
+      "id": "samlex-evo-2212e",
+      "name": "Samlex EVO-2212E",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-2212E",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Model-specific electrical ratings", "Brand/product colors", "Terminal types and positions", "Installation guidance"]
+    },
+    {
+      "id": "samlex-evo-3012e",
+      "name": "Samlex EVO-3012E",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-3012E",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Model-specific electrical ratings", "Brand/product colors", "Terminal types and positions", "Installation guidance"]
+    },
+    {
+      "id": "samlex-evo-4024e",
+      "name": "Samlex EVO-4024E",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-4024E",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Model-specific electrical ratings", "Brand/product colors", "Terminal types and positions", "Installation guidance"]
+    },
+    {
+      "id": "samlex-evo-0722",
+      "name": "Samlex EVO-0722",
+      "brand": "Samlex America",
+      "family": "Samlex EVO Inverter/Charger",
+      "productFamily": "EVO",
+      "productModel": "EVO-0722",
+      "componentType": "inverter/charger",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://samlexamerica.com/wp-content/uploads/2020/01/11025-EVO-2212E-3012E-2224E-4024E-0722_Lrez.pdf",
+      "missingData": ["Model-specific electrical ratings", "Brand/product colors", "Terminal types and positions", "Installation guidance"]
+    },
+    {
+      "id": "victron-phoenix-12-250",
+      "name": "Phoenix Inverter 12/250 VE.Direct",
+      "brand": "Victron Energy",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 12/250 VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "missingData": ["Exact model ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-phoenix-12-375",
+      "name": "Phoenix Inverter 12/375 VE.Direct",
+      "brand": "Victron Energy",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 12/375 VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "missingData": ["Exact model ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-phoenix-12-500",
+      "name": "Phoenix Inverter 12/500 VE.Direct",
+      "brand": "Victron Energy",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 12/500 VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "missingData": ["Exact model ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-phoenix-12-800",
+      "name": "Phoenix Inverter 12/800 VE.Direct",
+      "brand": "Victron Energy",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 12/800 VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "missingData": ["Exact model ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    },
+    {
+      "id": "victron-phoenix-24-1200",
+      "name": "Phoenix Inverter 24/1200 VE.Direct",
+      "brand": "Victron Energy",
+      "family": "Victron Phoenix Inverter VE.Direct",
+      "productFamily": "Phoenix Inverter VE.Direct",
+      "productModel": "Phoenix Inverter 24/1200 VE.Direct",
+      "componentType": "inverter",
+      "kind": "inverter",
+      "status": "reference only",
+      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+      "missingData": ["Exact model ratings", "Brand/product colors", "Terminal types and positions", "Model-specific installation guidance"]
+    }
+  ]
+}
