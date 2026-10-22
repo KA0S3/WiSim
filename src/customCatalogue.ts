@@ -1,9 +1,10 @@
 import type { CatalogRecord } from './catalog'
-import { validateProjectModel } from './simulation'
+import { validateProjectModel, type SimulationNode } from './simulation'
 
 const KEY = 'wiresim-custom-catalogue'
 
 const KINDS = new Set(['pv', 'mppt', 'battery', 'inverter', 'load', 'fuse', 'cable', 'bus', 'ac-source', 'transfer'])
+const isSimulationKind = (kind: string): kind is SimulationNode['kind'] => KINDS.has(kind)
 const POSITIVE_FIELDS = [
   'voltage', 'power', 'surge', 'capacityAh', 'energyWh', 'maxChargeCurrentA',
   'maxDischargeCurrentA', 'maxTransferCurrentA', 'maxVoltageDC', 'maxInterruptCurrentA',
@@ -16,7 +17,7 @@ export function validateCustomRecord(value: unknown): value is CatalogRecord {
   const record = value as Partial<CatalogRecord>
   if (record.status !== 'custom' || typeof record.id !== 'string' || !record.id.trim() ||
       typeof record.name !== 'string' || !record.name.trim() || typeof record.family !== 'string' ||
-      !record.family.trim() || typeof record.kind !== 'string' || !KINDS.has(record.kind)) return false
+      !record.family.trim() || typeof record.kind !== 'string' || !isSimulationKind(record.kind)) return false
   for (const field of POSITIVE_FIELDS) {
     const candidate = record[field]
     if (candidate !== undefined && (typeof candidate !== 'number' || !Number.isFinite(candidate) || candidate <= 0)) return false
@@ -30,7 +31,7 @@ export function validateCustomRecord(value: unknown): value is CatalogRecord {
   if (record.terminalLayout !== undefined) {
     if (!Array.isArray(record.terminalLayout) || record.terminalLayout.length === 0) return false
     if (record.terminalLayout.some(terminal => terminal.direction !== undefined && !['source', 'sink', 'bidirectional'].includes(terminal.direction))) return false
-    const probe = { nodes: [{ id: 'catalogue-validation', name: record.name, kind: record.kind as CatalogRecord['kind'], x: 0, y: 0, terminals: record.terminalLayout }], wires: [], irradiance: 100, temperature: 25 }
+    const probe = { nodes: [{ id: 'catalogue-validation', name: record.name, kind: record.kind, x: 0, y: 0, terminals: record.terminalLayout }], wires: [], irradiance: 100, temperature: 25 }
     if (validateProjectModel(probe).errors.length) return false
   }
   return true

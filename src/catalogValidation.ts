@@ -33,6 +33,9 @@ export function validateCatalogue(records: CatalogRecord[], ruleSets: Installati
     if (!record.id || !record.name || !record.brand || !record.family || !record.productModel || !record.componentType || !statusValues.includes(record.status)) structuralErrors.push(`${prefix} is missing a valid exact-model identity or evidence status`)
     if (!validUrl(record.source)) structuralErrors.push(`${prefix} is missing an HTTPS manufacturer source`)
     if (record.status === 'custom') structuralErrors.push(`${prefix} must be stored outside the manufacturer catalogue`)
+    if (record.status === 'verified' && !['pv', 'battery', 'mppt', 'inverter', 'load', 'cable', 'fuse', 'bus', 'ac-source', 'transfer'].includes(record.kind)) structuralErrors.push(`${prefix} cannot be simulation-verified with non-simulation component kind ${record.kind}`)
+    if (record.additionalSpecs?.some(spec => !spec.label || (typeof spec.value === 'number' ? !Number.isFinite(spec.value) : !spec.value) || !validUrl(spec.source))) structuralErrors.push(`${prefix} has an invalid additional specification`)
+    if (record.price && (!Number.isFinite(record.price.amount) || record.price.amount <= 0 || !['sale', 'regular', 'MSRP', 'displayed'].includes(record.price.priceType) || (record.price.regularAmount != null && (!Number.isFinite(record.price.regularAmount) || record.price.regularAmount <= 0)) || !record.price.currency || !record.price.region || !validUrl(record.price.source) || !/^\d{4}-\d{2}-\d{2}$/.test(record.price.sourceChecked))) structuralErrors.push(`${prefix} has invalid or unsourced price data`)
     if (record.status !== 'verified') {
       if (!record.missingData?.length) structuralErrors.push(`${prefix} must list the data still needing verification`)
       continue

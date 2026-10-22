@@ -12,3 +12,8 @@
 .wire-line.connection-issue path{animation:connection-mismatch-pulse 2.4s ease-in-out 2}
 @keyframes connection-mismatch-pulse{0%,100%{opacity:.78}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.wire-line.connection-issue path{animation:none}}
+.catalog-category{margin:18px 0 24px}
+.catalog-category>h3{position:sticky;top:0;z-index:2;margin:0 -20px 10px;padding:10px 20px;background:#edf3f8;border-bottom:1px solid #d6e1e9;color:#314b5e;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.catalog-brand{margin:0 0 14px}
+.catalog-brand>h4{display:flex;justify-content:space-between;align-items:center;margin:8px 0;color:#385365;font-size:12px}
+.catalog-brand>h4 small{color:#82919c;font-size:10px;font-weight:600}

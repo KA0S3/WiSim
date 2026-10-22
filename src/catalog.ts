@@ -1,6 +1,17 @@
 import database from './catalog-data.json' with { type: 'json' }
 import type { SimulationNode, Terminal } from './simulation'
 
+export type CatalogKind = SimulationNode['kind']
+  | 'inverter-charger'
+  | 'battery-charger'
+  | 'dc-dc-converter'
+  | 'battery-monitor'
+  | 'system-monitor'
+  | 'communication-interface'
+  | 'dc-distribution'
+  | 'display'
+  | 'accessory'
+
 export type CatalogSource = {
   kind: 'technical-specification' | 'installation-manual' | 'terminal-diagram' | 'appearance-reference'
   url: string
@@ -18,6 +29,23 @@ export type InstallationRuleSet = {
   rules: InstallationRule[]
 }
 
+export type CatalogAdditionalSpec = {
+  label: string
+  value: string | number
+  unit?: string
+  source: string
+}
+
+export type CatalogPrice = {
+  amount: number
+  priceType: 'sale' | 'regular' | 'MSRP' | 'displayed'
+  currency: string
+  region: string
+  regularAmount?: number
+  source: string
+  sourceChecked: string
+}
+
 export type CatalogRecord = {
   id: string
   name: string
@@ -28,7 +56,7 @@ export type CatalogRecord = {
   family: string
   productFamily?: string
   componentType?: string
-  kind: SimulationNode['kind']
+  kind: CatalogKind
   status: 'verified' | 'partially verified' | 'reference only' | 'custom'
   productModel?: string
   voltage?: number
@@ -65,7 +93,9 @@ export type CatalogRecord = {
   source?: string
   sourceChecked?: string
   missingData?: string[]
-  interfaces?: Array<'VE.Direct' | 'VE.Bus' | 'VE.Can' | 'BMS' | 'GX'>
+  additionalSpecs?: CatalogAdditionalSpec[]
+  price?: CatalogPrice
+  interfaces?: Array<'VE.Direct' | 'VE.Bus' | 'VE.Can' | 'BMS' | 'GX' | 'Bluetooth' | 'Wi-Fi' | 'Ethernet' | 'NMEA 2000' | 'CAN-bus' | 'RV-C' | 'USB'>
   terminalLayout?: Terminal[]
 }
 
@@ -90,7 +120,9 @@ export type CatalogDatabase = {
   records: CatalogRecord[]
 }
 
+const simulationKinds = new Set<string>(['pv', 'battery', 'mppt', 'inverter', 'load', 'cable', 'fuse', 'bus', 'ac-source', 'transfer'])
+
 export const CATALOG_DATABASE = database as CatalogDatabase
 export const CATALOG_RECORDS = CATALOG_DATABASE.records
-export const VERIFIED_CATALOG_RECORDS = CATALOG_RECORDS.filter((record): record is VerifiedCatalogRecord => record.status === 'verified')
+export const VERIFIED_CATALOG_RECORDS = CATALOG_RECORDS.filter((record): record is VerifiedCatalogRecord => record.status === 'verified' && simulationKinds.has(record.kind))
 export const INSTALLATION_RULE_SETS = CATALOG_DATABASE.installationRuleSets

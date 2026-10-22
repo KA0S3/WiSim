@@ -1,176 +1,184 @@
-﻿# Wi-Sim: staged wiring, components, and learning plan
+# Wi-Sim: physical wire routing and live solar-system behavior
 
-This replaces the previous sandbox refocus plan with an implementation sequence for the requested cable, component, warning, meter, and equipment-configuration work. This document remains a plan for those sandbox changes; catalogue expansion and simulator compatibility work are tracked separately. Deliver future implementation work in reviewable slices, preserve existing projects, and extend the current React/TypeScript/SVG workbench and bounded simulation rather than rebuilding them.
+This is the active refocus plan for Wi-Sim. It turns the requested concerns into requirements, staged implementation work, and acceptance checks. This is planning only: no runtime behavior is claimed to be implemented by this document.
 
-## Product goal and guardrails
+## Product outcome
 
-Wi-Sim is an educational solar and electrical wiring sandbox. Learners should be able to place recognizable equipment, connect the actual terminals, set understandable properties, see live modeled readings, and understand problems in the context of their own system.
+Make the sandbox feel like an understandable, continuously responding model of a solar electrical system. Learners should be able to connect devices freely, see current and device operating states respond to their choices, and observe modeled consequences when a system is configured badly. Wires should remain distinct, readable paths around equipment. Damaged equipment should have a clear recovery path that does not erase its configuration.
 
-- Keep the existing shared workbench, terminal-aware project model, deterministic simulation, persistence, training flows, and catalogue.
-- Prefer simple, explicit controls to a new editor framework or a broad redesign.
-- Do not silently discard or reinterpret existing project data. Preserve stable node/terminal/wire IDs where practical and retain import compatibility.
-- Show exact units, limits, and model/source status. A simplified result is not a real measurement, design approval, or compliance check.
-- Do not infer manufacturer specifications or universal electrical rules. Verify exact model claims against current manufacturer documentation; label generic or incomplete data honestly.
-- Keep warnings accessible and useful without relying on color, motion, or icon recognition alone.
+The aim is a progressively more physically grounded educational simulation, not a claim to be a complete real-world physics solver, installation guide, or design-approval tool. Every modeled behavior must state its assumptions and limits. Unsupported phenomena must be identified rather than represented by fabricated precision.
 
-## Existing implementation and implications
+## Scope and principles
 
-The plan is based on the current repository, especially [src/catalog-data.json](src/catalog-data.json), [src/catalog.ts](src/catalog.ts), [src/simulation.ts](src/simulation.ts), [src/main.tsx](src/main.tsx), [src/persistence.ts](src/persistence.ts), [src/customCatalogue.ts](src/customCatalogue.ts), and [docs/CATALOG_SOURCES.md](docs/CATALOG_SOURCES.md).
+- Prioritize wire routing and live, causal system behavior; these are the primary user problems.
+- Treat every connection as an experiment the learner may make. Compatibility issues should be represented as system behavior and consequences, not used to prevent connection.
+- Distinguish an observed symptom, a modeled cause, a teaching explanation, and an implementation limit. Do not substitute an arbitrary warning for a modeled effect.
+- Base damage and thresholds on explicit, documented model rules. Where a physical effect is not yet supported, show the limitation instead of inventing a result.
+- Show equipment-specific live readings, units, operating states, and where values are measured.
+- If motion/animation is used, derive it from current model state, respect reduced-motion preferences, and never rely on it as the sole carrier of information.
+- Preserve project data, device settings, wire identity, undo/redo, and existing project compatibility when changing the model.
+- Keep the experience educational. The simulation does not certify wiring, select real installation cable sizes, or replace manufacturer instructions and applicable standards.
 
-- The unified manufacturer-product database lives in `src/catalog-data.json`; `src/catalog.ts` provides its types and app exports. It currently contains 57 exact-model records across five component kinds and seven brands: 23 verified records and 34 clearly marked research candidates with missing-data checklists. Incomplete entries are visible in the catalogue but cannot be matched or applied as verified equipment. See [docs/CATALOG_SOURCES.md](docs/CATALOG_SOURCES.md) for exact candidate coverage and sources. User-created custom definitions remain separate local data and are not manufacturer-verified.
-- Custom catalogue records are stored separately in browser local storage by `src/customCatalogue.ts`. Project nodes already have editable/model fields such as watts, voltage, capacity, surge, and charge/discharge limits. Keep manufacturer records and learner-created configurations distinct; do not convert incomplete reference records into verified ones by adding editable values.
-- The simulation has a `Terminal` model with domain, role, direction, and optional `x`/`y` placement. `defaultTerminals()` defines standard terminal identities and roles. `CatalogRecord.terminalLayout` can supply per-record terminals. This is a good base for explicit terminal locations and ordering, but defaults and record-provided layouts need a consistent rendering/validation contract.
-- Wires are already records in `SimulationProject.wires`, with gauge, material, length, parallel count, insulation, color/label, endpoint terminal IDs, and persisted route points. Separately, `cable` is still listed as a placeable component kind. Treat the wire record—not a cable-shaped node—as the user-facing connection and preserve existing cable-node projects through compatibility handling.
-- `main.tsx` already has a connection-pending state, meter-mode/probe state, warning-panel state, and focused-diagnostic state. The simulation exports `measureProbe`; project persistence includes probes, wire route points, and diagnostic event history. Improve and wire these existing surfaces together instead of introducing parallel systems.
-- The existing app has regression coverage for catalogue validation, terminal validation, persistence, simulation, and training. Extend those focused tests and add UI-flow checks where the interaction changes.
+## Requirement register
 
-## Progress tracker (updated 2026-10-21)
+All requirements begin as **Planned**. Progress is recorded in both this file's stage tracker and [goal.md](goal.md); do not mark a requirement complete until its acceptance checks are met.
 
-Status reflects the latest active implementation pass. A stage is complete only when its acceptance checks are met; partial work is not presented as done.
+### Routing and wire layout
 
-| Stage | Status | Current evidence / remaining work |
+**WR-1 — Obstacle-aware routes.** Every wire path must route visibly around equipment bodies and terminals. Moving, resizing, adding, or removing a component must update available clearances and route geometry; a path must not be hidden behind equipment.
+
+**WR-2 — Separate lanes.** Distinct wires must use distinguishable paths and spacing levels rather than sharing an indistinguishable line. Resolve conflicts deterministically and consistently, including when components move or routes are edited. Crossings must not look like electrical junctions.
+
+**WR-3 — No wire self-loops.** A route must not double back through itself or create avoidable loops. A route that cannot be made unambiguous must be exposed as a conflict that the learner can correct, not silently rendered as a valid-looking path.
+
+**WR-4 — Stable corner editing.** Corners must move smoothly as a user drags them or an adjacent route changes. Maintain orthogonal segments without introducing loops, flips, or unexpected jumps. Preserve directly edited corners when possible and make route recovery understandable.
+
+**WR-5 — Geometry responds to component size.** Device dimensions must participate in obstacle clearance, routing, and spacing. Resizing or changing a device layout must not leave wires inside the enlarged body or cause route collisions.
+
+**WR-6 — Route identity and persistence.** Routes remain attached to their intended terminal IDs through component movement, resize, editing, undo/redo, save, reload, and import. A reroute must not silently change electrical endpoints.
+
+### Live electrical behavior and current flow
+
+**LS-1 — Causal, live updates.** Changes to connections, device settings/states, and environmental inputs supported by the model must promptly update affected electrical values and device states. Readings must come from the current project state, not static labels or stale snapshots.
+
+**LS-2 — Visible current flow.** Make the direction and relative magnitude of modeled current understandable on energized wires. Static visual cues are sufficient; animation is optional and appreciated when it adds clarity. Any flow cue must update when modeled direction or magnitude changes, stop when a path is inactive, and remain understandable with animation disabled or reduced.
+
+**LS-3 — Freely create connections.** Allow learners to connect any available terminals, including combinations that are mismatched, reversed, unsupported, or hazardous in the model. Connection creation must not be blocked solely by compatibility checks. Structural editor errors (for example, a missing endpoint record) may still be prevented and explained.
+
+**LS-4 — Effects before generic warnings.** When a connection or setting produces a modeled problem, show the resulting observable behavior—such as changed readings, limited output, an opened protection path, heating progression, or equipment damage where supported—alongside a concise explanation. Warnings supplement evidence; they do not replace it.
+
+**LS-5 — Explicit model confidence.** For each effect, distinguish calculated values, simplified estimates, qualitative effects, and unsupported conditions. No unexplained arbitrary warning, success-shaped fallback, or false measurement may be presented as a physical result.
+
+### Faults, consequences, and recovery
+
+**FC-1 — Model meaningful failure scenarios.** Plan explicit behavior for at least wrong conductor sizing, missing/incorrect protection, reversed or otherwise incorrect battery connections, and device operation outside supported limits. Each scenario needs defined inputs, causal progression, observable symptoms, affected devices, and reset/recovery behavior.
+
+**FC-2 — Evidence-based fault rules.** Define the model assumptions and thresholds for each scenario before implementing it. Use exact-model documentation when a rule is product-specific; label generic educational assumptions as such. Do not imply standards compliance or prescribe real-world installation choices.
+
+**FC-3 — Consequences are stateful.** Where the supported model predicts damage, equipment transitions into a visibly damaged or dead state and its subsequent behavior/readings reflect that state. Do not report damage where the model only supports a warning or estimate.
+
+**FC-4 — Replace damaged equipment.** Provide a clear replace/restore action for a dead or damaged component. It should create a working replacement while carrying forward appropriate configuration (for example, model, ratings, and user-entered settings) without carrying over damage. Define how existing connections are handled and make the outcome undoable and explicit.
+
+**FC-5 — Damage applies per capability.** Identify which component classes can meaningfully become damaged and what observable state changes for each. Avoid a universal, unsupported damage behavior; components without a modeled failure mode should explain that limitation.
+
+### Device-specific readings and state communication
+
+**DR-1 — Battery telemetry.** Show state of charge (SOC) as a live value, with charge/discharge direction and relevant modeled battery measurements. Clarify estimates and capacity/chemistry assumptions.
+
+**DR-2 — MPPT telemetry.** Show PV-side input (including supported voltage/current/power readings) separately from battery-side output (including supported charge voltage/current/power). Values on each side must respond to the same live operating point and expose conversion/limit behavior rather than conflating input and output.
+
+**DR-3 — Inverter telemetry and modes.** Show live DC input and supported AC output readings, plus an explicit operating/charging state. Model and communicate transitions such as bulk and absorption only when the required conditions and state transitions are defined; explain idle, limited, faulted, or unsupported states.
+
+**DR-4 — Per-device measurement contract.** Define relevant live readings and units for each modeled component kind. Present values at the device and side/terminal they describe. Do not force all devices into a battery-SOC-only or generic status display.
+
+**DR-5 — Explain system operation.** Provide a discoverable way to inspect what each device is doing and why: current operating state, inputs/outputs, active limits or faults, and the model evidence behind the displayed status.
+
+### Multimeter and measurement output
+
+**MM-1 — Functional live multimeter.** The multimeter must take measurements from the current simulation state and update when relevant connections, settings, or device states change. It must not display stale, hard-coded, or fabricated readings.
+
+**MM-2 — Actual continuity result.** Continuity must evaluate whether the selected leads have a continuous modeled electrical path under the current topology and device/protection states. Report a clear continuous, open, or unavailable/unsupported result; do not treat mere proximity, a shared device, or an unmodeled path as continuity. Explain the endpoints/path context.
+
+**MM-3 — Measurement context and validity.** Show selected leads/endpoints, measurement mode, units, and a clear status for valid, open, unavailable, or unsupported measurements. A measurement must update when its path or state changes.
+
+**MM-4 — Clear measurement output.** Provide an explicit, discoverable way to clear displayed/saved multimeter output or reading history. Clearing output must not alter the simulated circuit, device settings, or wires; confirm or undo only if the product's established interaction conventions require it.
+
+**MM-5 — Animation is optional.** A working multimeter and truthful live readings are required independently of any current-flow animation. Animation is optional and appreciated, but it must never substitute for a numeric/status reading or continuity result.
+
+## Staged delivery and acceptance
+
+Stages are ordered to avoid implementing visuals ahead of the behavior they represent. Each stage may be delivered in small, reviewed implementation slices. Shared requirements are cross-referenced rather than duplicated as separate features.
+
+### Stage 1 — Define the live model and evidence contract
+
+1. Inventory existing project, solver, route, device-state, and telemetry foundations before changing them.
+2. Specify the supported electrical quantities, update lifecycle, terminal/sign conventions, measurement/continuity semantics, output-clear behavior, and reading provenance.
+3. Define initial operating scenarios and acceptance fixtures, including normal operation, wrong cable sizing, missing protection, reversed battery connection, and device-specific MPPT/inverter states.
+4. For each fault scenario, record assumptions, causal rules, expected readings/state changes, damage eligibility, recovery, and unsupported cases.
+5. Separate sourced product constraints from generic teaching assumptions and record what the model does not calculate.
+
+**Acceptance:** every proposed live reading, meter measurement/continuity result, and fault behavior has a defined source/assumption, units, expected observable result, and explicit boundary. Output clearing is defined as display/history-only, with no circuit side effect. No numerical threshold is invented or treated as universal.
+
+### Stage 2 — Make routes collision-aware, separated, and stable
+
+1. Establish route geometry based on actual component bounds, terminal locations, and wire clearance.
+2. Allocate distinct lanes/levels to wires and define deterministic handling for crossings, constrained spaces, and route priority.
+3. Detect and prevent self-intersections, avoidable loops, overlapping centerlines, and routes concealed by equipment.
+4. Improve corner and segment editing so neighboring corners move smoothly while preserving right angles and avoiding loop creation.
+5. Recompute affected routes when components move or resize, while retaining user edits when they remain valid.
+6. Keep route changes attached to stable endpoints and preserve history/persistence behavior.
+
+**Acceptance:** representative dense layouts have no wire hidden by device geometry, no avoidable self-loops, and no indistinguishable shared wire paths; corner edits remain smooth and orthogonal; device resize/movement, undo/redo, save/reload, and import preserve the expected endpoints and route intent.
+
+### Stage 3 — Make readings, multimeter, and flow reflect the live model
+
+1. Establish one authoritative live calculation/update path for the readings in scope, including multimeter measurements.
+2. Update dependent device telemetry when topology, supported settings, source conditions, or operating state changes.
+3. Make the multimeter produce correct live readings for supported modes and actual continuity results from the modeled path/state; explicitly distinguish open from unavailable or unsupported.
+4. Provide a clear-output action for the meter's displayed/saved output, without changing simulation state.
+5. Show current direction and relative magnitude on active routes from calculated results; static cues satisfy this requirement. Optional animation may enhance the display but is not required.
+6. Ensure route styling and any flow cues remain distinct from connection status, faults, and non-power links.
+
+**Acceptance:** a controlled change to an input produces the expected, timely change to all affected readings and meter results; continuity changes correctly when a modeled path opens/closes; inactive/unsupported paths do not appear energized; readings include units and measurement context; clearing output leaves the circuit unchanged. Animation may be absent without failing acceptance.
+
+### Stage 4 — Let incorrect connections produce modeled behavior
+
+1. Remove compatibility-based blocking from the learner connection workflow while preserving validation of malformed project structure.
+2. Represent reversed, mismatched, unprotected, undersized, or otherwise out-of-limit conditions in the model according to Stage 1 rules.
+3. Calculate observable electrical changes and supported progression (for example, limits, protection response, thermal effects, or damage) before or alongside explanatory diagnostics.
+4. Keep the cause, evidence, and confidence/assumption visible and specific to the affected wire/device/system.
+5. Resolve active issues when their causal conditions are corrected without erasing useful historical evidence.
+
+**Acceptance:** learners can create the planned incorrect connections without an arbitrary compatibility blocker; each tested scenario produces its specified reading/state/effect; explanation corresponds to observed model evidence; unsupported outcomes are labeled, not fabricated.
+
+### Stage 5 — Add stateful damage and replacement
+
+1. Implement damaged/dead states only for component types and failure modes defined in Stage 1.
+2. Ensure damaged components stop, limit, or alter operation and telemetry as specified by the model.
+3. Add a discoverable replace/restore action with an explicit preview or confirmation of preserved settings and connection handling.
+4. Keep replacement undoable and compatible with project persistence/import; do not duplicate IDs or silently rewire unrelated terminals.
+
+**Acceptance:** a supported destructive scenario visibly leaves the affected component in the defined dead/damaged state; replacement restores a usable component with the agreed settings, handles connections predictably, and survives undo/redo and save/reload.
+
+### Stage 6 — Deliver device-specific telemetry and operating states
+
+1. Define and display relevant per-kind input, output, state, and limit readings.
+2. Implement battery SOC behavior and charge/discharge telemetry.
+3. Separate MPPT PV input from battery output and represent supported conversion/limit behavior.
+4. Define inverter readings and state transitions, including bulk/absorption only when fully specified by the model.
+5. Make device behavior inspectable through a consistent, discoverable interaction that explains state and evidence without hiding system-wide effects.
+
+**Acceptance:** each supported device shows appropriate live readings, clear units and measurement locations, and an explanatory state; changes propagate consistently across connected devices; unsupported values/modes are not implied.
+
+### Stage 7 — Integrated regression, usability, and documentation gate
+
+1. Verify end-to-end normal and fault scenarios from connection creation through readings, flow, explanation, damage/replacement, and recovery.
+2. Add focused automated coverage for routing/lane/self-loop invariants, resize/movement, live update propagation, meter calculations and continuity, clear-output behavior, fault progression, damage/replacement, telemetry calculations, and persistence.
+3. Verify keyboard, pointer, touch, narrow layouts, accessible status announcements, reduced motion, and undo/redo for changed interactions.
+4. Keep [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md), [docs/EQUIPMENT_FIELDS.md](docs/EQUIPMENT_FIELDS.md), and any applicable source guidance aligned with actual model capabilities.
+5. Run relevant typecheck, tests, UI/catalogue checks, build, and browser scenarios before treating a stage as complete.
+
+**Acceptance:** the integrated workflow passes targeted automated checks and documented browser QA; project data remains intact; all claims and reading precision match the implemented model.
+
+## Progress tracker
+
+Planning baseline: 2026-10-22. The user has requested a plan only; no implementation work has started under this refocus. Keep this table synchronized with [goal.md](goal.md).
+
+| Stage | Status | Completion evidence / next step |
 | --- | --- | --- |
-| 1. Shared equipment, terminal, and validation contract | In progress | Added [docs/EQUIPMENT_FIELDS.md](docs/EQUIPMENT_FIELDS.md), validation for node/wire string IDs and ratings, controller power tables and exact supported battery classes, terminal identity/label/domain/role/direction/layout/order and unique side/order slots, wire size/length/count/material/domain/color, route and device coordinates, sunlight percentage, temperatures above absolute zero, positive AC source values, device state booleans/enums, supported battery chemistry, and per-device AC output profiles. Schema v3 adds the explicit fuse amp limit while preserving legacy watts. Custom catalogue validation checks identity/kind, positive ratings, voltage tables, and terminal layouts; import reports invalid custom entries skipped while keeping the project. Project import rejects malformed array members and nested terminal/route/probe structures but keeps object-shaped unknown component kinds loadable with a clear validation error; unsupported kinds no longer crash default terminal lookup or the solver. Focused boundary/import regression cases are present, including new switch/fuse/chemistry/profile checks. Still needed: broader per-kind constraints and full integration verification. |
-| 2. Device configuration and terminal presentation | In progress | Inspector now configures PV power/Voc, MPPT power and charge-current caps, sourced battery-system compatibility, battery voltage/capacity/current limits, inverter nominal DC input and AC output voltage/frequency plus power/surge, load power factor, and protection current threshold. Verified inverter AC/DC model ratings populate these fields; mismatches are diagnosed and affected terminals are unsupported. Closest-model comparison now also checks sourced AC voltage/frequency against the active project profile and marks mismatches as failures instead of a generic pass. Source-backed model edits detach the exact product identity; terminal side/order selectors preserve IDs. Transfer and protection state now have visible inspector controls, and canvas double-click toggles flow through the undoable commit history. Device width expands for dense top/bottom terminal rows and wire endpoints use the same geometry. Still needed: exact-layout rendering review and responsive keyboard/touch QA. |
-| 3. Deliberate editable wire connections | In progress | Normal palette no longer offers cable nodes; terminal selection opens a conductor dialog with size, length, material, color, parallel count, and insulation; edits expose the same supported electrical properties. Malformed conductor values and missing endpoints remain blocked, but learners may save incompatible terminal pairs: the dialog explains the mismatch, the wire receives a brief reduced-motion-aware pulse and a wire-specific active warning, warning focus selects it, and the simulator excludes it from powered paths. Existing cable nodes are preserved, never auto-converted, and the inspector/documentation explain manual replacement and that deleting a legacy cable removes its attached wire records. The native modal now wraps its conductor controls in a submit form, so Enter saves a valid connection; Escape still cancels. Source audit and browser smoke checks cover compatible and incompatible wire creation. Still needed: full keyboard dialog, edit/delete/undo, and persistence coverage. |
-| 4. Route and corner editing | In progress | Wire paths render orthogonally through persisted waypoints and auto-route around device rectangles with 12-unit clearance. Later wires route around earlier wire segments with 8-unit edge clearance while leaving terminal lead-outs available; stable project order defines priority. Selected-wire inspector reports when saved corners or obstacles prevent a clear route and identifies remaining collinear overlap. Pathfinding is cached by project state and uses a priority queue. Device and route-corner drags now use the SVG inverse screen transform (including zoom and preserve-aspect letterboxing), pointer capture/cancel handling, and touch-action control; keyboard bend movement remains. Legacy `{x, y: 0}` bends remain readable. Later-created wires bridge across perpendicular crossings with a white gap and colored arc, stable stacking order, and accessible non-connection text. [tests/routing.test.mjs](tests/routing.test.mjs) covers orthogonal routes, crossings, endpoint/collinear distinctions, device/wire clearance, and impossible checkpoints. When a saved-corner conflict occurs, the selected-wire inspector now offers a one-step “Reset corners to auto-route” action in addition to moving, adding, or removing individual corners; the edit flows through the normal project commit/undo path. Still needed: verify auto-route resolves representative overlaps, route save/reload QA, and browser visual QA at the documented viewport/zoom combinations. |
-| 5. Active warnings and live meter | In progress | Active warnings are in the top header, new non-info diagnostics toast briefly, warning selection focuses its node/wire, and a clear-focus action is available. Evidence naming multiple devices now selects/highlights all matching nodes together; single-device fallback behavior remains. Each active warning expands to show why it matters, observed evidence, the bounded-model caveat, and a learning next step; known equipment-related warnings resolve their device and show product source status/link when available. Meter controls and endpoint-labeled readings are in the canvas toolbar; continuity checks a two-lead path over active wires, and resistance uses saved material/size/length/parallel values for the directly connected wire with sourced nominal 20 °C resistivity. Unknown imported wire materials now fail validation and yield an unavailable resistance reading instead of silently using copper. Current probes on a directly measured DC bus branch use its modeled downstream-load branch estimate; other DC paths remain system estimates and AC remains system apparent current. Saved probe rows now have individual removal, with a clear-all action for older hidden readings. Direct runtime assertions cover meter calculations; persistence schema tests cover probe serialization. Calculation and limits are documented in [docs/EQUIPMENT_FIELDS.md](docs/EQUIPMENT_FIELDS.md) and [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md). Unknown imported display colors are preserved and shown in neutral gray; color and domain metadata warnings now map to specific review guidance without changing terminal-driven electrical behavior. Expanded model-boundary details now tailor the “why it matters” and solver boundary text for data/control links, source/sink direction mismatches, open devices, and display metadata. Source reachability and bus-branch traversal now use only terminal-resolved, same-domain DC/AC power wires; data, earth, control-role, and endpoint-unresolved legacy links cannot create a modeled powered path or inflate a bus branch. Regression coverage now checks data/earth false paths, signal-only bus branches, and endpoint-only legacy wires remaining preserved without inferred source reachability. Still needed: broader branch-current accuracy/coverage and browser workflow/persistence QA. |
-| 6. Integration and verification | In progress | Added focused migration, MPPT-limit, compatibility, bus-branch meter, routing, malformed-import, and wrong-connection regression cases. `npm run verify` now passes typecheck, all 93 tests, catalogue validation, UI audit, and production build; catalogue validation reports 23 verified of 57 models, 9 component types, 9 sourced rule sets, and 0 structural errors. Browser smoke covered creating/editing wires, an intentionally mismatched connection, warning focus, delete/undo, and reset. Full laptop/tablet/phone keyboard, persistence, reduced-motion, and responsive QA remain outstanding. |
+| 1. Live model and evidence contract | Planned | Define readings, scenarios, assumptions, thresholds, damage eligibility, and model limits before implementation. |
+| 2. Collision-aware wire routing | Planned | Specify/test route lanes, obstacle clearances, loop prevention, resize behavior, corner editing, and route persistence. |
+| 3. Live readings, multimeter, and current flow | Planned | Establish authoritative updates, live meter modes and actual continuity, clear-output behavior, device telemetry contract, and static/optional animated flow cues. |
+| 4. Incorrect connections and modeled effects | Planned | Permit arbitrary terminal pairings and implement the evidence-based behaviors defined in Stage 1. |
+| 5. Damage and replacement | Planned | Define per-component failure/recovery behavior and implement settings-preserving, undoable replacement. |
+| 6. Device-specific telemetry and states | Planned | Implement battery, MPPT, inverter, and other supported device readings and explain operating states. |
+| 7. Integration and verification | Planned | Add regression coverage, perform end-to-end and accessibility/browser QA, and align simulation documentation. |
 
-### Latest slice notes
+## Explicit non-goals and boundaries
 
-- The simulator remains the bounded educational model described in [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md); these changes do not add installation or compliance claims.
-- Product-specific warning rules were not altered, so no manufacturer rating was inferred. The existing research boundary and solver limits were reviewed before UI changes.
-- The conductor editor follows the W3C [modal dialog pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/): a native modal receives focus, contains keyboard navigation, and closes on Escape. The warning disclosure uses native details/summary; browser QA is still required.
-- Verification: esbuild parsed the edited TS/TSX sources; focused runtime assertions covered MPPT caps, fuse migration preservation, and field-specific connection validation. `npm run typecheck` remains blocked before TypeScript execution by restricted parent-path `EPERM`. Do not treat this slice as release verified.
-- Custom catalogue follow-up: added `validateCustomRecord` for custom identity/kind, positive numeric fields, supported battery-voltage tables, and terminal layouts. Import keeps a valid project and surfaces a count when invalid custom entries are skipped. Syntax parsing passed; the runtime bundle attempt was blocked resolving the restricted `C:\Users\Shade` parent path, so this check still needs a supported runtime environment.
-- Routing follow-up: the renderer now uses all persisted wire waypoints to build orthogonal path segments; selected route handles can be dragged with pointer input or moved in 24-unit steps with arrow keys. New inspector corners are actual two-dimensional waypoints, and edits are clamped to the canvas bounds. Esbuild syntax parsing passed. Route interaction, legacy visual equivalence, persistence, collision avoidance, and crossing behavior still require browser QA and targeted regression coverage.
-- Terminal layout follow-up: device width now expands when top/bottom terminal rows would otherwise be crowded, using both terminal count and longest label to calculate spacing. The wire endpoint position calculation shares that width logic. Route handles expose keyboard slider position metadata. Esbuild syntax parsing passed; representative rendered layouts and responsive behavior still need browser review.
-- Warning explanation follow-up: each active issue has expandable teaching details that distinguish observed evidence, why it matters in the bounded model, and a next learning step. Diagnostic-to-device targeting is shared between details and canvas focus; known equipment-related cases now resolve inverter, controller, battery, protection, or open device. Verified catalogue source links/status are included when the affected node is source-backed. Esbuild TSX syntax and style presence checks passed; visual/keyboard QA and multi-target focus remain.
-- Meter follow-up: continuity now requires both leads and checks a path over active wires, so open protection paths report open; conductor resistance is calculated for the selected active wire from area, length, material, and parallel count using the ABB handbook's 20 °C copper/aluminium values. Current only appears across an active direct connection and is explicitly labeled as a system estimate with branch direction unsolved. The UI preserves four decimal places for ohms and includes the model explanation. Esbuild syntax parsing and direct runtime assertions passed for resistance, multi-wire continuity, and an open tripped-protection path. Per-branch current, persisted-probe workflow, and browser QA remain outstanding.
-- Wire-validation follow-up: new connections now show model validation errors while conductor properties are edited, including endpoint domain/polarity incompatibility; the Add button stays disabled until the new errors are cleared. The feedback tells learners to cancel and choose compatible terminals rather than saving a misleading connection. Esbuild TSX syntax parsing passed; keyboard and full dialog interaction QA remain.
-- Legacy-cable follow-up: the selected old cable-node inspector now explains why the node is preserved without automatic conversion, how to create replacement terminal-to-terminal wires, and that deleting the old node also deletes its attached old wire records. [docs/EQUIPMENT_FIELDS.md](docs/EQUIPMENT_FIELDS.md) records this compatibility path. Esbuild TSX syntax parsing passed; saved-project migration interaction still needs browser QA.
-- Inverter configuration follow-up: inverter settings now expose DC nominal input class, AC output voltage/frequency, continuous output, and surge. Verified catalogue values map to the new fields; changing AC profile or battery class marks mismatched inverter terminals unsupported and emits an explanatory diagnostic instead of converting the values. Added a focused regression test in `tests/refocus-flows.test.mjs`; esbuild syntax transforms and direct runtime assertions passed for applied ratings and matching/mismatching profiles. Manufacturer evidence and model boundaries are recorded in [docs/RESEARCH_GATE.md](docs/RESEARCH_GATE.md), [docs/EQUIPMENT_FIELDS.md](docs/EQUIPMENT_FIELDS.md), and [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md). Full test runner and browser QA remain outstanding.
-- Crossing-policy follow-up: extracted pure route construction/crossing helpers to [src/routing.ts](src/routing.ts). SVG wires now use stable project order (later wires bridge over earlier ones) for perpendicular interior crossings; a white gap and colored arc distinguish a crossing from an electrical junction, and the wire's accessible description names the non-connection. Added `tests/routing.test.mjs`; esbuild syntax parsing and direct runtime assertions passed for orthogonal waypoint routing, perpendicular crossing detection, endpoint contact, and collinear paths. Device collisions, overlapping parallel centerlines, and browser visual QA remain.
-- Device-avoidance follow-up: route planning now treats device cards as obstacles with 12 canvas units of clearance; terminal leads extend 18 units outward before routing around the endpoint cards. Saved waypoints remain required checkpoints; if a checkpoint lies inside an obstacle or no path can satisfy it, the selected-wire inspector reports the conflict and prompts the learner to move/remove a corner. Added obstacle-avoidance and blocked-checkpoint coverage to [tests/routing.test.mjs](tests/routing.test.mjs). Esbuild parsing and direct runtime checks passed for auto-avoidance, impossible-waypoint reporting, orthogonality, and crossing detection. Collinear wire overlaps and browser QA remain.
-- Routing performance/endpoint follow-up: pathfinding now uses a binary priority queue and route geometry/crossings are memoized per project state, avoiding a full route search on live-meter-only renders. Paths leave and enter at terminal-side offsets and treat endpoint device cards as obstacles for the remaining path. Added a no-bend orthogonality regression case. Esbuild parsing and direct routing checks passed; interactive performance and visual QA remain unverified.
-- Collinear overlap follow-up: added `findCollinearOverlaps` to [src/routing.ts](src/routing.ts), focused tests distinguishing shared path spans from endpoint-only contact, and selected-wire inspector feedback naming the overlapping route. Esbuild syntax parsing and direct assertions on shared spans versus endpoint touches pass using a temporary transformed module. The repository's test command is incompatible with installed Node 21 (`bad option: --experimental-strip-types`). Overlap resolution/rerouting remains an active Stage 4 requirement.
-- Multi-target warning-focus follow-up: warning evidence that names more than one node now selects/highlights all matching nodes while retaining the first as the main inspector target. Single-node diagnostic-kind fallback is preserved. Stage 5 no longer lists multi-target node focus as outstanding; wire-plus-node and multi-wire targets have not been added because current diagnostic evidence does not identify those target sets.
-- Verification follow-up: after overlap inspector and multi-node warning focus edits, esbuild syntax transforms pass. `npm run ui:check` reproduces the parent-path `EPERM` before its script starts. `npm test` separately fails immediately with `bad option: --experimental-strip-types` under Node 21. No browser or runtime claims are inferred from syntax parsing.
-- DC branch-meter follow-up: current probes spanning a direct DC bus branch now display the existing downstream load estimate for that wire; the estimate is explicitly labeled as bounded and excludes Kirchhoff sharing, conductor drop, and lead direction. Added a focused branch-probe assertion to the existing bus-current test and updated both simulation-limit documents. Direct runtime assertions pass for a DC bus with two custom-DC load terminals; the repository test command remains unavailable on installed Node 21.
-- Shared project-boundary follow-up: `validateProjectModel` now rejects sunlight outside 0–100%, nonfinite or below-absolute-zero panel/ambient temperatures, nonpositive/nonfinite specified AC source voltage/frequency, and nonfinite supplied device coordinates. Added focused regression cases and documented project environment field meanings. Direct runtime assertions pass for valid boundary values and each invalid case; full repository tests remain blocked by Node 21's unsupported test flag.
-- Automatic wire-clearance follow-up: the project route map now builds routes in stable wire order and supplies earlier interior route segments as 8-unit-clearance obstacles for each later route; the endpoint lead segments are excluded to permit shared terminal attachments. The inspector now describes device or earlier-wire route conflicts generically. Added a regression case for orthogonal clearance and direct transformed-module assertions pass. Browser layout and persistence QA remain required; saved waypoints can still force a conflict, which remains visible in the inspector.
-- Terminal-order validation follow-up: moved positive-integer validation outside the `side` conditional so malformed order values are rejected even when no display side is assigned; duplicate explicit side/order slots remain rejected. Added focused regression cases and direct runtime assertions pass. Full test runner still cannot start under installed Node 21.
-- Conductor-material validation follow-up: unrecognized imported wire materials now produce a model-validation error. Resistance mode checks the material again before calculating and returns an unavailable explanation instead of treating every unknown value as copper. Added regression coverage for the enum boundary and the resistance behavior; direct runtime assertions pass for sourced copper calculation and unsupported-material refusal.
-- Persisted-probe workflow follow-up: saved meter readings now expose an accessible individual remove button on each of the three visible rows and a clear-all action when older saved probes exist. Extended the browser QA checklist to verify all modes, live updates, removal, and export/import persistence. JSX/CSS syntax and keyboard/touch behavior still need real-browser QA; the existing persistence regression covers probe serialization.
-- In-process checks: ran `scripts/ui-check.mjs` through the Node REPL (pass) and ran the catalogue validation script from temporary esbuild-transformed modules (23 verified / 57 total, 9 component types, 9 sourced rule sets). The npm CLI equivalents remain constrained by Node startup `EPERM`; no build or browser result is inferred from these checks.
-- Full regression suite: the initial transformed `node:test` run exposed an outdated assertion that accepted a continuity result with no negative lead. Updated it to distinguish unsupported missing-lead readings from an open two-lead path. Re-ran all 9 test files one at a time through `node:test.run` against esbuild-transformed temporary local modules; all files passed. The CLI has since been updated to remove the Node 22-only strip-types flag, but workers fail at sandbox parent-path `EPERM` before assertions run.
-- Node 21 test-runner follow-up: added [scripts/ts-esbuild-loader.mjs](scripts/ts-esbuild-loader.mjs) to transpile local `.ts`/`.tsx` imports and resolve extensionless local TypeScript imports. `npm test` and `catalog:check` now use the loader and no longer require the newer strip-types flag; `esbuild` is declared directly as a dev dependency. Loader resolution and TS transform were verified in the REPL. CLI command execution remains blocked before script startup by the sandbox's parent-path `EPERM`.
-- Updated CLI result: `npm test` reaches Node's TAP runner with the new loader, but each child test worker fails before loading its file because Node cannot `lstat C:\Users\Shade`. Independently, all nine source test files pass with `node:test.run` in the Node REPL using equivalent esbuild-transformed local modules. The environment failure is isolated to CLI worker startup, not a reported project assertion.
-- Pointer-mapping follow-up: device and route-corner drag deltas are now converted through `SVGSVGElement.getScreenCTM().inverse()`, which handles CSS zoom and SVG aspect-ratio letterboxing; pointer cancel removes drag listeners, and touch-action is disabled on draggable SVG targets. Extended the browser checklist to test mouse/touch at 70%, 100%, and 130% zoom across viewports. Esbuild TSX parsing passes; runtime alignment still needs browser QA.
-- Post-pointer static verification: the UI source audit passes again after pointer handling changes; esbuild transforms pass for `main.tsx`, the Node 21 loader, and the modified probe regression test. This does not replace viewport interaction testing.
-- Import-safety follow-up: `isProject` now rejects null/array members before migration dereferences them. Unknown but object-shaped node kinds remain loadable; validation names the unsupported kind, and `defaultTerminals` falls back to an empty list to keep terminal-aware solver paths from throwing. Direct runtime checks and all 9 transformed test files pass after this change.
-- Nested import validation follow-up: parser now checks terminal lists, power limit tables, supported battery voltage lists, route points, saved meter probes/endpoints/modes, and event records before migration or rendering can consume them. Model validation checks stable string IDs, terminal text/direction, and wire domain/display color. Added malformed nested record cases; all 9 transformed test files still pass.
-- Runtime availability: a fresh Vite launch on 2026-10-21 again failed before app startup with Node `EPERM` resolving `C:\Users\Shade`. Do not repeat this same launch check unless the execution environment changes; real-browser QA remains blocked in this environment.
-## Ordered delivery plan
-
-### 1. Establish the shared equipment, terminal, and validation contract
-
-Do this first because rating inputs, terminal rendering, connection dialogs, simulation checks, and warnings all depend on the same device and terminal facts.
-
-1. Document the fields each existing device kind can meaningfully configure, with explicit units and whether each value is a user setting, an exact product rating, or a derived result.
-2. Evolve the catalogue/node model only as needed to represent those fields consistently. Keep source, verification status, product identity, and learner-editable custom values distinct. Add validation and migration/default rules for older saved projects.
-3. Define stable terminal IDs, domain/role/direction, physical display side (top, bottom, left, or right), and display order. Catalogue-supplied layouts should be explicit per product where known; generic defaults should remain clearly generic.
-4. Define one validation boundary shared by the editor, catalogue/custom-record entry, saved/imported projects, and simulation. Reject impossible or structurally invalid values with a field-specific explanation; do not silently clamp, omit, or substitute values.
-5. Preserve unsupported behavior as unsupported. A rating field alone must not imply that the solver models a physical feature.
-
-**Acceptance:** existing saved/imported projects still load; known terminal identities remain connectable; new fields have units, bounds, and clear provenance; invalid values are explained; partially verified products stay visibly partial.
-
-### 2. Make equipment configuration useful and terminal presentation accurate
-
-Build the component workflow on the shared model from step 1.
-
-1. Keep the palette for actual devices, not conductors. For each placed device, provide a readable settings surface for relevant name/model and numerical properties.
-2. Cover the current device kinds with sensible properties rather than one universal form. Examples include PV rated output and voltage data; MPPT battery/system voltage, maximum PV open-circuit voltage/input power, and charge-current limits; battery nominal voltage, capacity, and charge/discharge limits; inverter DC voltage, AC voltage/frequency, continuous apparent/real output, surge capability, and supported charger details; load voltage/power or apparent-power inputs; and protection-device ratings only where the model supports them.
-3. Display manufacturer naming as an aid, not a substitute for exact fields. For example, parse or explain an MPPT model name only when that exact model has a verified source. Do not treat a Victron naming pattern as universal across brands or infer an unverified rating from a name.
-4. Let learners set permissible values on their own/custom devices. Validate the actual constraints before applying settings, identify which constraint fails, and distinguish editable assumptions from source-backed fixed ratings.
-5. Render terminals at the configured top, bottom, or side and in the configured order. Provide a direct, discoverable way to change placement/order (including drag-reordering where it remains usable by keyboard and touch); preview the result and keep connected wire endpoints attached to the same terminal IDs.
-6. Prevent terminal overlap. Adapt spacing, label placement, or device presentation to terminal count and zoom; do not hide terminals behind device shapes, labels, or other terminals. Use a restrained, consistent visual identity for device kinds and brands while keeping labels and electrical roles readable.
-
-**Acceptance:** representative PV, MPPT, battery, inverter, load, and protection-device cases show the correct terminal count, identity, side, and order; moving terminals does not change connection identity; impossible settings cannot be saved; model/source status is still visible.
-
-### 3. Make every wire a deliberate connection with editable properties
-
-Use the existing terminal connection flow and wire model; remove the duplicate “cable as a component” interaction from the normal palette.
-
-1. Connect by choosing a source terminal and a destination terminal. Only after both endpoints are chosen, open a focused wire-properties dialog before committing the connection.
-2. In that dialog, set conductor size/gauge with units, material, length, color (a controlled dropdown/palette), and only the other properties already supported by the model (such as parallel count or insulation). Provide meaningful defaults without implying that a default is safe for installation.
-3. Validate conductor inputs and structural endpoint integrity before saving. Explain domain and polarity/role mismatches inline, but allow learners to save an intentionally wrong terminal pair; mark it visibly, explain the specific issue, and exclude it from modeled powered paths so it cannot masquerade as a valid energized connection.
-4. Make selecting an existing wire reopen the same editable properties, with a clear delete action and undo support. Keep its endpoints and route separate from its electrical attributes.
-5. Preserve older wire records and imported projects. Where old projects contain a placeable cable node, define a non-destructive compatibility path and communicate any unsupported conversion rather than silently deleting it.
-
-**Acceptance:** no cable node is needed to create a wire; each new wire has explicit endpoints and properties; edit/delete/undo/import preserve existing wire data; incompatible terminal pairs remain available as learning examples with clear warnings and never masquerade as successful powered connections.
-
-### 4. Finish direct route and corner editing; keep all connections visible
-
-Complete routing on top of the wire creation and terminal-position work.
-
-1. Keep routes orthogonal and attached to their terminal IDs as devices move or terminals are repositioned.
-2. Make route editing direct: drag segments/corners, add a 90-degree corner on a segment, and remove a selected corner with pointer, keyboard, and touch-accessible controls. Preserve manual points on save/reload.
-3. Route around device bodies and terminals. Do not draw cables behind a device face or let two cables share an indistinguishable centerline. Ensure selected routes remain easy to grab without obscuring the other routes.
-4. Define a deterministic visual policy for unavoidable crossings: make crossings distinguishable from electrical junctions, and never imply a connection where endpoints do not connect. Keep wire layering and selection highlighting consistent.
-5. If two paths cannot be displayed clearly in the available space, expose the conflict and allow the learner to reroute; do not hide a cable or pretend the layout is collision-free.
-
-**Acceptance:** learners can add, drag, and remove corners; routes remain orthogonal and attached after component/terminal moves; overlapping component bodies do not conceal wires; apparent crossings are not confused with junctions; routes persist through reload and undo.
-
-### 5. Replace scattered diagnostics with active, explanatory warnings and a live meter
-
-Use the existing simulation result, diagnostic records, warning state, and `measureProbe` rather than creating a second diagnostic engine.
-
-1. Create a compact warning control in the top workbench area. A new active issue should briefly appear as a small timed notification there, then leave the collapsed view while remaining available in the expandable active-warning list.
-2. Separate current active issues from historical learning/evidence events. Resolve or remove an active warning when its cause is corrected; do not show stale history as a current fault.
-3. Give each warning a concise plain-language summary and a separate, expandable in-depth explanation specific to the affected device/wire/topology. Include the observed evidence, why it matters in this bounded model, a safe learning next step, and relevant source/verification status where applicable.
-4. Selecting a warning should focus and highlight the exact device, terminal, or wire on the sandbox and provide a clear way to return to the normal view. Support multiple targets when a diagnostic genuinely concerns a connection between two endpoints.
-5. Remove the bottom diagnostics area and diagnostic content from the selected-component sidebar. Keep device settings in the sidebar; warnings must remain available irrespective of current selection.
-6. Move the digital multimeter out of the component sidebar to a stable top-level workbench control. Make voltage/current/resistance/continuity probes work against the live model, show units and measurement endpoints, update when topology/settings change, and state when a measurement is unavailable or unsupported rather than returning a fabricated value. Reuse and verify persisted probes where they fit the interaction.
-7. Research warning rules before changing them. Separate validated model constraints from teaching heuristics and unknown conditions; consult current manufacturer documentation for product-specific rules and the project’s research/limits documentation for boundaries. Never claim standards compliance or installation approval.
-
-**Acceptance:** a new warning is briefly noticed, then remains discoverable in the expanded active list; its short and detailed explanations are specific and understandable; activation locates/highlights its source; the component sidebar has no diagnostics; the meter is reachable anywhere in the workbench and updates with live model changes.
-
-### 6. Integrate, preserve, and verify the complete workflow
-
-1. Exercise the sequence end to end: place/configure device → inspect/reorder terminals → connect terminals → set wire properties → route around devices → observe meter readings and warnings → correct an issue.
-2. Add focused regression coverage for catalogue data/constraints, terminal layout and stable IDs, wire-dialog validation and persistence, route-point editing, active-warning lifecycle/focus, and live meter measurements.
-3. Check keyboard-only use, focus order, accessible names/announcements, color contrast, reduced motion, undo/redo, import/export, autosave, touch targets, and narrow layouts.
-4. Run the repository’s existing typecheck, targeted tests, `catalog:check`, `ui:check`, and build as relevant to each implementation slice. Complete the manual laptop/tablet/phone interaction gate in [docs/BROWSER_QA_CHECKLIST.md](docs/BROWSER_QA_CHECKLIST.md).
-5. Update [docs/CATALOG_SOURCES.md](docs/CATALOG_SOURCES.md) when model claims or catalogue status actually change, and keep [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md) aligned with supported calculations and warnings.
-
-**Acceptance:** the full workflow works without hidden controls or lost project data; automated checks cover the changed behavior; manual responsive and accessibility checks are recorded; documentation does not overstate source verification or solver capability.
-
-## Explicit non-goals
-
-- No wholesale dashboard/editor rewrite, canvas-library migration, infinite canvas, or simulation-engine replacement.
-- No cable node in the normal device palette; conductors belong to connections.
-- No uncontrolled catalogue expansion or inferred manufacturer ratings.
-- No overlapping/hidden terminal and wire presentation, false electrical junctions, or decorative alerts that substitute for explanation.
-- No implication that a simulator reading or warning certifies real-world system design.
-- Do not implement all stages in one change; complete and verify the dependency order above in focused slices.
-
-
-
-
-
-
-- Accessible path-state control follow-up (2026-10-21): transfer switches and fuses now have visible inspector buttons with action-specific labels and a clear note that the action changes simulated state only. Canvas double-click toggles now use the normal commit path, so Undo/Redo restores them. Extracted `toggleDevicePath` and added tests for switch/fuse transitions, identity/rating preservation, and unsupported targets; UI audit and source parsing pass; the transformed full suite passes (12 files, 90 tests). Added manual viewport QA for the inspector controls and Undo/Redo.
-- Warning-detail teaching follow-up (2026-10-21): expanded warning details for indexed model-boundary diagnostics now resolve from their evidence instead of falling back to generic copy. Control/data, direction mismatch, open-device, and display-metadata warnings each explain why the condition matters and what the bounded solver does not model. Added dedicated helper tests and a UI wiring audit assertion; the full transformed suite passes (11 files, 87 tests), as does the UI audit and TSX parsing.
-- Profile-aware equipment matching follow-up (2026-10-21): closest inverter catalogue matches now compare source-backed AC voltage/frequency with the active project AC profile; exact matches pass, mismatches fail, and incomplete ratings remain “needs verification.” The inspector passes the selected profile to the comparison helper. Added focused regression coverage for matching, mismatching, and missing ratings; all 10 transformed test files pass (85 tests), and the UI audit and TSX parsing pass.
-- Power-path reachability follow-up (2026-10-21): source reachability and DC bus-branch estimates now traverse only terminal-resolved same-domain DC/AC connections; data, earth, control-role, and unresolved legacy endpoint-only wires are excluded. This aligns solver behavior with the existing control/data warning and prevents signal wiring from appearing to power a load. Added regression checks for data/earth-only load paths, a data branch on a DC bus, and endpoint-only legacy wires remaining unresolved and non-energizing. Updated an older topology fixture to include explicit terminal IDs rather than relying on endpoint-only links. Full transformed suite passes (10 files, 84 tests), and UI audit/TSX parsing pass. Broader current-sharing accuracy remains bounded and out of scope for this targeted correction.
-- Learning from incorrect connections (2026-10-21): learners can now keep incompatible terminal pairs in the project, but those wires are styled with a brief subtle pulse, accompanied by a specific active warning, focusable from the warning list, and excluded from modeled powered paths. The conductor dialog explains that the wire will not carry modeled power rather than blocking the experiment. Tests cover polarity/domain issues, diagnostics, and non-energizing solver behavior; manual browser smoke verified saving a polarity mismatch and focusing its warning. Full responsive and reduced-motion QA remains open.
-- Wire rendering crash fix (2026-10-21): connection creation previously reached a wire-label expression that referenced undefined `y1`/`y2`, causing a runtime render exception after saving a wire. The label now uses route-derived coordinates. Typecheck, all 93 tests, catalogue check, UI audit, production build, and browser smoke for wire creation/edit/undo passed. Full responsive browser QA remains open.
-- Final verification after learnable mismatch behavior (2026-10-21): `npm run verify` passes typecheck, 93 tests, catalogue validation, UI audit, and production build. Browser smoke confirmed incompatible connections save, display a focused warning and issue styling, are excluded from modeled paths, and resolve on delete/undo; the app resets cleanly afterward. Full keyboard, persistence, reduced-motion, and three-viewport QA remains open.
-- Terminal placement follow-up (2026-10-21): extracted side/order placement into [src/terminalLayout.ts](src/terminalLayout.ts). Moving a terminal now compacts both its old and new side order while retaining terminal IDs, labels, domains, and roles. Added three regression tests covering side changes, same-side reordering, and missing IDs; the full transformed suite passes (10 files, 82 tests), TSX/module parsing passes, and the UI audit passes. Responsive rendering and keyboard/touch use still require browser QA.
-- Full in-process verification (2026-10-21): corrected the temporary test module import rewrite and reran the complete suite after the latest changes; all 12 test files passed (90 tests, 0 failures). The UI source audit passes, and catalogue validation returns 23/57 verified models, 9 component types, 9 sourced rule sets, and 0 structural errors. The `npm test` child-worker `EPERM` remains isolated to CLI startup; build/typecheck and browser behavior still require verification.
-- Keyboard connection-dialog follow-up (2026-10-21): the conductor properties modal now uses form submission; Enter submits valid values, the submit button remains disabled while model validation fails, and Escape/Cancel dismiss without saving. Extended the UI audit and browser checklist for focus trapping and these keyboard paths. esbuild parsing and the UI audit pass in the Node REPL; actual focus order and native dialog behavior still require browser QA.
-- Device-state validation follow-up (2026-10-21): the shared project validator now rejects invalid transfer switch states, non-boolean `enabled`/`tripped`/`resettable` flags, unsupported battery chemistry values, and unsupported per-device AC profiles. This prevents malformed imported state from silently behaving like a closed path or a valid model selection. Added focused tests; esbuild parsing and direct transformed-module assertions passed for four invalid cases plus accepted default states. Full CLI tests remain blocked by Node worker `EPERM`.
-- Route recovery follow-up (2026-10-21): added a selected-wire action to clear all saved route corners and retry the deterministic auto-router, giving learners a direct recovery option when saved bends conflict with a device or another wire. The action uses the normal `updateWire` → `commit` path, so it participates in project history. Added a source-level UI audit assertion; esbuild TSX transform and `scripts/ui-check.mjs` pass in the Node REPL. Real interaction/undo and visual routing behavior remain part of browser QA.
-- Display-metadata follow-up (2026-10-21): unsupported saved wire colors and display-domain tags are warnings rather than electrical-model errors. The UI preserves unknown colors in the editor and renders them gray; diagnostics now classify both color/domain warnings with a clear review remedy. esbuild syntax transforms pass for the changed TS/TSX and test sources. `npm test` reaches TAP but all nine workers remain blocked before test loading by `EPERM` resolving `C:\Users\Shade`; this turn did not obtain a valid full-suite rerun. A first custom in-process rerun attempt used an incompatible `node:test.run` event collection shape and is not counted as a test result.
+- This plan does not authorize a wholesale editor rewrite or an unbounded general-purpose physics engine.
+- “Connect anything to anything” means do not block learner experiments for electrical incompatibility; it does not mean accepting structurally malformed project data.
+- Do not invent damage, thresholds, exact readings, or operating modes when the model lacks support.
+- Do not present animation, warnings, or simplified calculations as installation approval, standards compliance, or a substitute for professional/manufacturer guidance.
+- Do not expand the catalogue or unrelated editor features unless required by a defined refocus requirement.
+- Do not mark an item complete because a control or warning exists; verify the observable behavior and its stated acceptance criteria.

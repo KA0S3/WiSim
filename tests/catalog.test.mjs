@@ -5,7 +5,7 @@ import { applyRecordToNode, checkInterface, checkNominalVoltage, compareRecord }
 import { saveCustomRecord, saveCustomRecords } from '../src/customCatalogue.ts'
 
 test('unified product catalogue includes a broad, honestly status-labelled model inventory', () => {
-  assert.ok(CATALOG_RECORDS.length >= 50, `expected at least 50 exact-model records, got ${CATALOG_RECORDS.length}`)
+  assert.ok(CATALOG_RECORDS.length >= 110, `expected broad component and brand coverage, got ${CATALOG_RECORDS.length}`)
   const verified = CATALOG_RECORDS.filter(record => record.status === 'verified')
   const inProgress = CATALOG_RECORDS.filter(record => record.status !== 'verified')
   assert.ok(verified.length > 0)
@@ -13,9 +13,44 @@ test('unified product catalogue includes a broad, honestly status-labelled model
   assert.ok(verified.every(record => record.brand && record.brandColors && record.componentType))
   assert.ok(inProgress.every(record => record.source?.startsWith('https://') && record.missingData?.length))
   assert.ok(CATALOG_RECORDS.every(record => record.source?.startsWith('https://')))
-  assert.ok(new Set(CATALOG_RECORDS.map(record => record.brand)).size >= 7)
+  assert.ok(new Set(CATALOG_RECORDS.map(record => record.brand)).size >= 9)
   assert.ok(new Set(CATALOG_RECORDS.map(record => record.kind)).size >= 5)
   assert.equal(new Set(CATALOG_RECORDS.map(record => record.id)).size, CATALOG_RECORDS.length)
+})
+
+test('installation-related inventory is grouped across inverter, charger, monitoring, and bus components', () => {
+  const componentTypes = new Set(CATALOG_RECORDS.map(record => record.componentType))
+  const brands = new Set(CATALOG_RECORDS.map(record => record.brand))
+
+  assert.ok(componentTypes.has('inverter/charger'))
+  assert.ok(componentTypes.has('battery charger'))
+  assert.ok(componentTypes.has('system controller'))
+  assert.ok(componentTypes.has('communication interface'))
+  assert.ok(componentTypes.has('DC distribution'))
+  assert.ok(componentTypes.has('battery management system'))
+  for (const brand of ['Victron Energy', 'Samlex America', 'Xantrex', 'Renogy', 'NOCO', 'EPEVER', 'Morningstar']) {
+    assert.ok(brands.has(brand), `expected ${brand} coverage`)
+  }
+
+  const multiPlus = CATALOG_RECORDS.find(record => record.id === 'victron-multiplus-ii-48-5000-230v')
+  const quattro = CATALOG_RECORDS.find(record => record.id === 'victron-quattro-ii-48-5000-70-50')
+  const xantrex = CATALOG_RECORDS.find(record => record.id === 'xantrex-freedom-x-1200')
+  const charger = CATALOG_RECORDS.find(record => record.id === 'noco-genius10')
+  assert.equal(multiPlus?.kind, 'inverter-charger')
+  assert.equal(quattro?.kind, 'inverter-charger')
+  assert.equal(xantrex?.power, 1200)
+  assert.equal(xantrex?.surge, 2400)
+  assert.equal(charger?.chargeCurrent, 10)
+  assert.ok([multiPlus, quattro, xantrex, charger].every(record => record?.status === 'partially verified'))
+})
+
+test('all model entries on the current Victron MultiPlus-II family page are inventoried', () => {
+  const multiPlusModels = CATALOG_RECORDS.filter(record => record.brand === 'Victron Energy' && record.productFamily === 'MultiPlus-II')
+  assert.equal(multiPlusModels.length, 26)
+  assert.ok(multiPlusModels.every(record => record.status === 'partially verified' && record.source === 'https://www.victronenergy.com/inverters-chargers/multiplus-ii'))
+  assert.ok(multiPlusModels.some(record => record.productModel.includes('GX')))
+  assert.ok(multiPlusModels.some(record => record.productModel.includes('UL 1741')))
+  assert.ok(multiPlusModels.some(record => record.productModel.includes('50/60Hz')))
 })
 
 test('verified models have documented physical terminal positions and installation guidance', () => {
