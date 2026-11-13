@@ -40,6 +40,11 @@ export function validateCatalogue(records: CatalogRecord[], ruleSets: Installati
       if (!record.missingData?.length) structuralErrors.push(`${prefix} must list the data still needing verification`)
       continue
     }
+    for(const key of ['moduleImp','moduleIsc','moduleVmp','moduleVoc','maxSeriesFuseA','pvMaxOperatingVoltage','pvStartHeadroomV','pvRunHeadroomV','batteryFuseMinimumA','batteryFuseMaximumA'] as const)if(record[key]!==undefined&&(!Number.isFinite(record[key])||record[key]!<=0))structuralErrors.push(`${prefix} has an invalid ${key}`)
+    for(const key of ['moduleVocTemperatureCoefficientPerC','modulePowerTemperatureCoefficientPerC','moduleIscTemperatureCoefficientPerC'] as const)if(record[key]!==undefined&&(!Number.isFinite(record[key])||Math.abs(record[key]!)>.02))structuralErrors.push(`${prefix} has an invalid ${key}`)
+    if(record.moduleVmp&&record.moduleVoc&&record.moduleVmp>=record.moduleVoc||record.moduleImp&&record.moduleIsc&&record.moduleImp>=record.moduleIsc)structuralErrors.push(`${prefix} has inconsistent PV operating/open-circuit ratings`)
+    if(record.pvMaxOperatingVoltage&&record.pvVoc&&record.pvMaxOperatingVoltage>record.pvVoc)structuralErrors.push(`${prefix} has an operating voltage above its absolute PV maximum`)
+    if(record.batteryFuseMinimumA&&record.batteryFuseMaximumA&&record.batteryFuseMinimumA>record.batteryFuseMaximumA)structuralErrors.push(`${prefix} has an inconsistent battery fuse range`)
     const terminals = record.terminalLayout ?? []
     const terminalIds = terminals.map(terminal => terminal.id)
     const duplicateTerminals = terminalIds.filter((id, index) => terminalIds.indexOf(id) !== index)

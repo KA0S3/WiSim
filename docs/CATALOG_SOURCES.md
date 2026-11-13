@@ -108,3 +108,9 @@ These are manufacturer instructions, not a complete installation design or a sub
 Earlier generated names and generic example profiles without manufacturer evidence were removed. Current non-verified rows are different: each is an exact product identity linked to a manufacturer source, explicitly marked as in progress/reference only, and paired with a checklist of unknowns. They are not presented as verified products or complete simulation profiles.
 
 User-created custom records continue to be stored separately in local browser storage by `src/customCatalogue.ts`; they are not manufacturer-verified products and are not mixed into `src/catalog-data.json`. The JSON file is the single source of truth for sourced manufacturer models. It has a schema version, review date, rule sets, and product records to make adding a sourced model straightforward.
+
+## Corrections checked 12 November 2026
+
+The current BlueSolar manufacturer table gives SPM041751200 Vmp as 19.4 V, rather than the earlier 18.5 V value. The 215 W / 24 V entry is SPM042152402, with Vmp 40.1 V, Voc 46.01 V, Imp 5.36 A and Isc 5.65 A. The former record combined a different part number and ratings and has been corrected against the source table. The Lithium Battery Smart 12.8 V / 200 Ah power inserts are M8; the M10 insert applies to the 330 Ah variant. Corrected records carry the current sourceChecked date. Existing saved projects retain their values until the user chooses Restore catalogue defaults.
+
+The workbench now maps catalogue data by component type. MPPT nominal battery voltage is not used as PV operating voltage, PV Vmp is applied explicitly, and the Phoenix 12/1200 receives its documented 9.3 V cutoff, 91% peak-efficiency assumption, 10 W idle and 2200 W peak ratings. Constant efficiency and generic dynamics remain approximations. Reference/partially verified records open their sources; they cannot be added as verified workbench models.

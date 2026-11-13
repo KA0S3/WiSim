@@ -1,0 +1,35 @@
+import { chromium } from '@playwright/test'
+import { mkdir, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+
+const root=process.cwd()
+await mkdir(path.join(root,'.cache','browser-temp'),{recursive:true})
+process.env.TEMP=path.join(root,'.cache','browser-temp');process.env.TMP=process.env.TEMP
+await mkdir(path.join(root,'artifacts'),{recursive:true})
+const browser=await chromium.launch({channel:'msedge',headless:true,args:['--disable-gpu-sandbox']})
+const page=await browser.newPage({viewport:{width:1600,height:1000},deviceScaleFactor:1})
+const errors=[]
+page.on('pageerror',e=>errors.push(e.message))
+page.on('console',m=>{if(m.type()==='error')errors.push(m.text())})
+await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'})
+await page.getByText('Physics engine connected',{exact:true}).waitFor({timeout:25000})
+await page.waitForTimeout(1500)
+await page.screenshot({path:'artifacts/workbench-desktop.png'})
+console.log(JSON.stringify({title:await page.title(),engine:await page.locator('.inspector-footer').innerText(),metrics:await page.locator('.power-metrics').innerText(),nodes:await page.locator('.react-flow__node').count(),errors},null,2))
+await page.getByRole('button',{name:'3D workbench',exact:true}).click()
+await page.waitForTimeout(3500)
+await page.screenshot({path:'artifacts/workbench-physical.png'})
+await page.getByRole('button',{name:'Terminal detail',exact:true}).click()
+await page.waitForTimeout(300)
+await page.screenshot({path:'artifacts/workbench-terminals.png'})
+await page.getByRole('button',{name:'Design a system',exact:true}).click()
+await page.screenshot({path:'artifacts/workbench-designer.png'})
+await page.getByRole('button',{name:'Close dialog'}).click()
+await page.getByRole('button',{name:'Schematic',exact:true}).click()
+await page.setViewportSize({width:390,height:844})
+await page.waitForTimeout(500)
+await page.getByRole('button',{name:'Fit system',exact:true}).click()
+await page.waitForTimeout(700)
+await page.screenshot({path:'artifacts/workbench-mobile.png'})
+await writeFile('artifacts/preview-report.json',JSON.stringify({errors,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)},null,2))
+await browser.close()

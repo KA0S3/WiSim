@@ -2,3 +2,8 @@ node_modules/
 dist/
 .npm-cache/
 *.tsbuildinfo
+.cache/
+artifacts/
+vendor/**/.git/
+vendor/eecircuit-engine/
+vendor/ngspice/

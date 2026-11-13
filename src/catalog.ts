@@ -74,6 +74,15 @@ export type CatalogRecord = {
   moduleVmp?: number
   moduleIsc?: number
   moduleImp?: number
+  moduleVocTemperatureCoefficientPerC?: number
+  modulePowerTemperatureCoefficientPerC?: number
+  moduleIscTemperatureCoefficientPerC?: number
+  maxSeriesFuseA?: number
+  pvMaxOperatingVoltage?: number
+  pvStartHeadroomV?: number
+  pvRunHeadroomV?: number
+  batteryFuseMinimumA?: number
+  batteryFuseMaximumA?: number
   connectorType?: string
   waveform?: string
   pvVoc?: number

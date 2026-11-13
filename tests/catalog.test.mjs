@@ -130,12 +130,12 @@ test('EPEVER Tracer AN G3 variants keep their model-specific PV limits and charg
 test('BlueSolar module records retain exact STC ratings and connector type', () => {
   const module175 = CATALOG_RECORDS.find(record => record.id === 'victron-bluesolar-175w-12v')
   assert.equal(module175.productModel, 'SPM041751200')
-  assert.deepEqual([module175.power, module175.moduleVoc, module175.moduleVmp, module175.moduleIsc, module175.moduleImp], [175, 23.7, 18.5, 9.89, 9.03])
+  assert.deepEqual([module175.power, module175.moduleVoc, module175.moduleVmp, module175.moduleIsc, module175.moduleImp], [175, 23.7, 19.4, 9.89, 9.03])
   assert.match(module175.connectorType, /MC4/)
 
   const module215 = CATALOG_RECORDS.find(record => record.id === 'victron-bluesolar-215w-24v')
-  assert.equal(module215.productModel, 'SPM042151200')
-  assert.deepEqual([module215.power, module215.moduleVoc, module215.moduleVmp, module215.moduleIsc, module215.moduleImp], [215, 30.11, 24.11, 9.91, 9.41])
+  assert.equal(module215.productModel, 'SPM042152402')
+  assert.deepEqual([module215.power, module215.moduleVoc, module215.moduleVmp, module215.moduleIsc, module215.moduleImp], [215, 46.01, 40.1, 5.65, 5.36])
 })
 
 test('Phoenix 12/1200 inverter record keeps DC/AC ratings and terminal domains explicit', () => {

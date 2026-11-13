@@ -1,28 +1,52 @@
-# WireSim Sandbox
+﻿# WiSim
 
-WireSim is an educational electrical workbench centered on one always-live canvas. Place devices, connect labeled terminals with sized conductors, change a setting, and read evidence from the same bounded model.
+An electrical sandbox and system designer under active redesign. The current entry point is `src/workbench-entry.tsx`; the new implementation lives in `src/workbench`. Legacy code remains for reference and migration.
 
-## Run locally
+## Preview
 
-```bash
-npm install
+Double-click `Preview.cmd`, or run `Preview.cmd` from CMD in this folder. It reopens an existing WiSim preview, or installs missing dependencies and starts Vite with automatic browser opening at http://127.0.0.1:5173. Node.js and npm are required. Keep the server window open; Ctrl+C stops it. If the preview is already running, open that address directly.
+
+## Current implementation
+
+- ngspice/WASM simulation in a worker, terminal networks, conductor resistance, generic equipment models, voltage probes and scope.
+- Schematic editing, settings, undo/redo, automatic saving, named project library, saved versions/copies and JSON import/export.
+- Provisional single-phase system generation with individual panel/pack/protection quantities, terminal/end CSV schedules and readable multi-sheet PDF drawings.
+- Linked schematic, 3D and terminal views; terminal detail shares workbench geometry, switches components and supports live probes. Physical route lengths can affect electrical calculations.
+
+The full platform is unfinished. Catalogue records are not all validated simulation models, and regional selection does not establish installation compliance. Equipment movement, separate camera controls, wiring preservation, mounting, emulated phone gestures and saved-project recovery have dedicated browser checks. Measured interaction evidence covers three project sizes; maximum-size projects, physical phones and broader accessibility remain open.
+
+## Development and checks
+
+```sh
+npm ci
 npm run dev
+npm run verify
 ```
 
-Release checks:
+Verification runs typechecking, tests, catalogue validation, production build and the workbench browser suite. The browser suite uses installed Microsoft Edge.
 
-```bash
-npm run typecheck
-npm test
-npm run catalog:check
-npm run ui:check
-npm run build
-```
+The browser suite includes general workbench flows, 3D controls, phone gestures and named-project saving/retrieval. Run `npm run ui:projects` separately for project versions, backups and storage-failure recovery.
 
-The Sandbox supports terminal-aware DC/AC/data/earth connections, orthogonal labeled wires with draggable persisted bends, terminal-accurate endpoints and gauge-scaled conductor strokes, a focusable canvas with grid-snapped keyboard movement and additive multi-selection, device duplication, mobile-width action wrapping, Grid/Shore sources, open/closed transfer paths, four explicit AC profiles, live terminal diagnostics and device-state indicators, persisted meter probes, isolated fault challenges, measurable design requirements, local autosave, v1 migration, JSON export/import with custom catalogue definitions, and contextual source-linked model references. The manufacturer product catalogue is kept in the single editable [src/catalog-data.json](src/catalog-data.json) database and is grouped by component category and brand. Verified records can be applied to the bounded simulation; partially verified accessories and product variants remain research references with sourced claims and explicit missing-data checklists. The catalogue includes inverters/inverter-chargers, MPPT controllers, battery chargers, monitoring and communication interfaces, battery management, DC distribution, batteries, PV modules, and protection devices. See [docs/CATALOG_SOURCES.md](docs/CATALOG_SOURCES.md) for sourcing and quality rules.
+`npm run ui:touch` checks phone-size touch gestures and panel controls. After a build, `npm run ui:performance` measures camera pan and wired equipment dragging on 7, 84 and 196-device fixtures while simulation runs. It writes renderer-specific timing and idle-draw evidence to `artifacts/interaction-performance.json`; results describe this host rather than a universal frame-rate guarantee.
 
-The solver is deterministic and educational. It reports boundaries and unsupported/invalid connections; it is not SPICE, a telemetry tool, wiring approval, or a substitute for current manufacturer documentation and applicable standards. See [docs/SIMULATION_LIMITS.md](docs/SIMULATION_LIMITS.md), [docs/RESEARCH_GATE.md](docs/RESEARCH_GATE.md), and [goal.md](goal.md) for the current handoff state.
+## Work plan
 
-The active product direction is defined by [SANDBOX_REFOCUS_PLAN.md](SANDBOX_REFOCUS_PLAN.md); superseded dashboard plans are not part of the release contract. The remaining manual browser gate is documented in [docs/BROWSER_QA_CHECKLIST.md](docs/BROWSER_QA_CHECKLIST.md).
+Core application and electrical behaviour come first, followed by smooth schematic interactions, then 3D movement/routing, visual polish and detailed manufacturer models.
 
-Catalogue records and sourcing were updated for this work; run the repository checks before treating the updated database or application build as verified. The remaining manual release-gate item is browser interaction QA across responsive widths.
+- [Completed work, evidence and remaining tasks](docs/redesign/IMPLEMENTATION.md)
+- [Current status and remaining scope](docs/redesign/STATUS.md)
+- [Expanded foundation requirements and work order](docs/redesign/FOUNDATION-PLAN.md)
+- [Movement, equipment settings, roofs and solar controls](docs/redesign/CONTROLS.md)
+- [Saving projects and restoring older versions](docs/redesign/SAVING.md)
+- [Fault callouts, diagnostics and optional fixes](docs/redesign/DIAGNOSTICS.md)
+- [Running larger systems and calculation recovery](docs/redesign/RUNNING.md)
+- [Electrical model assumptions and power balance](docs/redesign/ELECTRICAL-MODELS.md)
+- [Interaction measurements and limits](docs/redesign/PERFORMANCE.md)
+- [Preview and review instructions](docs/redesign/REVIEW.md)
+- [Upstream solver sources and licenses](docs/redesign/UPSTREAM.md)
+- [Catalogue sourcing](docs/CATALOG_SOURCES.md)
+
+Older planning and simulation-limit documents describe the legacy implementation unless stated otherwise. No public deployment has been performed.
+
+
+Compact array/bank controls and their limits are described in [Groups](docs/redesign/GROUPS.md). Run `npm run ui:groups` for the dedicated desktop workflow checks.
