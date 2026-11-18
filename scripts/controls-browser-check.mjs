@@ -35,7 +35,7 @@ try{
  await check('rectangle selection and screen organisation preserve electrical wiring',async()=>{
   await page.waitForTimeout(800);const battery=await page.locator('.react-flow__node').filter({has:page.locator('.node-name').filter({hasText:/^Home battery$/})}).boundingBox(),fuse=await page.locator('.react-flow__node').filter({has:page.locator('.node-name').filter({hasText:/^Battery protection$/})}).boundingBox()
   await page.mouse.move(Math.min(battery.x,fuse.x)-6,Math.max(battery.y+battery.height,fuse.y+fuse.height)+6);await page.mouse.down();await page.mouse.move(Math.max(battery.x+battery.width,fuse.x+fuse.width)+6,Math.min(battery.y,fuse.y)-6,{steps:12});await page.mouse.up();await expect.poll(()=>page.locator('.react-flow__node.selected').count()).toBeGreaterThanOrEqual(2)
-  const before=await saved();await page.getByLabel('Arrangement options',{exact:true}).click();await page.getByRole('button',{name:'Arrange for screen',exact:true}).click();await expect.poll(async()=>JSON.stringify((await saved()).devices.map(d=>[d.x,d.y]))).not.toBe(JSON.stringify(before.devices.map(d=>[d.x,d.y])));expect((await saved()).wires).toEqual(before.wires)
+  const before=await saved();await expect(page.getByLabel('Arrangement options',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Auto arrange',exact:true}).click();await expect.poll(async()=>JSON.stringify((await saved()).devices.map(d=>[d.x,d.y]))).not.toBe(JSON.stringify(before.devices.map(d=>[d.x,d.y])));expect((await saved()).wires).toEqual(before.wires)
  })
  await fresh()
  await check('nearest catalogue alternatives show differences and create actual parallel units',async()=>{
