@@ -4,6 +4,7 @@ import {pvVocAtTemperature,pvIscAtTemperature,pvDiodeScale} from './pv-ratings'
 import {networkMeasurements,measurementKey,measurementStart,timeAverage as average} from './measurements'
 import { synchronizeLengths } from './geometry'
 import {staticFindings} from './static-findings'
+import {solverReferences} from './solver-references'
 import {withSchedules} from './appliances'
 import {batteryPermission,engineeringFindings} from './engineering'
 import { emptyState, wireResistance, type Device, type Finding, type Frame, type Project, type RuntimeState } from './model'
@@ -35,8 +36,9 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
   const findings: Finding[] = staticFindings(project)
   for (const d of project.devices) {
     const id = safe(d.id), s = d.spec, n = (p: string) => nodeName(d.id, p), internal = `int_${id}`, sense = sensor(d.id)
-    // Extremely weak references define floating island common-mode without joining their returns.
-    d.ports.forEach(port => lines.push(`Rref_${id}_${safe(port.id)} ${n(port.id)} 0 1e9`))
+    // Tiny bleeders define unused/open behavioral terminals. Each electrical
+    // island gets its common-mode reference after all elements are stamped.
+    d.ports.forEach(port => lines.push(`Rref_${id}_${safe(port.id)} ${n(port.id)} 0 1e12`))
     if (!d.on || state.trips.includes(d.id)) { lines.push(`${sense} ${n(positivePort(d))} ${internal} 0`, `Roff_${id} ${internal} ${n(d.ports.length > 1 ? negativePort(d) : 'p')} 1e12`); continue }
     const source = (value: string, out = 'p', returnPort = 'n') => { lines.push(`Bsrc_${id} src_${id} ${n(returnPort)} V=${value}`, `Rsrc_${id} src_${id} ${internal} ${Math.max(.00001, s.resistance)}`, `${sense} ${internal} ${n(out)} 0`) }
     switch (d.kind) {
@@ -81,7 +83,10 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
         const taper=`max(0,min(1,(${target}-${battery})/${target/30}))`,present=`max(0,min(1,${battery}-1))`,headroom=`max(0,min(1,(${pv}-${battery}-${threshold})/.25))`
         const limit=`min(1,${s.rating}*${out}/(${s.efficiency}*max(1e-9,${pv}^2/${resistance})))`
         const conductance=`(${taper}*${present}*${headroom}*${limit}/${resistance})`,power=`(${pv}^2*${conductance})`
+        // Keep an inactive input defined in darkness or with an open return.
+        // This high-impedance sensing path is included in measured input power.
         lines.push(`Vpvinput_${id} ${n('pv+')} pv_in_${id} 0`,
+          `Rpvbleed_${id} pv_in_${id} ${n('pv-')} 1e9`,
           `Bpvload_${id} pv_in_${id} ${n('pv-')} I=${pv}*${conductance}`,
           `Bcharge_${id} ${n('bat-')} ${internal} I=${s.efficiency}*${power}/${out}`,
           `${sense} ${internal} ${n('bat+')} 0`); break
@@ -132,9 +137,12 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
     lines.push(`${wireSensor(w.id)} ${from} ${mid} 0`, `Rwire_${safe(w.id)} ${mid} ${to} ${Math.max(1e-7, wireResistance(w, project.ambient))}`)
   }
   for(const id of project.engineering?.earthing?.neutralBondIds??[]){const d=project.devices.find(d=>d.id===id);if(d?.ports.some(p=>p.id==='pe')&&['inverter','grid','three-phase'].includes(d.kind))lines.push(`Rbond_${safe(id)} ${nodeName(id,'n')} ${nodeName(id,'pe')} .001`)}
+  const preferred=project.devices.flatMap(d=>d.ports.filter(p=>['n','pv-','bat-','dc-'].includes(p.id)).map(p=>nodeName(d.id,p.id)))
+  const {references,offsets}=solverReferences(lines,preferred,state.nodes)
+  lines.push(...references)
   // Restart each short transient segment with retained reactive state and source phase.
   const existingNodes=new Set(project.devices.flatMap(d=>d.ports.map(p=>nodeName(d.id,p.id))))
-  for (const [node, voltage] of Object.entries(state.nodes)) if (Number.isFinite(voltage) && existingNodes.has(node)) lines.push(`.ic v(${node})=${voltage}`)
+  for (const [node, voltage] of Object.entries(state.nodes)) if (Number.isFinite(voltage) && existingNodes.has(node)) lines.push(`.ic v(${node})=${voltage-(offsets.get(node)??0)}`)
   if (!state.time) for (const d of project.devices.filter(d => d.kind === 'capacitor')) lines.push(`.ic v(${nodeName(d.id, 'p')})=0 v(${nodeName(d.id, 'n')})=0`)
   // ngspice otherwise exports every internal wire/source node. Keep all real
   // terminals and branch currents, but avoid exporting unused implementation nodes.

@@ -34,7 +34,8 @@ self.onmessage = async ({ data }: MessageEvent<{ type: 'run' | 'reset'; project:
     const packed=transferableFrame(result.frame);packed.frame.durationMs=performance.now()-start
     self.postMessage({ type: 'frame', frame: packed.frame,state:result.state, requestId: data.requestId },{transfer:packed.transfer})
   } catch (error) {
-    const reason=error instanceof Error?error.message:String(error),details=engine.getError().slice(-6).filter(Boolean).join('\n')
-    self.postMessage({ type: 'error', error: reason+(details&&!reason.includes(details)?'\nSolver details: '+details:''), requestId: data.requestId, revision: data.revision })
+    const reason=error instanceof Error?error.message:String(error)
+    const details=[...new Set([...reason.split('\n'),...engine.getError().slice(-6)].map(line=>line.trim()).filter(line=>line&&line!=='[object Object]'))].join('\n')
+    self.postMessage({ type: 'error', error: details, requestId: data.requestId, revision: data.revision })
   } finally { busy = false }
 }
