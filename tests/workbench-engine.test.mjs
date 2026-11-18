@@ -9,10 +9,31 @@ import {CATALOG_RECORDS} from '../src/catalog.ts'
 import {applyCatalogRecord} from '../src/workbench/catalog-device.ts'
 import {applyProductSelection} from '../src/workbench/catalog-bank.ts'
 import {defaultSolarSite,siteSun,setPanelFacing} from '../src/workbench/solar.ts'
+import {resistanceBetween} from '../src/workbench/instruments.ts'
+import {defaultBuilding} from '../src/workbench/building-plan.ts'
 
 const engine=new Simulation()
 async function solve(p,state=emptyState(),seconds=.1) { await engine.start();state=prepareState(p,state);const compiled=compileCircuit(p,state,seconds);engine.setNetList(compiled.netlist);const raw=await engine.runSim();return interpret(p,raw,state,1,0,compiled.findings,seconds) }
 const near=(actual,expected,tolerance,label='value')=>assert.ok(Math.abs(actual-expected)<=tolerance,`${label}: expected ${expected} ± ${tolerance}, got ${actual}`)
+
+test('directional BMS equivalent limits current, inhibits cold charging and preserves discharge',async()=>{
+ const p=blankProject(),b=makeDevice('battery',0,0),load=makeDevice('resistor',300,0);load.spec.resistance=1;p.devices=[b,load];p.wires=[connect(b,'p',load,'p',16,.1),connect(load,'n',b,'n',16,.1)]
+ b.batteryLimits={chargeA:5,dischargeA:10,chargeMinC:5,chargeMaxC:50,dischargeMinC:-20,dischargeMaxC:50,lowVoltage:5,highVoltage:60,minSoc:0,maxSoc:100,control:'internal',externalConnected:false,source:'test equivalent'}
+ let result=await solve(p);near(result.frame.devices[b.id].current,10,.01,'Discharge current cap');assert.ok(result.frame.devices[b.id].power>0)
+ b.batteryLimits.control='external';result=await solve(p);assert.ok(Math.abs(result.frame.devices[b.id].current)<1e-5)
+ b.batteryLimits.externalConnected=true;p.ambient=0;result=await solve(p);near(result.frame.devices[b.id].current,10,.01,'Cold discharge remains enabled')
+ const source=makeDevice('battery',600,0);source.spec.voltage=58;source.spec.resistance=1;p.devices=[b,source];p.wires=[connect(source,'p',b,'p',16,.1),connect(b,'n',source,'n',16,.1)];p.ambient=25
+ result=await solve(p);near(result.frame.devices[b.id].current,-5,.01,'Charge current cap')
+ p.ambient=0;result=await solve(p);assert.ok(Math.abs(result.frame.devices[b.id].current)<1e-5,'Cold charge is blocked')
+})
+
+test('stored energy remains reported after isolating a capacitor and blocks resistance measurement',async()=>{
+ const p=blankProject(),capacitor=makeDevice('capacitor',0,0),state=emptyState()
+ capacitor.on=false;p.devices=[capacitor];state.capacitors[capacitor.id]=10
+ const result=await solve(p,state),reading=result.frame.devices[capacitor.id]
+ near(reading.storedEnergyJ,.05,1e-9,'Retained capacitor energy')
+ assert.match(resistanceBetween(p,[{id:capacitor.id,port:'p'},{id:capacitor.id,port:'n'}],result.frame).detail,/Discharge/)
+})
 
 test('sourced 550 W module reproduces its STC Vmp/Imp point and cold open-circuit voltage',async()=>{
  const p=blankProject(),pv=applyCatalogRecord(makeDevice('pv',0,0),CATALOG_RECORDS.find(r=>r.id==='canadian-solar-cs6w-550ms-2278')),load=makeDevice('resistor',300,0)
@@ -25,6 +46,7 @@ test('parallel catalogue alternatives contribute real branch current and conserv
  for(const [kind,model]of [['battery','victron-lithium-smart-12-8-100'],['pv','victron-bluesolar-175w-12v']]){
   let p=blankProject();const source=makeDevice(kind,0,0),load=makeDevice('resistor',300,0);load.spec.resistance=2;p.devices=[source,load];p.wires=[connect(source,'p',load,'p',16,.5),connect(load,'n',source,'n',16,.5)];p.sun=100
   p=applyProductSelection(p,source.id,CATALOG_RECORDS.find(r=>r.id===model),2)
+  for(const d of p.devices)if(d.batteryLimits)d.batteryLimits.externalConnected=true;
   const {frame}=await solve(p),sources=p.devices.filter(d=>d.kind===kind),current=sources.reduce((sum,d)=>sum+frame.devices[d.id].current,0),power=sources.reduce((sum,d)=>sum+frame.devices[d.id].power,0),loss=Object.values(frame.wires).reduce((sum,w)=>sum+w.loss,0)
   assert.equal(sources.length,2);assert.ok(sources.every(d=>frame.devices[d.id].current>0))
   near(current,frame.devices[load.id].current,.00001,'Parallel branch current balance')
@@ -146,7 +168,7 @@ test('panel direction and site time change solved PV output without rewiring the
 test('a catalogue 12 V inverter powers an AC load rather than retaining the 48 V generic cutoff',async()=>{
  const p=blankProject(),from=id=>CATALOG_RECORDS.find(r=>r.id===id)
  const b=applyCatalogRecord(makeDevice('battery',0,0),from('victron-lithium-smart-12-8-200')),inverter=applyCatalogRecord(makeDevice('inverter',300,0),from('victron-phoenix-12-1200-230v')),load=makeDevice('load',600,0)
- load.spec.watts=300;p.devices=[b,inverter,load];p.wires=[connect(b,'p',inverter,'dc+',35,1),connect(b,'n',inverter,'dc-',35,1),connect(inverter,'l',load,'p'),connect(inverter,'n',load,'n')]
+ b.batteryLimits.externalConnected=true;load.spec.watts=300;p.devices=[b,inverter,load];p.wires=[connect(b,'p',inverter,'dc+',35,1),connect(b,'n',inverter,'dc-',35,1),connect(inverter,'l',load,'p'),connect(inverter,'n',load,'n')]
  const {frame}=await solve(p);assert.ok(frame.devices[load.id].power>295);assert.ok(frame.devices[b.id].power>frame.devices[load.id].power)
 })
 
@@ -256,7 +278,7 @@ test('charger regulates an unloaded voltage and stays unpowered without a mains 
 test('catalogue solar/controller/battery components produce charging within the configured current limit',async()=>{
  const p=blankProject(),product=(kind,id)=>applyCatalogRecord(makeDevice(kind,0,0),CATALOG_RECORDS.find(r=>r.id===id))
  const pv=product('pv','victron-bluesolar-175w-12v'),mppt=product('mppt','victron-smartsolar-75-15'),battery=product('battery','victron-lithium-smart-12-8-100')
- p.sun=100;p.devices=[pv,mppt,battery];p.wires=[connect(pv,'p',mppt,'pv+'),connect(pv,'n',mppt,'pv-'),connect(mppt,'bat+',battery,'p'),connect(mppt,'bat-',battery,'n')]
+ battery.batteryLimits.externalConnected=true;p.sun=100;p.devices=[pv,mppt,battery];p.wires=[connect(pv,'p',mppt,'pv+'),connect(pv,'n',mppt,'pv-'),connect(mppt,'bat+',battery,'p'),connect(mppt,'bat-',battery,'n')]
  const {frame}=await solve(p);assert.ok(frame.devices[battery.id].power<-80);assert.ok(frame.devices[mppt.id].current<=15.001);assert.ok(frame.devices[battery.id].voltage<14.4)
 })
 
@@ -357,6 +379,31 @@ test('automatic design generates a valid connected project that the real engine 
   for(const region of ['ZA','GB','US']) {const p=designSystem({...defaultRequirements,region});assert.ok(validateProject(p));const {frame}=await solve(p);const load=p.devices.find(d=>d.kind==='load');assert.ok(frame.devices[load.id].power>2300);assert.ok(p.designNotes.some(n=>n.includes('Provisional')))}
 })
 
+test('building-fitted design solves after supported route lengths resize its conductors',async()=>{
+ const p=designSystem({...defaultRequirements,building:defaultBuilding()});p.sun=0
+ const {frame}=await solve(p),load=p.devices.find(d=>d.kind==='load')
+ assert.ok(frame.devices[load.id].power>2300);assert.equal(p.fitIssues.length,0)
+ assert.ok(p.wires.every(w=>w.autoRoute&&!w.autoRoute.error))
+ assert.ok(!frame.findings.some(f=>f.severity==='fault'))
+})
+
+test('automatic split/three-phase output has measured line voltages and scheduled loads switch at the chosen hour',async()=>{
+ for(const [phases,region,ratio] of [['split','US',2],['three','ZA',Math.sqrt(3)]]){
+  const p=designSystem({...defaultRequirements,phases,region});p.sun=0
+  const result=await solve(p),inverters=p.devices.filter(d=>d.kind==='inverter'),a=result.frame.waveforms[inverters[0].id+':l'],b=result.frame.waveforms[inverters[1].id+':l'],times=result.frame.times
+  const {measureBetween}=await import('../src/workbench/measurements.ts')
+  const measurement={ac:true,frequency:region==='US'?60:50},line=measureBetween(a,b,times,measurement,measurement)
+  near(line.value,inverters[0].spec.voltage*ratio,2,'Line-to-line RMS voltage')
+ }
+ const p=designSystem({...defaultRequirements,appliances:[{id:'day',name:'Day appliance',watts:1000,quantity:1,startHour:8,endHour:10,startupMultiplier:1,startupSeconds:0,phase:'auto'}]})
+ p.sun=0;p.scheduleHour=8
+ const first=await solve(p),load=p.devices.find(d=>d.schedule)
+ assert.ok(first.frame.devices[load.id].power>950)
+ p.scheduleHour=12
+ const second=await solve(p,first.state)
+ assert.ok(second.frame.devices[load.id].power<.001);assert.equal(load.on,true)
+})
+
 test('generated high-power and high-solar systems stay within their generic battery current limits',async()=>{
   for(const requirements of [
     {...defaultRequirements,dailyKwh:1,peakW:8000,autonomyHours:1},
@@ -391,4 +438,51 @@ test('import validation rejects malformed terminals and ambiguous state identifi
     p=>p.devices[0].ports[0].offset=2,
     p=>p.devices[0].spec.frequency=0,
   ]) { const p=solarProject();mutate(p);assert.equal(validateProject(p),false) }
+})
+
+test('latched trip keeps original measured overload and affected circuit after opening',async()=>{
+ const p=blankProject(),fuse=makeDevice('fuse',100,0),battery=makeDevice('battery',0,0),load=makeDevice('resistor',300,0)
+ load.spec.resistance=.1;fuse.spec.rating=1;p.devices=[battery,fuse,load];p.wires=[connect(battery,'p',fuse,'p',16,.1),connect(fuse,'n',load,'p',16,.1),connect(load,'n',battery,'n',16,.1)]
+ let result=await solve(p)
+ assert.ok(result.state.trips.includes(fuse.id))
+ const original=result.frame.findings.find(f=>f.id===`trip-${fuse.id}`).detail
+ assert.match(original,/A exceeded 1 A/);assert.match(original,/Connected equipment/)
+ result=await solve(p,result.state)
+ assert.equal(result.frame.findings.find(f=>f.id===`trip-${fuse.id}`).detail,original)
+})
+
+test('generated long-start motor survives repeated real-engine windows without overload or trip',async()=>{
+ const p=designSystem({...defaultRequirements,appliances:[{id:'pump',name:'Pump',watts:1500,quantity:1,startHour:8,endHour:10,startupMultiplier:4,startupSeconds:5,phase:'auto'}]});p.sun=0
+ let state=emptyState()
+ for(let i=0;i<24;i++){const result=await solve(p,state);state=result.state;assert.equal(state.trips.length,0);assert.ok(!result.frame.findings.some(f=>f.severity==='fault'||f.id.startsWith('overload-')||f.id.startsWith('battery-limit-')),JSON.stringify(result.frame.findings))}
+})
+
+test('schematic exports retain PV input measurements for long imported identities and branch aliases',async()=>{
+ const p=solarProject()
+ const renamed=new Map(p.devices.map((d,i)=>[d.id,'imported-'+i+'-'+('equipment'.repeat(1))]))
+ p.devices=p.devices.map(d=>({...d,id:renamed.get(d.id)}))
+ p.wires=p.wires.map(w=>({...w,from:renamed.get(w.from),to:renamed.get(w.to)}))
+ const state=prepareState(p,emptyState()),compiled=compileCircuit(p,state)
+ assert.ok(compiled.netlist.split('\n').filter(line=>line.startsWith('.save ')).every(line=>line.length<1024))
+ await engine.start();engine.setNetList(compiled.netlist);const raw=await engine.runSim()
+ const aliases=structuredClone(raw);aliases.data=aliases.data.map(d=>({...d,name:d.name.startsWith('i(')?d.name.slice(2,-1)+'#branch':d.name}))
+ const result=interpret(p,aliases,state,1,0,compiled.findings)
+ const controller=p.devices.find(d=>d.kind==='mppt')
+ assert.ok(result.frame.devices[controller.id].inputPower>0)
+})
+
+test('inverter DC input readings and configurable limits reflect the solved battery supply',async()=>{
+ const p=solarProject(),inverter=p.devices.find(d=>d.kind==='inverter')
+ assert.equal(validateProject(p),true)
+ inverter.spec.dcMaxVoltage=40;inverter.spec.dcMaxCurrent=1
+ assert.equal(validateProject(p),true)
+ const {frame}=await solve(p),r=frame.devices[inverter.id]
+ assert.ok(r.inputVoltage>40)
+ assert.ok(r.inputCurrent>1)
+ assert.ok(r.inputPower>r.power)
+ near(r.inputPower,r.power/inverter.spec.efficiency+(inverter.spec.idleWatts??8),.1,'DC input conversion balance')
+ assert.ok(frame.findings.some(f=>f.id==='inverter-dc-voltage-'+inverter.id))
+ assert.ok(frame.findings.some(f=>f.id==='inverter-dc-current-'+inverter.id))
+ delete inverter.spec.dcMaxVoltage;delete inverter.spec.dcMaxCurrent
+ assert.equal(validateProject(p),true)
 })

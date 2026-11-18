@@ -50,3 +50,13 @@ test('adaptive windows never shorten an ordinary AC reading below one full sourc
  s.send(s.workers[0],{type:'error',revision:0,error:'retry'});s.r.tick();assert.equal(s.workers[1].posts[0].seconds,.05)
  s.send(s.workers[1],{type:'error',revision:0,error:'retry'});s.r.tick();assert.equal(s.workers[2].posts[0].seconds,.05);s.r.dispose()
 })
+
+test('clearing trip latches preserves time, charge and reactive storage in the next worker',()=>{
+ const s=setup();s.r.tick();const checkpoint=s.success(s.workers[0],12.3)
+ checkpoint.trips=['protection'];checkpoint.tripCauses={protection:'Overload'};checkpoint.overloadSeconds={protection:3}
+ s.r.clearTrips();s.r.tick()
+ const restored=s.workers.at(-1).posts[0].checkpoint
+ assert.equal(restored.time,12.3);assert.deepEqual(restored.soc,checkpoint.soc);assert.deepEqual(restored.capacitors,checkpoint.capacitors)
+ assert.deepEqual(restored.trips,[]);assert.deepEqual(restored.overloadSeconds,{});assert.deepEqual(restored.tripCauses,{})
+ s.r.dispose()
+})

@@ -39,8 +39,8 @@ test('catalogue stores source-backed extended specifications and dated regional 
   assert.equal(pricedBattery?.price?.currency, 'USD')
   assert.equal(pricedBattery?.price?.amount, 799)
   assert.equal(pricedBattery?.price?.priceType, 'sale')
-  assert.equal(phoenix?.power, 1300)
-  assert.equal(phoenix?.surge, 3000)
+  assert.equal(phoenix?.power, 1450)
+  assert.equal(phoenix?.surge, 2100)
   assert.equal(phoenix?.voltage, 48)
 })
 

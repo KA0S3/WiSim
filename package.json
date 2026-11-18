@@ -15,7 +15,7 @@
     "catalog:check": "node --loader ./scripts/ts-esbuild-loader.mjs scripts/catalog-check.mjs",
     "ui:check": "node scripts/workbench-browser-check.mjs",
     "ui:legacy": "node scripts/ui-check.mjs",
-    "verify": "npm run typecheck && npm test && npm run catalog:check && npm run build && npm run ui:check && npm run ui:physical && npm run ui:touch && npm run ui:projects && npm run ui:diagnostics && npm run ui:recovery && npm run ui:large && npm run ui:controls && npm run ui:groups",
+    "verify": "npm run typecheck && npm test && npm run catalog:check && npm run build && npm run ui:check && npm run ui:physical && npm run ui:touch && npm run ui:projects && npm run ui:diagnostics && npm run ui:recovery && npm run ui:large && npm run ui:controls && npm run ui:groups && npm run ui:designer && npm run ui:engineering && npm run ui:improvements && npm run ui:usability",
     "ui:physical": "node scripts/physical-browser-check.mjs",
     "ui:performance": "node --loader ./scripts/ts-esbuild-loader.mjs scripts/workbench-performance.mjs",
     "ui:touch": "node scripts/workbench-touch-check.mjs",
@@ -25,7 +25,11 @@
     "ui:dev": "node scripts/dev-simulation-browser-check.mjs",
     "ui:controls": "node scripts/controls-browser-check.mjs",
     "ui:large": "node --loader ./scripts/ts-esbuild-loader.mjs scripts/large-system-browser-check.mjs",
-    "ui:groups": "node scripts/groups-browser-check.mjs"
+    "ui:groups": "node scripts/groups-browser-check.mjs",
+    "ui:designer": "node scripts/designer-browser-check.mjs",
+    "ui:engineering": "node scripts/engineering-browser-check.mjs",
+    "ui:usability": "node scripts/usability-browser-check.mjs",
+    "ui:improvements": "node --loader ./scripts/ts-esbuild-loader.mjs scripts/requested-improvements-browser-check.mjs"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "5.3.0",

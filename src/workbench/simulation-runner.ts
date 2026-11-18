@@ -77,6 +77,7 @@ export class SimulationRunner{
  }
  retry(){this.stop();this.pending=true;this.error='';this.attempts=0;this.recovering=false;this.slow=false;this.seconds=.1;this.status='Retrying calculation';this.emit()}
  cancel(){this.stop();this.pending=false;this.running=false;this.slow=false;this.recovering=false;this.error='';this.status='Calculation cancelled; project stays editable';this.emit()}
+ clearTrips(){if(this.checkpoint){this.checkpoint={...this.checkpoint,trips:[],tripCauses:{},overloadSeconds:{}};this.frame=null;this.retry()}}
  reset(){this.checkpoint=undefined;this.frame=null;this.retry()}
  step(){this.running=false;this.pending=!this.busy;this.emit()}
  dispose(){this.disposed=true;this.stop()}

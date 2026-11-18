@@ -11,7 +11,7 @@ export function networkMeasurements(project:Project,state:RuntimeState):Record<s
  for(const d of project.devices){
   d.ports.forEach(p=>root(measurementKey(d.id,p.id)))
   if(!d.on||state.trips.includes(d.id))continue
-  const groups=d.kind==='inverter'?[['l','n'],['dc+','dc-']]:d.kind==='charger'?[['l','n'],['bat+','bat-']]:d.kind==='mppt'?[['pv+','pv-'],['bat+','bat-']]:[d.ports.map(p=>p.id)]
+  const groups=d.kind==='inverter'?[['l','n'],['dc+','dc-']]:d.kind==='charger'?[['l','n'],['bat+','bat-']]:d.kind==='mppt'?[['pv+','pv-'],['bat+','bat-']]:[d.ports.filter(p=>p.domain!=='earth').map(p=>p.id)]
   for(const group of groups)for(const port of group.slice(1))join(measurementKey(d.id,group[0]),measurementKey(d.id,port))
  }
  for(const w of project.wires)join(measurementKey(w.from,w.fromPort),measurementKey(w.to,w.toPort))
@@ -25,7 +25,7 @@ export function networkMeasurements(project:Project,state:RuntimeState):Record<s
  const couplings=new Map<string,Set<string>>()
  for(const d of project.devices){
   if(!d.on||state.trips.includes(d.id)||!['inverter','charger','mppt'].includes(d.kind))continue
-  const domains=[...new Set(d.ports.map(p=>root(measurementKey(d.id,p.id))))]
+  const domains=[...new Set(d.ports.filter(p=>p.domain!=='earth').map(p=>root(measurementKey(d.id,p.id))))]
   for(const a of domains)for(const b of domains)if(a!==b){const linked=couplings.get(a)??new Set<string>();linked.add(b);couplings.set(a,linked)}
  }
  const observation=new Map<string,Set<number>>()
@@ -67,5 +67,6 @@ export function measureBetween(a:NumericSeries,b:NumericSeries,times:NumericSeri
  const frequency=left.ac&&right.ac?(left.frequency===right.frequency?left.frequency:null):left.ac?left.frequency:right.frequency
  const observations=[left,right].flatMap(m=>m.observationFrequency!==undefined?[m.observationFrequency]:m.ac?[m.frequency]:[]),unique=new Set(observations)
  const measurement:Measurement={ac,frequency,...(observations.length?{observationFrequency:unique.size===1?observations[0]:null}:{})}
- return {value:timeAverage(a.map((v,i)=>v-(b[i]??0)),times,measurementStart(times,measurement),ac),ac,frequency}
+ const begin=measurementStart(times,measurement)
+ return {value:timeAverage(a.map((v,i)=>v-(b[i]??0)),times,begin,ac),begin,ac,frequency}
 }

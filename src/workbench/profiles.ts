@@ -1,4 +1,6 @@
 import type {Device,Kind,Triple} from './model'
+import {CATALOG_RECORDS} from '../catalog'
+import {simulationReadiness} from './catalog-readiness'
 
 export type PhysicalProfile={id:string;name:string;kind:Kind;dimensions:Triple;source:string;checked:string;style:'solar-frame'|'blue-controller'|'blue-battery'|'blue-inverter';color:string;terminalAccuracy:'approximate';geometryOnly?:boolean;terminals?:Record<string,Triple>}
 const solar='https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf'
@@ -27,6 +29,7 @@ export const physicalProfiles:PhysicalProfile[]=[
  profile('victron-lithium-smart-25-6-200','Lithium Battery Smart 25.6 V / 200 Ah','battery',[.65,.237,.163],battery,'blue-battery'),
  profile('victron-phoenix-12-1200-230v','Phoenix 12/1200 VE.Direct, 230 V','inverter',[.232,.117,.362],'https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf','blue-inverter'),
 ]
+for(const record of CATALOG_RECORDS){const readiness=simulationReadiness(record);if(!readiness.ready||physicalProfiles.some(p=>p.id===record.id))continue;const kind=readiness.kind!,s=record.simulation!;physicalProfiles.push({...profile(record.id,record.name,kind,s.dimensions,s.source,kind==='pv'?'solar-frame':kind==='battery'?'blue-battery':kind==='inverter'?'blue-inverter':'blue-controller'),checked:s.checked,color:record.brandColors?.primary??'#68757b'})}
 export const physicalProfile=(id?:string)=>physicalProfiles.find(p=>p.id===id)
 export function applyPhysicalProfile(device:Device,id:string):Device{
  const profile=physicalProfile(id)

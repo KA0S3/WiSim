@@ -2,6 +2,7 @@ import type { Device, Project, Wire } from './model'
 import { deviceCenter, transformPoint, resolveMounts, moveDeviceInSpace } from './spatial'
 import {ensureReferences} from './references'
 import {cleanGroups} from './equipment-groups'
+import {refreshSupportedRoutes} from './surface-routing'
 
 export type Point3 = [number, number, number]
 export function localTerminalPosition(device: Device, portId: string): Point3 {
@@ -25,8 +26,8 @@ export function routeLength(points: Point3[]): number {
   return points.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p[0]-points[i][0],p[1]-points[i][1],p[2]-points[i][2]),0)
 }
 export function synchronizeLengths(project: Project): Project {
-  project=ensureReferences(resolveMounts(project))
-  return {...project,groups:cleanGroups(project),wires:project.wires.map(w=>w.lengthMode==='physical'?{...w,length:routeLength(physicalWirePoints(project,w))+(w.slack??0)}:w)}
+  project=ensureReferences(refreshSupportedRoutes(resolveMounts(project)))
+  return {...project,groups:cleanGroups(project),wires:project.wires.map(w=>w.lengthMode==='physical'&&!w.autoRoute?.error?{...w,length:routeLength(physicalWirePoints(project,w))+(w.slack??0)}:w)}
 }
 export function moveEquipment(project: Project,id:string,position:Point3):Project {
   if(!position.every(Number.isFinite))throw new Error('Equipment coordinates must be finite')
@@ -35,7 +36,7 @@ export function moveEquipment(project: Project,id:string,position:Point3):Projec
 
 export function setWireRoute(project: Project, id: string, route: Point3[]): Project {
   if (route.some(point => point.length !== 3 || !point.every(Number.isFinite))) throw new Error('Route coordinates must be finite')
-  return synchronizeLengths({...project,wires:project.wires.map(w=>w.id===id?{...w,lengthMode:'physical',route3d:route.map(p=>[...p] as Point3)}:w)})
+  return synchronizeLengths({...project,wires:project.wires.map(w=>w.id===id?{...w,lengthMode:'physical',autoRoute:undefined,route3d:route.map(p=>[...p] as Point3)}:w)})
 }
 
 export function insertWireBend(project: Project, id: string): Point3[] {

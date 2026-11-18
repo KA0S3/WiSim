@@ -3,7 +3,9 @@ import {solarExposure} from './solar'
 import {pvVocAtTemperature,pvIscAtTemperature,pvDiodeScale} from './pv-ratings'
 import {networkMeasurements,measurementKey,measurementStart,timeAverage as average} from './measurements'
 import { synchronizeLengths } from './geometry'
-import {connectionFindings} from './connection-checks'
+import {staticFindings} from './static-findings'
+import {withSchedules} from './appliances'
+import {batteryPermission,engineeringFindings} from './engineering'
 import { emptyState, wireResistance, type Device, type Finding, type Frame, type Project, type RuntimeState } from './model'
 
 export const terminalKey = (id: string, port: string) => `${id}:${port}`
@@ -17,6 +19,7 @@ const positivePort = (d: Device) => d.kind === 'inverter' ? 'l' : (d.kind === 'm
 const negativePort = (d: Device) => (d.kind === 'mppt'||d.kind==='charger') ? 'bat-' : 'n'
 
 export function prepareState(project: Project, state: RuntimeState): RuntimeState {
+  project=withSchedules(project)
   const next=structuredClone(state)
   const ids=new Set(project.devices.map(d=>d.id))
   for(const group of ['soc','capacitors','inductors','overloadSeconds','starts','enabled'] as const)for(const key of Object.keys(next[group]))if(!ids.has(key.split(':')[0]))delete next[group][key]
@@ -26,22 +29,29 @@ export function prepareState(project: Project, state: RuntimeState): RuntimeStat
 }
 
 export function compileCircuit(project: Project, state: RuntimeState = emptyState(), seconds = .1) {
+  project=withSchedules(project)
   project=synchronizeLengths(project)
   const lines = ['WiSim terminal network', '.options reltol=0.001 abstol=1e-9 vntol=1e-6 itl1=300 itl4=100 method=gear', '.model Dgeneric D(Is=1e-12 N=1.5 Rs=.01)']
-  const findings: Finding[] = connectionFindings(project)
-  const connections = new Set(project.wires.flatMap(w => [terminalKey(w.from, w.fromPort), terminalKey(w.to, w.toPort)]))
+  const findings: Finding[] = staticFindings(project)
   for (const d of project.devices) {
     const id = safe(d.id), s = d.spec, n = (p: string) => nodeName(d.id, p), internal = `int_${id}`, sense = sensor(d.id)
     // Extremely weak references define floating island common-mode without joining their returns.
     d.ports.forEach(port => lines.push(`Rref_${id}_${safe(port.id)} ${n(port.id)} 0 1e9`))
-    const missing=d.ports.filter(port=>!connections.has(terminalKey(d.id,port.id)))
-    if (missing.length && !['bus', 'ground'].includes(d.kind)) findings.push({ id: `open-${d.id}`, severity: d.on&&missing.length<d.ports.length?'warning':'info', title: 'Unconnected terminal', detail: `${d.name}: ${missing.map(p=>p.label).join(', ')} ${missing.length===1?'is':'are'} unconnected. A complete outgoing and return path is needed for current.`, target: d.id })
     if (!d.on || state.trips.includes(d.id)) { lines.push(`${sense} ${n(positivePort(d))} ${internal} 0`, `Roff_${id} ${internal} ${n(d.ports.length > 1 ? negativePort(d) : 'p')} 1e12`); continue }
     const source = (value: string, out = 'p', returnPort = 'n') => { lines.push(`Bsrc_${id} src_${id} ${n(returnPort)} V=${value}`, `Rsrc_${id} src_${id} ${internal} ${Math.max(.00001, s.resistance)}`, `${sense} ${internal} ${n(out)} 0`) }
     switch (d.kind) {
       case 'battery': {
         const soc = state.soc[d.id] ?? project.initialSoc
         const ocv = s.voltage * (.92 + .1 * Math.min(1, soc / 100))
+        if(d.batteryLimits){
+          const b=d.batteryLimits,permission=batteryPermission(project,d,state),v=`v(${n('p')},${n('n')})`
+          const charge=permission.charge?String(b.chargeA):'0'
+          const discharge=permission.discharge?String(b.dischargeA):'0'
+          if(permission.discharge||permission.charge)lines.push(`.nodeset v(${n('p')})=${ocv} v(${n('n')})=0`)
+          lines.push(`Bbattery_${id} ${n('n')} ${internal} I=max(-(${charge}),min(${discharge},(${ocv}-${v})/${Math.max(.00001,s.resistance)}))`,`${sense} ${internal} ${n('p')} 0`)
+          for(const [index,reason]of permission.reasons.entries())findings.push({id:`bms-${d.id}-${index}`,severity:'warning',title:'Battery management limits active',detail:reason+' Directional current/voltage limits use a bounded equivalent, not cell-level BMS firmware.',target:d.id})
+          break
+        }
         source(soc <= 0 ? '0' : String(ocv)); break
       }
       case 'pv': {
@@ -67,7 +77,8 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
         // One shared input-power expression feeds both converter sides. Current
         // limiting/taper must curtail PV draw as well as battery output, otherwise
         // an inactive/full controller silently consumes the entire panel output.
-        const taper=`max(0,min(1,(${target}-${battery})/${target/30}))`,present=`max(0,min(1,${battery}-1))`,headroom=`max(0,min(1,(${pv}-${battery})/2))`
+        const threshold=state.enabled[d.id+':tracking']?(s.pvRunHeadroom??1):(s.pvStartHeadroom??2)
+        const taper=`max(0,min(1,(${target}-${battery})/${target/30}))`,present=`max(0,min(1,${battery}-1))`,headroom=`max(0,min(1,(${pv}-${battery}-${threshold})/.25))`
         const limit=`min(1,${s.rating}*${out}/(${s.efficiency}*max(1e-9,${pv}^2/${resistance})))`
         const conductance=`(${taper}*${present}*${headroom}*${limit}/${resistance})`,power=`(${pv}^2*${conductance})`
         lines.push(`Vpvinput_${id} ${n('pv+')} pv_in_${id} 0`,
@@ -97,8 +108,8 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
       }
       case 'inverter': {
         const vdc = `v(${n('dc+')},${n('dc-')})`
-        source(`${s.voltage * Math.SQRT2}*sin(2*pi*${s.frequency}*(time+${state.time}))*min(1,max(0,(${vdc}-${s.cutoff})/2))`, 'l')
-        lines.push(`Bdraw_${id} ${n('dc+')} ${n('dc-')} I=(max(0,v(${n('l')},${n('n')})*i(${sense}))/${s.efficiency}+${s.idleWatts??8})/max(5,${vdc})*max(0,min(1,(${vdc}-${s.cutoff})/2))`); break
+        source(`${s.voltage * Math.SQRT2}*sin(2*pi*${s.frequency}*(time+${state.time})-${(s.phaseDegrees??0)*Math.PI/180})*min(1,max(0,(${vdc}-${s.cutoff})/2))`, 'l')
+        lines.push(`Vdcinput_${id} ${n('dc+')} inverter_dc_${id} 0`, `Bdraw_${id} inverter_dc_${id} ${n('dc-')} I=(max(0,v(${n('l')},${n('n')})*i(${sense}))/${s.efficiency}+${s.idleWatts??8})/max(5,${vdc})*max(0,min(1,(${vdc}-${s.cutoff})/2))`); break
       }
       case 'load': case 'dc-load': case 'motor': {
         const boost = d.kind === 'motor' && state.time - (state.starts[d.id] ?? 0) < s.startupSeconds ? s.surge : 1
@@ -120,6 +131,7 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
     const from = nodeName(w.from, w.fromPort), to = nodeName(w.to, w.toPort), mid = `wire_${safe(w.id)}`
     lines.push(`${wireSensor(w.id)} ${from} ${mid} 0`, `Rwire_${safe(w.id)} ${mid} ${to} ${Math.max(1e-7, wireResistance(w, project.ambient))}`)
   }
+  for(const id of project.engineering?.earthing?.neutralBondIds??[]){const d=project.devices.find(d=>d.id===id);if(d?.ports.some(p=>p.id==='pe')&&['inverter','grid','three-phase'].includes(d.kind))lines.push(`Rbond_${safe(id)} ${nodeName(id,'n')} ${nodeName(id,'pe')} .001`)}
   // Restart each short transient segment with retained reactive state and source phase.
   const existingNodes=new Set(project.devices.flatMap(d=>d.ports.map(p=>nodeName(d.id,p.id))))
   for (const [node, voltage] of Object.entries(state.nodes)) if (Number.isFinite(voltage) && existingNodes.has(node)) lines.push(`.ic v(${node})=${voltage}`)
@@ -133,11 +145,13 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
     if(d.on&&!state.trips.includes(d.id)){
       if(d.kind==='three-phase')for(const phase of ['b','c'])signals.add(`i(${sensor(d.id)}_${phase})`)
       if(d.kind==='charger'){signals.add(`i(vinput_${safe(d.id)})`);signals.add(`v(rect_p_${safe(d.id)})`);signals.add(`v(rect_n_${safe(d.id)})`)}
+      if(d.kind==='inverter')signals.add(`i(vdcinput_${safe(d.id)})`)
       if(d.kind==='mppt')signals.add(`i(vpvinput_${safe(d.id)})`)
     }
   }
   for(const w of project.wires)signals.add(`i(${wireSensor(w.id)})`)
-  const list=[...signals];for(let i=0;i<list.length;i+=16)lines.push('.save '+list.slice(i,i+16).join(' '))
+  // Imported IDs can make a batch exceed ngspice's input-line limit.
+  for(const signal of signals)lines.push('.save '+signal)
   // Algebraic DC networks do not need 500 repeated samples per window.
   // Keep fine sampling whenever an AC source or stored-energy device is present.
   const dynamic=project.devices.some(d=>['grid','three-phase','inverter','charger','capacitor','inductor','motor'].includes(d.kind)),step=dynamic?.0002:seconds
@@ -146,9 +160,13 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
 }
 
 export function interpret(project: Project, raw: ResultType, state: RuntimeState, revision: number, durationMs: number, initialFindings: Finding[] = [],expectedDuration=.1): { frame: Frame; state: RuntimeState } {
+  project=withSchedules(project)
   project=synchronizeLengths(project)
   if (raw.dataType !== 'real' || !raw.numPoints) throw new Error('The solver returned no usable transient data.')
-  const data = Object.fromEntries(raw.data.map(v => [v.name.toLowerCase(), v.values]))
+  const data = Object.fromEntries(raw.data.map(v => {
+    const name=v.name.toLowerCase()
+    return [name.endsWith('#branch')?`i(${name.slice(0,-7)})`:name,v.values]
+  }))
   const times = data.time ?? [], end = times[times.length - 1] ?? 0
   if (!times.length || end < expectedDuration*.999 || !raw.data.every(v => v.values.every(Number.isFinite))) throw new Error('The network did not converge to a complete solution. Review source connections and component values.')
   if(times.length!==raw.numPoints||times.some((t,i)=>i>0&&t<=times[i-1])||raw.data.some(v=>v.values.length!==times.length))throw new Error('The solver returned inconsistent transient samples; live readings were not accepted.')
@@ -158,6 +176,7 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
     if(d.on&&!state.trips.includes(d.id)){
       if(d.kind==='three-phase')for(const phase of ['b','c'])required.push(`i(${sensor(d.id)}_${phase})`)
       if(d.kind==='charger')required.push(`i(vinput_${safe(d.id)})`,`v(rect_p_${safe(d.id)})`,`v(rect_n_${safe(d.id)})`)
+      if(d.kind==='inverter')required.push(`i(vdcinput_${safe(d.id)})`)
       if(d.kind==='mppt')required.push(`i(vpvinput_${safe(d.id)})`)
     }
     if(required.some(key=>!data[key]))throw new Error(`The solver omitted required measurements for ${d.name}; live readings were not accepted.`)
@@ -190,6 +209,7 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
       const averagePower = average(delta.map((v, i) => v * current[i]), times, 0)
       next.soc[d.id] = Math.max(0, Math.min(100, (state.soc[d.id] ?? project.initialSoc) - averagePower * end / 3600 / (s.voltage * Math.max(.1, s.capacityAh)) * 100))
       frame.devices[d.id].soc = next.soc[d.id]
+      if(d.batteryLimits&&d.on){const b=d.batteryLimits;if(reading.current>1e-6&&reading.voltage<b.lowVoltage)next.enabled[d.id+':discharge-blocked']=true;if(reading.current< -1e-6&&reading.voltage>b.highVoltage)next.enabled[d.id+':charge-blocked']=true}
       if (Math.abs(reading.current) > s.rating) findings.push({ id: `battery-limit-${d.id}`, severity: 'warning', title: 'Battery current limit', detail: `${Math.abs(reading.current).toFixed(1)} A exceeds the configured ${s.rating} A limit.`, target: d.id })
     }
     if(d.kind==='charger') {
@@ -199,19 +219,30 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
       reading.inputCurrent=average(amps,times,inputCut,true)
       reading.inputPower=average(input.map((v,i)=>v*amps[i]),times,inputCut)
       const positive=data['v(rect_p_'+id+')']??zeros(),negative=data['v(rect_n_'+id+')']??zeros()
-      next.capacitors[d.id]=positive.at(-1)!-negative.at(-1)!
-      next.capacitors[d.id+':output']=delta.at(-1)!
+      if (d.on && !state.trips.includes(d.id)) {
+        next.capacitors[d.id]=positive.at(-1)!-negative.at(-1)!
+        next.capacitors[d.id+':output']=delta.at(-1)!
+      }
     }
     if(d.kind==='mppt'){
       const input=voltage(d.id,'pv+').map((v,i)=>v-voltage(d.id,'pv-')[i]),amps=data[`i(vpvinput_${safe(d.id)})`]??zeros()
       reading.inputVoltage=average(input,times,cut)
       reading.inputCurrent=average(amps,times,cut)
       reading.inputPower=average(input.map((v,i)=>v*amps[i]),times,cut)
+      next.enabled[d.id+':tracking']=d.on&&reading.inputCurrent>1e-6&&reading.inputVoltage>reading.voltage+(s.pvRunHeadroom??1)
     }
-    if (d.kind === 'capacitor') next.capacitors[d.id] = delta[delta.length - 1]
-    if (d.kind === 'inductor' || d.kind === 'motor') next.inductors[d.id] = current[current.length - 1]
+    if (d.on && !state.trips.includes(d.id)) {
+      if (d.kind === 'capacitor') next.capacitors[d.id] = delta[delta.length - 1]
+      if (d.kind === 'inductor' || d.kind === 'motor') next.inductors[d.id] = current[current.length - 1]
+    }
     if (d.kind === 'inverter') {
       const vp = voltage(d.id, 'dc+'), vn = voltage(d.id, 'dc-'), vdc = average(vp.map((v, i) => v - vn[i]), times, measurementStart(times,measurements[measurementKey(d.id,'dc+')]))
+      const amps=data[`i(vdcinput_${safe(d.id)})`]??zeros(),input=vp.map((v,i)=>v-vn[i])
+      reading.inputVoltage=vdc
+      reading.inputCurrent=average(amps,times,cut)
+      reading.inputPower=average(input.map((v,i)=>v*amps[i]),times,cut)
+      if(d.on&&s.dcMaxVoltage&&vdc>s.dcMaxVoltage)findings.push({id:'inverter-dc-voltage-'+d.id,severity:'fault',title:'Inverter DC input voltage exceeds its rating',detail:`${vdc.toFixed(1)} V at the input exceeds the configured ${s.dcMaxVoltage} V maximum. Review the battery series arrangement and inverter input rating.`,target:d.id})
+      if(d.on&&s.dcMaxCurrent&&Math.abs(reading.inputCurrent)>s.dcMaxCurrent)findings.push({id:'inverter-dc-current-'+d.id,severity:'warning',title:'Inverter DC input current exceeds its rating',detail:`${Math.abs(reading.inputCurrent).toFixed(1)} A at the input exceeds the configured ${s.dcMaxCurrent} A maximum. Review demand, battery voltage and inverter sizing.`,target:d.id})
       if (d.on && vdc < s.cutoff + 2) { reading.state = 'warning'; findings.push({ id: `low-dc-${d.id}`, severity: 'fault', title: 'Inverter input voltage is low', detail: `${vdc.toFixed(1)} V at the input; cutoff is ${s.cutoff} V. Check the battery and both DC conductors.`, target: d.id }) }
     }
     if (d.kind === 'fuse' || d.kind === 'inverter') {
@@ -219,8 +250,8 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
       next.overloadSeconds[d.id] = ratio > 1 ? (state.overloadSeconds[d.id] ?? 0) + end : 0
       const tripTime = d.kind === 'fuse' ? 5 / Math.max(.01, ratio * ratio - 1) : Math.abs(power) > s.rating ? .1 : 2
       if (ratio > 1) findings.push({ id: `overload-${d.id}`, severity: 'warning', title: `${d.name} is overloaded`, detail: `${ratio.toFixed(2)} × rating. Generic protection delay ${tripTime.toFixed(2)} s; not a manufacturer curve.`, target: d.id })
-      if (next.overloadSeconds[d.id] >= tripTime && !next.trips.includes(d.id)) next.trips.push(d.id)
-      if (next.trips.includes(d.id)) { reading.state = 'tripped'; findings.push({ id: `trip-${d.id}`, severity: 'fault', title: `${d.name} has tripped`, detail: 'The path is latched open. Correct the cause and reset the simulation to restore it.', target: d.id }) }
+      if (next.overloadSeconds[d.id] >= tripTime && !next.trips.includes(d.id)) { next.trips.push(d.id); next.tripCauses ??= {}; next.tripCauses[d.id] = `${d.kind==='fuse'?`${average(current,times,cut,true).toFixed(1)} A exceeded ${s.rating} A`:`${Math.abs(power).toFixed(0)} W exceeded ${s.watts} W continuous (${s.rating} W surge)`} for ${next.overloadSeconds[d.id].toFixed(2)} s. Connected equipment: ${project.devices.filter(other=>project.wires.some(w=>w.from===d.id&&w.to===other.id||w.to===d.id&&w.from===other.id)).map(other=>other.name).join(', ')}.` }
+      if (next.trips.includes(d.id)) { reading.state = 'tripped'; findings.push({ id: `trip-${d.id}`, severity: 'fault', title: `${d.name} has tripped`, detail: `${next.tripCauses?.[d.id] ?? 'The original trip measurement is unavailable for this older simulation state.'} Reduce connected demand or correct the circuit, then reset the simulation to clear the latched trip.`, target: d.id }) }
     }
     if (d.kind === 'mppt') {
       const a = voltage(d.id, 'pv+'), b = voltage(d.id, 'pv-'), pvV = average(a.map((v, i) => v - b[i]), times, measurementStart(times,measurements[measurementKey(d.id,'pv+')]))
@@ -236,7 +267,20 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
     frame.waveforms[w.id] = wave
     if (rms * r > 1) findings.push({ id: `drop-${w.id}`, severity: 'warning', title: 'Conductor voltage drop', detail: `${(rms * r).toFixed(2)} V lost over ${w.length} m of ${w.area} mm² conductor, including contact resistance.`, target: w.id })
   }
+  const engineering=engineeringFindings(project,frame)
+  const engineeringIds=new Set(engineering.map(f=>f.id))
+  for(let index=findings.length-1;index>=0;index--)if(engineeringIds.has(findings[index].id))findings.splice(index,1)
+  findings.push(...engineering)
   const conflictingSources=project.devices.filter(d=>d.on&&['grid','three-phase','inverter'].includes(d.kind)&&frame.measurements?.[d.id]?.ac&&frame.measurements[d.id].frequency===null)
+  for (const d of project.devices) {
+    const s = d.spec, reading = frame.devices[d.id]
+    if (d.kind === 'capacitor') reading.storedEnergyJ = .5 * s.capacitance * (next.capacitors[d.id] ?? 0) ** 2
+    if (d.kind === 'inductor' || d.kind === 'motor') reading.storedEnergyJ = .5 * s.inductance * (next.inductors[d.id] ?? 0) ** 2
+    if (d.kind === 'charger') reading.storedEnergyJ = .5 * s.capacitance * (next.capacitors[d.id] ?? 0) ** 2 + .5 * .0001 * (next.capacitors[d.id + ':output'] ?? 0) ** 2
+    if (d.on && d.kind === 'capacitor' && Math.abs(reading.voltage) > s.voltage) findings.push({ id: `capacitor-voltage-${d.id}`, severity: 'fault', title: 'Capacitor voltage rating exceeded', detail: `${Math.abs(reading.voltage).toFixed(2)} V exceeds the configured ${s.voltage} V rating. Isolate and discharge before changing equipment.`, target: d.id })
+    if (d.on && d.kind === 'capacitor' && reading.voltage < -.5) findings.push({ id: `capacitor-polarity-${d.id}`, severity: 'warning', title: 'Capacitor has reverse voltage', detail: `${reading.voltage.toFixed(2)} V from + to −. Review polarity and whether the actual capacitor permits bipolar operation.`, target: d.id })
+    if (d.on && ['load', 'dc-load', 'motor'].includes(d.kind) && reading.voltage > s.voltage * 1.1) findings.push({ id: `load-voltage-${d.id}`, severity: 'warning', title: 'Appliance supply exceeds its configured voltage', detail: `${reading.voltage.toFixed(1)} V at ${d.name}, configured for ${s.voltage} V. Check its actual input range and connected source.`, target: d.id })
+  }
   if(Object.values(measurements).some(m=>m.observationFrequency===null))findings.push({id:'coupled-observation-window',severity:'info',title:'Power-coupled sources use a shared measurement window',detail:`Different source frequencies share a power-coupled network. Associated readings use the full ${(end*1000).toFixed(1)} ms sample window so source, conversion and cable power can be compared. Inspect source and transfer arrangements; individual AC/DC classifications are retained.`})
   if(conflictingSources.length)findings.push({id:'frequency-conflict',severity:'fault',title:'AC sources have incompatible frequencies',detail:'Connected sources do not share one frequency: '+conflictingSources.map(d=>d.name+' ('+d.spec.frequency+' Hz)').join(', ')+'. Readings use the full sampled window; check source and transfer connections.'})
   next.time = state.time + end

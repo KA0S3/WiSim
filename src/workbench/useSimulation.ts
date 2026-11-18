@@ -12,5 +12,5 @@ export function useSimulation(project:Project,revision:number){
  },[])
  useEffect(()=>{runner.current?.update(project,revision,running)},[project,revision,running])
  const visibleFrame=project.devices.length&&view.frame?.revision===revision?view.frame:null
- return {frame:visibleFrame,running,setRunning,error:view.error,ready:!!visibleFrame,status:view.status,recovering:view.recovering,slow:view.slow,time:project.devices.length?view.time:0,stepSeconds:view.stepSeconds,reset:()=>runner.current?.reset(),retry:()=>runner.current?.retry(),cancel:()=>runner.current?.cancel(),step:()=>runner.current?.step()}
+ return {frame:visibleFrame,running,setRunning,error:view.error,ready:!!visibleFrame,status:view.status,recovering:view.recovering,slow:view.slow,time:project.devices.length?view.time:0,stepSeconds:view.stepSeconds,clearTrips:()=>runner.current?.clearTrips(),reset:()=>runner.current?.reset(),retry:()=>runner.current?.retry(),cancel:()=>runner.current?.cancel(),step:()=>runner.current?.step()}
 }

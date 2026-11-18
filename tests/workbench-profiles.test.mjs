@@ -15,7 +15,7 @@ test('catalogue and geometry-only dimension profiles survive project import',()=
   const r=record(profile.id),d=profile.geometryOnly?applyPhysicalProfile(makeDevice(profile.kind,0,0),profile.id):applyCatalogRecord(makeDevice(profile.kind,0,0),r),p=blankProject();p.devices=[d]
   assert.deepEqual([d.spec.width,d.spec.height,d.spec.depth],profile.dimensions)
   assert.equal(d.physicalProfile,profile.id);assert.ok(validateProject(JSON.parse(JSON.stringify(p))))
-  assert.ok(['www.victronenergy.com','www.canadiansolar.com'].includes(new URL(profile.source).hostname))
+  assert.equal(new URL(profile.source).protocol,'https:');assert.ok(profile.geometryOnly || r.source?.startsWith('https://') || r.simulation?.source?.startsWith('https://'))
  }
 })
 test('catalogue mapping keeps PV operating voltage, battery voltage and inverter output/cutoff distinct',()=>{

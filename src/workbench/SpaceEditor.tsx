@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { Project, StructureKind, Triple } from './model'
+import type { Project, StructureKind, Triple,Mount } from './model'
 import { makeStructure, mountDevice, removeStructure, rotateDevice, updateStructure } from './spatial'
 import {ProfileNote} from './ProfileNote'
 
@@ -29,6 +29,7 @@ export function SpaceEditor({project,selected,onChange,onSelect}:{project:Projec
       <label>Mount to<select aria-label="Mount equipment to" value={device.mount?.structureId??''} onChange={e=>onChange(mountDevice(project,device.id,e.target.value||null))}><option value="">Freestanding</option>{project.structures?.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
       {device.mount&&<>
         {project.structures?.find(s=>s.id===device.mount!.structureId)?.kind==='box'&&<label>Mount face<select aria-label="Mount face" value={device.mount.face} onChange={e=>onChange(mountDevice(project,device.id,device.mount!.structureId,e.target.value as 'front'|'inside'))}><option value="front">Front face</option><option value="inside">Inside back plane</option></select></label>}
+        {project.structures?.find(s=>s.id===device.mount!.structureId)?.kind==='wall'&&<label>Mount face<select aria-label="Mount face" value={device.mount.face} onChange={e=>onChange(mountDevice(project,device.id,device.mount!.structureId,e.target.value as Mount['face']))}><option value="front">Front of wall</option><option value="back">Back of wall</option></select></label>}
         <p>Offsets are horizontal, vertical and clearance along the mounting face. Moving mounted equipment updates these offsets.</p>
         <Coordinates label="Mount offset" values={device.mount.offset} onChange={offset=>onChange({...project,devices:project.devices.map(d=>d.id===device.id?{...d,mount:{...device.mount!,offset}}:d)})}/>
       </>}

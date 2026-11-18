@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastReviewed": "2026-11-13",
+  "lastReviewed": "2026-11-17",
   "policy": "Keep exact manufacturer model identities in this unified database even while research is incomplete. Use verified only when ratings, colors, terminal layouts, and installation guidance are sourced; otherwise use partially verified or reference only, list missingData, and never infer unknown values. Cite each additional specification and record region-specific prices with a checked date.",
   "installationRuleSets": [
     {
@@ -373,7 +373,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.113,
+          0.1,
+          0.04
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-75-15",
@@ -472,7 +486,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.113,
+          0.1,
+          0.04
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-100-15",
@@ -571,7 +599,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.113,
+          0.1,
+          0.05
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-100-20",
@@ -673,7 +715,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_75-10_up_to_100-20/en/technical-specifications.html#UUID-76446d33-4879-0ca6-037b-8b7a5b2e7231",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.131,
+          0.1,
+          0.06
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-100-30",
@@ -750,7 +806,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.186,
+          0.13,
+          0.07
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-100-50",
@@ -827,7 +897,21 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_100-30__100-50/en/technical-specifications.html#UUID-442101f7-4e04-06ad-29bc-f7d165109144",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.186,
+          0.13,
+          0.07
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-50",
@@ -972,7 +1056,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.188,
+          0.199,
+          0.147
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 100,
+          "dischargeA": 100,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-100",
@@ -1117,7 +1233,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.321,
+          0.197,
+          0.152
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 200,
+          "dischargeA": 200,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-200",
@@ -1262,7 +1410,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-11-12"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.321,
+          0.237,
+          0.152
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 400,
+          "dischargeA": 400,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-25-6-100",
@@ -1407,7 +1587,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.65,
+          0.197,
+          0.163
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 200,
+          "dischargeA": 200,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 22.4,
+          "highVoltage": 28.8,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 2,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-160",
@@ -1534,7 +1746,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.321,
+          0.237,
+          0.152
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 320,
+          "dischargeA": 320,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-180",
@@ -1661,7 +1905,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.321,
+          0.237,
+          0.152
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 360,
+          "dischargeA": 360,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-12-8-330",
@@ -1793,7 +2069,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.359,
+          0.265,
+          0.206
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 400,
+          "dischargeA": 400,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 11.2,
+          "highVoltage": 14.4,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 4,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "victron-lithium-smart-25-6-200",
@@ -1920,7 +2228,39 @@
         }
       ],
       "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
-      "sourceChecked": "2026-10-22"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.65,
+          0.237,
+          0.163
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "External BMS/control is required and initially unconnected. Published pack operating voltage limits feed a bounded inhibit model; actual BMS acts on cell alarms. Total bank limit is 20 units. SOC/OCV and internal resistance remain generic."
+        ],
+        "batteryLimits": {
+          "chargeA": 400,
+          "dischargeA": 400,
+          "chargeMinC": 5,
+          "chargeMaxC": 50,
+          "dischargeMinC": -20,
+          "dischargeMaxC": 50,
+          "lowVoltage": 22.4,
+          "highVoltage": 28.8,
+          "minSoc": 0,
+          "maxSoc": 100,
+          "control": "external",
+          "externalConnected": false,
+          "source": "https://www.victronenergy.com/media/pg/Lithium_Battery_Smart/en/technical-data.html",
+          "maxSeries": 2,
+          "maxParallel": 20
+        }
+      }
     },
     {
       "id": "blue-sea-285-7184-60a",
@@ -2855,7 +3195,24 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
-      "sourceChecked": "2026-11-12"
+      "sourceChecked": "2026-11-17",
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.485,
+          0.03
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-215w-24v",
@@ -2902,7 +3259,24 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
-      "sourceChecked": "2026-11-12"
+      "sourceChecked": "2026-11-17",
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.705,
+          1.58,
+          0.035
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-phoenix-12-1200-230v",
@@ -2916,7 +3290,7 @@
       "productColorName": "Blue metal enclosure",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/1200 230V VE.Direct",
+      "productModel": "Inverter 12/1200 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "verified",
@@ -2976,25 +3350,82 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.232,
+          0.117,
+          0.362
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 10,
+        "continuous40W": 850,
+        "deratePerC": 0.0125
+      },
+      "maximumEfficiencyPercent": 91
     },
     {
       "id": "victron-smartsolar-150-60",
-      "name": "SmartSolar MPPT 150/60",
+      "name": "SmartSolar MPPT 150/60-Tr",
       "brand": "Victron Energy",
       "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
       "productFamily": "SmartSolar MPPT",
-      "productModel": "SmartSolar MPPT 150/60",
+      "productModel": "SmartSolar 150/60-Tr",
       "componentType": "mppt solar charge controller",
       "kind": "mppt",
       "status": "partially verified",
-      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-60_up_to_250-70/en/technical-specifications.html",
       "missingData": [
-        "Exact electrical ratings",
-        "Brand and product colors",
-        "Terminal positions and order",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, exact terminal coordinates and installation drawing remain unverified."
+      ],
+      "voltage": 48,
+      "current": 60,
+      "chargeCurrent": 60,
+      "pvVoc": 150,
+      "pvMaxOperatingVoltage": 145,
+      "pvStartHeadroomV": 5,
+      "pvRunHeadroomV": 1,
+      "supportedBatteryVoltages": [
+        12,
+        24,
+        36,
+        48
+      ],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 860,
+        "24": 1720,
+        "36": 2580,
+        "48": 3440
+      },
+      "power": 3440,
+      "maximumEfficiencyPercent": 98,
+      "maxPvShortCircuitCurrentA": 50,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-60_up_to_250-70/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.25,
+          0.185,
+          0.095
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Tr screw-terminal variant. One independent tracker. 150/85 and 150/100 listed restricted SKUs support 12/24 V only; do not apply 36/48 V ratings from other labels."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-150-70",
@@ -3082,7 +3513,7 @@
           "order": 4
         }
       ],
-      "sourceChecked": "2026-11-13",
+      "sourceChecked": "2026-11-17",
       "additionalSpecs": [
         {
           "label": "Variant",
@@ -3101,61 +3532,172 @@
           "unit": "A",
           "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html"
         }
-      ]
+      ],
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.25,
+          0.185,
+          0.095
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-150-85",
-      "name": "SmartSolar MPPT 150/85",
+      "name": "SmartSolar MPPT 150/85-Tr VE.Can SCC115085412 (12/24 V only)",
       "brand": "Victron Energy",
       "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
       "productFamily": "SmartSolar MPPT",
-      "productModel": "SmartSolar MPPT 150/85",
+      "productModel": "SmartSolar 150/85-Tr VE.Can restricted 12/24 V SKU",
       "componentType": "mppt solar charge controller",
       "kind": "mppt",
       "status": "partially verified",
-      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
       "missingData": [
-        "Exact electrical ratings",
-        "Brand and product colors",
-        "Terminal positions and order",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, exact terminal coordinates and installation drawing remain unverified."
+      ],
+      "voltage": 24,
+      "current": 85,
+      "chargeCurrent": 85,
+      "pvVoc": 150,
+      "pvMaxOperatingVoltage": 145,
+      "pvStartHeadroomV": 5,
+      "pvRunHeadroomV": 1,
+      "supportedBatteryVoltages": [
+        12,
+        24
+      ],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 1200,
+        "24": 2400
+      },
+      "power": 2400,
+      "maximumEfficiencyPercent": 98,
+      "maxPvShortCircuitCurrentA": 70,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.295,
+          0.216,
+          0.103
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Tr screw-terminal variant. One independent tracker. 150/85 and 150/100 listed restricted SKUs support 12/24 V only; do not apply 36/48 V ratings from other labels."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-150-100",
-      "name": "SmartSolar MPPT 150/100",
+      "name": "SmartSolar MPPT 150/100-Tr VE.Can SCC115110412 (12/24 V only)",
       "brand": "Victron Energy",
       "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
       "productFamily": "SmartSolar MPPT",
-      "productModel": "SmartSolar MPPT 150/100",
+      "productModel": "SmartSolar 150/100-Tr VE.Can restricted 12/24 V SKU",
       "componentType": "mppt solar charge controller",
       "kind": "mppt",
       "status": "partially verified",
-      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
       "missingData": [
-        "Exact electrical ratings",
-        "Brand and product colors",
-        "Terminal positions and order",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, exact terminal coordinates and installation drawing remain unverified."
+      ],
+      "voltage": 24,
+      "current": 100,
+      "chargeCurrent": 100,
+      "pvVoc": 150,
+      "pvMaxOperatingVoltage": 145,
+      "pvStartHeadroomV": 5,
+      "pvRunHeadroomV": 1,
+      "supportedBatteryVoltages": [
+        12,
+        24
+      ],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 1450,
+        "24": 2900
+      },
+      "power": 2900,
+      "maximumEfficiencyPercent": 98,
+      "maxPvShortCircuitCurrentA": 70,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.295,
+          0.216,
+          0.103
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Tr screw-terminal variant. One independent tracker. 150/85 and 150/100 listed restricted SKUs support 12/24 V only; do not apply 36/48 V ratings from other labels."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-250-60",
-      "name": "SmartSolar MPPT 250/60",
+      "name": "SmartSolar MPPT 250/60-Tr",
       "brand": "Victron Energy",
       "family": "Victron SmartSolar MPPT 150/60 up to 250/100",
       "productFamily": "SmartSolar MPPT",
-      "productModel": "SmartSolar MPPT 250/60",
+      "productModel": "SmartSolar 250/60-Tr",
       "componentType": "mppt solar charge controller",
       "kind": "mppt",
       "status": "partially verified",
-      "source": "https://www.victronenergy.com/solar-charge-controllers/smartsolar-250-85-250-100",
+      "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-60_up_to_250-70/en/technical-specifications.html",
       "missingData": [
-        "Exact electrical ratings",
-        "Brand and product colors",
-        "Terminal positions and order",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, exact terminal coordinates and installation drawing remain unverified."
+      ],
+      "voltage": 48,
+      "current": 60,
+      "chargeCurrent": 60,
+      "pvVoc": 250,
+      "pvMaxOperatingVoltage": 245,
+      "pvStartHeadroomV": 5,
+      "pvRunHeadroomV": 1,
+      "supportedBatteryVoltages": [
+        12,
+        24,
+        36,
+        48
+      ],
+      "nominalPvPowerWByBatteryVoltage": {
+        "12": 860,
+        "24": 1720,
+        "36": 2580,
+        "48": 3440
+      },
+      "power": 3440,
+      "maximumEfficiencyPercent": 99,
+      "maxPvShortCircuitCurrentA": 60,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-60_up_to_250-70/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.25,
+          0.185,
+          0.095
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Tr screw-terminal variant. One independent tracker. 150/85 and 150/100 listed restricted SKUs support 12/24 V only; do not apply 36/48 V ratings from other labels."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-250-70",
@@ -3243,7 +3785,7 @@
           "order": 4
         }
       ],
-      "sourceChecked": "2026-11-13",
+      "sourceChecked": "2026-11-17",
       "additionalSpecs": [
         {
           "label": "Variant",
@@ -3262,7 +3804,21 @@
           "unit": "A",
           "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html"
         }
-      ]
+      ],
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.25,
+          0.185,
+          0.095
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-250-85",
@@ -3350,7 +3906,7 @@
           "order": 4
         }
       ],
-      "sourceChecked": "2026-11-13",
+      "sourceChecked": "2026-11-17",
       "additionalSpecs": [
         {
           "label": "Variant",
@@ -3369,7 +3925,21 @@
           "unit": "A",
           "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html"
         }
-      ]
+      ],
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.295,
+          0.216,
+          0.103
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-smartsolar-250-100",
@@ -3457,7 +4027,7 @@
           "order": 4
         }
       ],
-      "sourceChecked": "2026-11-13",
+      "sourceChecked": "2026-11-17",
       "additionalSpecs": [
         {
           "label": "Variant",
@@ -3476,7 +4046,21 @@
           "unit": "A",
           "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/installation.html"
         }
-      ]
+      ],
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Manual_SmartSolar_MPPT_150-70_up_to_250-100_VE.Can/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.295,
+          0.216,
+          0.103
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-20w",
@@ -3491,11 +4075,31 @@
       "power": 20,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.5,
+      "moduleImp": 1.09,
+      "moduleVoc": 22.6,
+      "moduleIsc": 1.19,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.35,
+          0.44,
+          0.025
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-30w",
@@ -3510,11 +4114,31 @@
       "power": 30,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.7,
+      "moduleImp": 1.61,
+      "moduleVoc": 22.87,
+      "moduleIsc": 1.76,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.35,
+          0.56,
+          0.025
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-40w",
@@ -3529,11 +4153,31 @@
       "power": 40,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.3,
+      "moduleImp": 2.19,
+      "moduleVoc": 22.45,
+      "moduleIsc": 2.4,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          0.425,
+          0.025
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-55w",
@@ -3548,11 +4192,31 @@
       "power": 55,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.8,
+      "moduleImp": 2.94,
+      "moduleVoc": 22.9,
+      "moduleIsc": 3.22,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          0.545,
+          0.025
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-90w",
@@ -3567,11 +4231,31 @@
       "power": 90,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 19.6,
+      "moduleImp": 4.59,
+      "moduleVoc": 24.06,
+      "moduleIsc": 5.03,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          0.78,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-115w",
@@ -3579,18 +4263,38 @@
       "brand": "Victron Energy",
       "family": "Victron BlueSolar Monocrystalline Panels",
       "productFamily": "BlueSolar Monocrystalline Panel",
-      "productModel": "SPM041151200",
+      "productModel": "SPM041151202",
       "componentType": "photovoltaic module",
       "kind": "pv",
       "status": "partially verified",
       "power": 115,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 19,
+      "moduleImp": 6.04,
+      "moduleVoc": 23.32,
+      "moduleIsc": 6.61,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.03,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-130w",
@@ -3605,11 +4309,31 @@
       "power": 130,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.64,
+      "moduleImp": 6.98,
+      "moduleVoc": 22.83,
+      "moduleIsc": 7.35,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.2,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-140w",
@@ -3624,11 +4348,31 @@
       "power": 140,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 19.4,
+      "moduleImp": 7.22,
+      "moduleVoc": 23.6,
+      "moduleIsc": 8.05,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.25,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-150w",
@@ -3643,11 +4387,31 @@
       "power": 150,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 18.2,
+      "moduleImp": 8.25,
+      "moduleVoc": 22.3,
+      "moduleIsc": 8.69,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.485,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-185w",
@@ -3662,11 +4426,31 @@
       "power": 185,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 19.68,
+      "moduleImp": 9.41,
+      "moduleVoc": 24.11,
+      "moduleIsc": 9.91,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.668,
+          1.485,
+          0.03
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-305w",
@@ -3681,11 +4465,31 @@
       "power": 305,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 32.5,
+      "moduleImp": 9.38,
+      "moduleVoc": 39.7,
+      "moduleIsc": 10.27,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          1.002,
+          1.658,
+          0.035
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "victron-bluesolar-360w",
@@ -3700,11 +4504,31 @@
       "power": 360,
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
       "missingData": [
-        "Exact electrical ratings beyond nominal power",
-        "Brand and product colors",
-        "Connector and terminal layout",
-        "Model-specific installation guidance"
-      ]
+        "Appearance detail, exact connector/terminal coordinates and per-module series-fuse rating need verification."
+      ],
+      "moduleVmp": 38.4,
+      "moduleImp": 9.38,
+      "moduleVoc": 47.4,
+      "moduleIsc": 10.24,
+      "moduleVocTemperatureCoefficientPerC": -0.0035,
+      "modulePowerTemperatureCoefficientPerC": -0.0045,
+      "moduleIscTemperatureCoefficientPerC": 0.0004,
+      "sourceChecked": "2026-11-17",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-BlueSolar-Monocrystalline-Panels-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          1.002,
+          1.98,
+          0.04
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Datasheet STC ratings and temperature coefficients; no bypass-diode or partial-shading model. Exact external connector variant remains unresolved."
+        ]
+      }
     },
     {
       "id": "battle-born-bb10012",
@@ -3916,11 +4740,11 @@
     },
     {
       "id": "victron-phoenix-12-250",
-      "name": "Phoenix Inverter 12/250 230V VE.Direct",
+      "name": "Inverter 12/250 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/250 230V VE.Direct",
+      "productModel": "Inverter 12/250 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -3945,21 +4769,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 87,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 4.2,
+        "continuous40W": 175,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-12-375",
-      "name": "Phoenix Inverter 12/375 230V VE.Direct",
+      "name": "Inverter 12/375 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/375 230V VE.Direct",
+      "productModel": "Inverter 12/375 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -3984,21 +4827,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 89,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 5.6,
+        "continuous40W": 260,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-12-500",
-      "name": "Phoenix Inverter 12/500 230V VE.Direct",
+      "name": "Inverter 12/500 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/500 230V VE.Direct",
+      "productModel": "Inverter 12/500 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4023,21 +4885,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 90,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.172,
+          0.086,
+          0.275
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 6,
+        "continuous40W": 350,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-12-800",
-      "name": "Phoenix Inverter 12/800 230V VE.Direct",
+      "name": "Inverter 12/800 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/800 230V VE.Direct",
+      "productModel": "Inverter 12/800 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4062,21 +4943,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 90,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.23,
+          0.105,
+          0.325
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 6.5,
+        "continuous40W": 560,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-1200",
-      "name": "Phoenix Inverter 24/1200 230V VE.Direct",
+      "name": "Inverter 24/1200 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/1200 230V VE.Direct",
+      "productModel": "Inverter 24/1200 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4101,27 +5001,46 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 91,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.232,
+          0.117,
+          0.327
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 11,
+        "continuous40W": 850,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-12-1600",
-      "name": "Phoenix Inverter 12/1600 230V VE.Direct",
+      "name": "Inverter 12/1600 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 12/1600 230V VE.Direct",
+      "productModel": "Inverter 12/1600 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
       "voltage": 12,
-      "power": 1300,
-      "surge": 3000,
+      "power": 1450,
+      "surge": 2200,
       "acVoltage": 230,
       "acFrequency": 50,
       "waveform": "Pure sine wave",
@@ -4140,21 +5059,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 92,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.232,
+          0.117,
+          0.395
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 9.3,
+        "inputMinV": 9.2,
+        "inputMaxV": 17,
+        "idleW": 12,
+        "continuous40W": 1200,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-250",
-      "name": "Phoenix Inverter 24/250 230V VE.Direct",
+      "name": "Inverter 24/250 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/250 230V VE.Direct",
+      "productModel": "Inverter 24/250 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4179,21 +5117,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 88,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 5.2,
+        "continuous40W": 175,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-375",
-      "name": "Phoenix Inverter 24/375 230V VE.Direct",
+      "name": "Inverter 24/375 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/375 230V VE.Direct",
+      "productModel": "Inverter 24/375 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4218,21 +5175,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 89,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 6.1,
+        "continuous40W": 260,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-500",
-      "name": "Phoenix Inverter 24/500 230V VE.Direct",
+      "name": "Inverter 24/500 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/500 230V VE.Direct",
+      "productModel": "Inverter 24/500 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4257,21 +5233,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 90,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.172,
+          0.086,
+          0.275
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 6.5,
+        "continuous40W": 350,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-800",
-      "name": "Phoenix Inverter 24/800 230V VE.Direct",
+      "name": "Inverter 24/800 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/800 230V VE.Direct",
+      "productModel": "Inverter 24/800 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4296,27 +5291,46 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 90,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.216,
+          0.105,
+          0.305
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 7,
+        "continuous40W": 560,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-24-1600",
-      "name": "Phoenix Inverter 24/1600 230V VE.Direct",
+      "name": "Inverter 24/1600 VE.Direct 230 V (HW15)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 24/1600 230V VE.Direct",
+      "productModel": "Inverter 24/1600 VE.Direct 230 V HW15",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
       "voltage": 24,
-      "power": 1300,
-      "surge": 3000,
+      "power": 1450,
+      "surge": 2100,
       "acVoltage": 230,
       "acFrequency": 50,
       "waveform": "Pure sine wave",
@@ -4334,22 +5348,41 @@
           "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf"
         }
       ],
-      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Inverter_VE.Direct_230V_-_HW15/en/technical-specifications.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 91,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Inverter_VE.Direct_230V_-_HW15/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.231,
+          0.117,
+          0.365
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 18.6,
+        "inputMinV": 18.4,
+        "inputMaxV": 34,
+        "idleW": 14,
+        "continuous40W": 1300,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-250",
-      "name": "Phoenix Inverter 48/250 230V VE.Direct",
+      "name": "Inverter 48/250 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/250 230V VE.Direct",
+      "productModel": "Inverter 48/250 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4374,21 +5407,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 88,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 7.9,
+        "continuous40W": 175,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-375",
-      "name": "Phoenix Inverter 48/375 230V VE.Direct",
+      "name": "Inverter 48/375 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/375 230V VE.Direct",
+      "productModel": "Inverter 48/375 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4413,21 +5465,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 90,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.165,
+          0.086,
+          0.26
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 8.5,
+        "continuous40W": 260,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-500",
-      "name": "Phoenix Inverter 48/500 230V VE.Direct",
+      "name": "Inverter 48/500 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/500 230V VE.Direct",
+      "productModel": "Inverter 48/500 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4452,21 +5523,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 91,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.172,
+          0.086,
+          0.275
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 9,
+        "continuous40W": 350,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-800",
-      "name": "Phoenix Inverter 48/800 230V VE.Direct",
+      "name": "Inverter 48/800 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/800 230V VE.Direct",
+      "productModel": "Inverter 48/800 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4491,21 +5581,40 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 91,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.216,
+          0.105,
+          0.305
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 9.5,
+        "continuous40W": 560,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-1200",
-      "name": "Phoenix Inverter 48/1200 230V VE.Direct",
+      "name": "Inverter 48/1200 VE.Direct 230 V (legacy)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/1200 230V VE.Direct",
+      "productModel": "Inverter 48/1200 VE.Direct 230 V legacy datasheet variant",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
@@ -4530,27 +5639,46 @@
         }
       ],
       "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 92,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.232,
+          0.117,
+          0.327
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 12,
+        "continuous40W": 850,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-phoenix-48-1600",
-      "name": "Phoenix Inverter 48/1600 230V VE.Direct",
+      "name": "Inverter 48/1600 VE.Direct 230 V (HW15)",
       "brand": "Victron Energy",
       "family": "Victron Phoenix Inverter VE.Direct",
       "productFamily": "Phoenix Inverter VE.Direct",
-      "productModel": "Phoenix Inverter 48/1600 230V VE.Direct",
+      "productModel": "Inverter 48/1600 VE.Direct 230 V HW15",
       "componentType": "inverter",
       "kind": "inverter",
       "status": "partially verified",
       "voltage": 48,
-      "power": 1300,
-      "surge": 3000,
+      "power": 1450,
+      "surge": 2100,
       "acVoltage": 230,
       "acFrequency": 50,
       "waveform": "Pure sine wave",
@@ -4568,14 +5696,33 @@
           "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf"
         }
       ],
-      "source": "https://www.victronenergy.com/upload/documents/Datasheet-Inverter-VE.Direct-250VA-1600VA-EN.pdf",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Inverter_VE.Direct_230V_-_HW15/en/technical-specifications.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Temperature-derated continuous output and efficiency",
-        "Brand/product colors",
-        "Exact terminal type and physical positions",
-        "Model-specific installation guidance"
-      ]
+        "Detailed appearance, terminal coordinates and exact outlet SKU remain unverified."
+      ],
+      "maximumEfficiencyPercent": 92,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Inverter_VE.Direct_230V_-_HW15/en/technical-specifications.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.231,
+          0.117,
+          0.365
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "230 V / 50 Hz default, editable to 60 Hz. Peak efficiency used as a constant; ECO, restart timing and dynamic cutoff are not reproduced. Hardware revisions have different ratings; match the named variant."
+        ],
+        "cutoffV": 37.2,
+        "inputMinV": 36.8,
+        "inputMaxV": 62,
+        "idleW": 15,
+        "continuous40W": 1300,
+        "deratePerC": 0.0125
+      }
     },
     {
       "id": "victron-multiplus-ii-12-3000-230v",
@@ -5382,11 +6529,11 @@
     },
     {
       "id": "victron-blue-smart-ip22-12-15",
-      "name": "Blue Smart IP22 Charger 12V/15A",
+      "name": "Blue Smart IP22 12/15 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 12V/15A",
+      "productModel": "IP22 12/15, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5395,23 +6542,39 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 93,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 14.399999999999999,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip22-12-20",
-      "name": "Blue Smart IP22 Charger 12V/20A",
+      "name": "Blue Smart IP22 12/20 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 12V/20A",
+      "productModel": "IP22 12/20, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5420,23 +6583,39 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 93,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 14.399999999999999,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip22-12-30",
-      "name": "Blue Smart IP22 Charger 12V/30A",
+      "name": "Blue Smart IP22 12/30 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 12V/30A",
+      "productModel": "IP22 12/30, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5445,23 +6624,39 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 93,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 14.399999999999999,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip22-24-8",
-      "name": "Blue Smart IP22 Charger 24V/8A",
+      "name": "Blue Smart IP22 24/8 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 24V/8A",
+      "productModel": "IP22 24/8, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5470,23 +6665,39 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 94,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 28.799999999999997,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip22-24-12",
-      "name": "Blue Smart IP22 Charger 24V/12A",
+      "name": "Blue Smart IP22 24/12 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 24V/12A",
+      "productModel": "IP22 24/12, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5495,23 +6706,39 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 94,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 28.799999999999997,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip22-24-16",
-      "name": "Blue Smart IP22 Charger 24V/16A",
+      "name": "Blue Smart IP22 24/16 230 V / one output",
       "brand": "Victron Energy",
       "family": "Victron Blue Smart battery chargers",
       "productFamily": "Blue Smart IP22",
-      "productModel": "Blue Smart IP22 Charger 24V/16A",
+      "productModel": "IP22 24/16, 230 V one-output variant",
       "componentType": "battery charger",
       "kind": "battery-charger",
       "status": "partially verified",
@@ -5520,15 +6747,31 @@
       "interfaces": [
         "Bluetooth"
       ],
-      "source": "https://www.victronenergy.com/chargers/blue-smart-ip22-charger",
-      "sourceChecked": "2026-10-22",
+      "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Exact manufacturer SKU and output count",
-        "Charge profile voltages and supported chemistry details",
-        "AC input and efficiency ratings",
-        "Terminal types and positions",
-        "Product colors and model-specific installation guidance"
-      ]
+        "Exact market plug SKU, detailed appearance and terminal coordinates remain unverified."
+      ],
+      "maximumEfficiencyPercent": 94,
+      "simulation": {
+        "version": 1,
+        "source": "https://www.victronenergy.com/media/pg/Blue_Smart_IP22_Charger_230V_manual/en/technical-specifications---bsc---psc.html",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.108,
+          0.235,
+          0.065
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "One DC output, normal 14.4/28.8 V target. Constant maximum efficiency and generic rectifier/link model; adaptive stages and power factor are not reproduced."
+        ],
+        "acVoltage": 230,
+        "acFrequency": 50,
+        "chargeVoltage": 28.799999999999997,
+        "idleW": 0.5
+      }
     },
     {
       "id": "victron-blue-smart-ip65-6-12-1-1",
@@ -6201,12 +7444,31 @@
         }
       ],
       "source": "https://xantrex.com/products/inverters/freedom-x-1200/",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Color reference and product finish",
-        "Terminal positions and detailed connection diagram",
-        "Installation guide/source"
-      ]
+        "Detailed appearance and exact terminal coordinates remain unverified."
+      ],
+      "acFrequency": 60,
+      "maximumEfficiencyPercent": 86,
+      "simulation": {
+        "version": 1,
+        "source": "https://xantrex.com/products/inverters/freedom-x-1200/",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.263,
+          0.091,
+          0.376
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Conservative 86% full-load efficiency and 10 W no-load upper bound used as constants. AC pass-through/transfer relay is not represented; inverter output only. Actual specified bounds are >86% and <10 W."
+        ],
+        "cutoffV": 10.5,
+        "inputMinV": 10.5,
+        "inputMaxV": 16.5,
+        "idleW": 10
+      }
     },
     {
       "id": "xantrex-freedom-x-1200-pro",
@@ -6296,12 +7558,31 @@
         }
       ],
       "source": "https://xantrex.com/products/inverters/freedom-x-1200/",
-      "sourceChecked": "2026-10-22",
+      "sourceChecked": "2026-11-17",
       "missingData": [
-        "Color reference and product finish",
-        "Terminal positions and detailed connection diagram",
-        "Installation guide/source"
-      ]
+        "Detailed appearance and exact terminal coordinates remain unverified."
+      ],
+      "acFrequency": 60,
+      "maximumEfficiencyPercent": 86,
+      "simulation": {
+        "version": 1,
+        "source": "https://xantrex.com/products/inverters/freedom-x-1200/",
+        "checked": "2026-11-17",
+        "dimensions": [
+          0.263,
+          0.091,
+          0.376
+        ],
+        "geometry": "placeholder",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations.",
+          "Conservative 86% full-load efficiency and 10 W no-load upper bound used as constants. AC pass-through/transfer relay is not represented; inverter output only. Actual specified bounds are >86% and <10 W."
+        ],
+        "cutoffV": 10.5,
+        "inputMinV": 10.5,
+        "inputMaxV": 16.5,
+        "idleW": 10
+      }
     },
     {
       "id": "renogy-rng-invt-2000-12v-p2-us",
@@ -6534,7 +7815,7 @@
         }
       ],
       "source": "https://www.canadiansolar.com/na/wp-content/uploads/sites/3/2026/01/CS-Datasheet-HiKu6_CS6W-MS_v2.7_EN-2278mm.pdf",
-      "sourceChecked": "2026-11-13",
+      "sourceChecked": "2026-11-17",
       "additionalSpecs": [
         {
           "label": "Width",
@@ -6564,7 +7845,21 @@
           "value": "Flexible rear leads; 3D connector locations are approximate",
           "source": "https://www.canadiansolar.com/na/wp-content/uploads/sites/3/2026/01/CS-Datasheet-HiKu6_CS6W-MS_v2.7_EN-2278mm.pdf"
         }
-      ]
+      ],
+      "simulation": {
+        "version": 1,
+        "source": "https://www.canadiansolar.com/na/wp-content/uploads/sites/3/2026/01/CS-Datasheet-HiKu6_CS6W-MS_v2.7_EN-2278mm.pdf",
+        "checked": "2026-11-17",
+        "dimensions": [
+          1.134,
+          2.278,
+          0.03
+        ],
+        "geometry": "approximate",
+        "assumptions": [
+          "Generic behavioural equivalent; internal resistance, switching dynamics, terminal coordinates and firmware are approximations."
+        ]
+      }
     }
   ]
 }

@@ -1,6 +1,12 @@
 # Next designer pass: source review
 
-Research started 13 November 2026. These notes are preparation; the catalogue and shipped designer have **not** yet been changed by this research. The shipped proposal still uses generic 400 W panels, two-panel strings and one generic controller. Full scope remains in FOUNDATION-PLAN.md.
+Section 2 of ORDERED-PLAN.md was implemented 17 November 2026. The designer compares the existing sourced 175/215/550 W modules and exact 48 V-capable controllers, evaluating series length, independent controller count, cold Voc, estimated hot Vmp, input current, nameplate power, minimum-bank-voltage output current and optional panel footprint. The UI exposes alternatives and temperature/space inputs. Each controller has its own collectors, strings and output protection.
+
+Ranking minimises module count plus three units per controller, then excess power and footprint. It uses an equipment-count objective because installed prices are unavailable. Hot Vmp is estimated from Pmax/Isc temperature coefficients. Input current includes an explicit 1.25 allowance. Footprint excludes roof packing gaps. Battery packs and coordinated inverters remain generic pending the later electrical/product sections.
+
+Daily appliance blocks determine energy, concurrent running demand and simultaneous startup, including overnight periods. Automatic/explicit phase assignment sizes each inverter. The selected schedule hour controls actual generated loads and is editable under Environment. Split phase uses the US 120/240 V profile with 180° outputs. Three-phase uses 120° outputs, regional phase-neutral voltage and a shared neutral. Model phase angles and daily blocks appear in exports.
+
+Official controller and panel sources below were reopened on 17 November. Added the documented BlueSolar temperature coefficients to the two existing module records. Focused designer/group/export checks passed (19 cases), as did three real-ngspice designer checks and TypeScript. These include measured line-to-line voltages and schedule switching. Broader verification remains deferred until all ordered sections are implemented.
 
 Primary sources opened:
 

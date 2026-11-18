@@ -1,13 +1,15 @@
 import type {CatalogRecord} from '../catalog'
 import type {Device,Project} from './model'
 import {applyCatalogRecord} from './catalog-device'
+import {simulationReady,catalogKind} from './catalog-readiness'
+import {bankProductPlan} from './catalog-bank'
 import {connectionFindings} from './connection-checks'
 
 /** Rank only locally verified, voltage-compatible devices with sufficient configured capacity. */
 function strictProducts(device:Device,records:CatalogRecord[]):CatalogRecord[]{
  const s=device.spec,relative=(a:number,b:number)=>Math.abs(a-b)/Math.max(1,Math.abs(b))
  const ranked=records.flatMap(record=>{
-  if(record.status!=='verified'||record.kind!==device.kind)return []
+  if(!simulationReady(record)||catalogKind(record)!==device.kind)return []
   let score=0
   if(device.kind==='battery'){
    if(!record.voltage||relative(record.voltage,s.voltage)>.1||!record.capacityAh||record.capacityAh<s.capacityAh||record.capacityAh>s.capacityAh*2.1)return []
@@ -43,7 +45,7 @@ export function productOptions(device:Device,records:CatalogRecord[],project?:Pr
   charger:[['rating','Charge current','A',2],['voltage','AC input voltage','V',3],['chargeVoltage','Charge target','V',3]],
  }
  if(!fields[device.kind])return []
- return records.filter(r=>r.status==='verified'&&r.kind===device.kind).map(record=>{
+ return records.filter(r=>simulationReady(r)&&catalogKind(r)===device.kind).map(record=>{
   const candidate=applyCatalogRecord(device,record),proposed=project?{...project,devices:project.devices.map(d=>d.id===device.id?candidate:d)}:undefined
   const issues=project?connectionFindings(proposed as Project).filter(f=>f.related.includes(device.id)).map(f=>f.title+': '+f.detail):[]
   let score=0;const differences:string[]=[],number=(n:number)=>Number(n.toFixed(3)).toString()

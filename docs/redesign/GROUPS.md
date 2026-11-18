@@ -22,3 +22,6 @@ Collapsed equipment and internal-wire faults map to the visible group marker and
 Controlled schematic nodes retain their measured dimensions across live-reading updates. Terminal measurements refresh when a port layout changes; drawing a new simulation frame must not clear conductor paths. The production group browser check verifies all nine visible conductors after continuing frames, all 25 when the PV group expands, and nine again after collapse and dragging.
 
 Adding branches is a sandbox edit: protection, branch balance, cable sizing, collector/controller limits, permitted parallel operation and mounting space still need review. It does not rerun the designer or establish installation compliance. New branches have measured physical lengths; supported surface auto-routing remains separate unfinished work.
+# Designer quantity update, 17 November 2026
+
+The sourced default design now contains 23 real devices and 29 conductors, presented as eight items. Its PV group has six 550 W modules in three two-module strings. Larger proposals can have separate PV groups per independent MPPT. Older saved groups retain their original units and topology. Focused group/layout/export checks pass for the changed designer output.

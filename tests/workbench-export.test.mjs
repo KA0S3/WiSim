@@ -7,9 +7,9 @@ import {synchronizeLengths,physicalWirePoints,routeLength} from '../src/workbenc
 
 test('generated equipment, cable and end schedules count actual units with both terminal endpoints',()=>{
  const p=designSystem(defaultRequirements),data=exportData(p)
- assert.equal(p.devices.filter(d=>d.kind==='pv').length,8)
+ assert.equal(p.devices.filter(d=>d.kind==='pv').length,6)
  assert.equal(p.devices.filter(d=>d.kind==='battery').length,2)
- assert.equal(p.devices.filter(d=>d.kind==='fuse').length,7)
+ assert.equal(p.devices.filter(d=>d.kind==='fuse').length,8)
  assert.equal(data.connections.length,p.wires.length)
  assert.equal(data.terminations.length,p.wires.length*2)
  assert.equal(new Set(data.terminations.map(t=>t.reference)).size,p.wires.length*2)

@@ -4,6 +4,23 @@ The sandbox permits electrically wrong settings and connections. It does not sil
 
 ## Find a problem
 
+Section 1 of ORDERED-PLAN.md was implemented on 17 November 2026. Static findings now include source terminal shorts, bypassed equipment/protection, parallel AC-source conflicts and inconsistent PV ratings. Unconnected-terminal findings are available before solving. Solved findings add capacitor overvoltage/reverse polarity and appliance overvoltage. Source isolation and direct protection-bridge removal use the existing preview/Apply/Undo workflow.
+
+## Multimeter modes
+
+Open the meter tool in Schematic, or place probes in Terminal detail, then choose a mode.
+
+- Voltage uses two terminals. Auto selects signed DC or AC RMS. Explicit DC measures the mean. AC component mode removes DC offset before calculating RMS.
+- Current uses the selected conductor's actual sampled branch current. Signed DC follows its saved From to To direction. Auto and AC component modes are also available.
+- Frequency measures interpolated rising crossings between the probes over the solved sample window. It requires two crossings and periods consistent within 2%. Insufficient samples or distorted/mixed signals can remain unresolved.
+- Power uses selected equipment's average instantaneous voltage times current. Converter output is the primary measured side. Input power remains in Live readings.
+- Resistance calculates equivalent DC resistance of the connected linear network, including parallel/bridge paths, conductor/contact resistance, closed switches/fuses, linear loads and inductor windings. Discharged capacitors are open at DC. Nonlinear/dynamic paths require isolation.
+- Continuity uses the same resistance calculation and an explicit 30 Ω threshold.
+
+Resistance/continuity require isolated sources. Pausing leaves sources connected. Reactive equipment also requires a current solved frame that verifies negligible retained energy. Switching equipment off preserves its stored state. The model does not simulate physical discharge of an isolated component. Discharge through an appropriate connected path or use the explicit simulation reset for a fresh initial state.
+
+Focused verification passed eight new instrument/fault cases, the 13 existing connection cases, three existing measurement cases and one real-ngspice retained-energy regression. TypeScript passed. The first focused run caught a missing shared window return field, which was corrected. The real-solver regression caught the isolated-energy state bug described above. Broad/browser regression is deferred until the ordered sections are complete.
+
 - **Red** marks faults such as reversed supply polarity, incompatible battery/inverter voltage classes, direct AC/DC terminal crossovers, excessive PV Voc or a tripped path.
 - **Amber** marks warnings such as an unsuitable charging target, conductor drop, overload or a partially connected active device.
 - **Notes** include entirely unconnected newly placed equipment. They remain in the diagnostics panel without immediately filling the diagram with callouts.

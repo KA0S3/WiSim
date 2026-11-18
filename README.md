@@ -31,6 +31,8 @@ The browser suite includes general workbench flows, 3D controls, phone gestures 
 
 ## Work plan
 
+The current requested order and section acceptance criteria are tracked in [Ordered implementation plan](docs/redesign/ORDERED-PLAN.md).
+
 Core application and electrical behaviour come first, followed by smooth schematic interactions, then 3D movement/routing, visual polish and detailed manufacturer models.
 
 - [Completed work, evidence and remaining tasks](docs/redesign/IMPLEMENTATION.md)

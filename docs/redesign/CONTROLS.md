@@ -1,5 +1,9 @@
 # Workbench controls
 
+The shared 2D home/compartment editor is available in the system designer and 3D controls. Building-only application and explicit equipment refit have separate effects. Floor/roof selection, construction animation and generated Learn rooms are described in [Building design](BUILDINGS.md). Six focused Edge scenarios passed for the new workflows, including phone controls, route preview/Undo and plan gestures. Escape cancels plan editing without closing the designer. Tab navigation includes collapsible sections and the plan.
+
+Supported cable routing was added on 17 November 2026. In 3D, select a conductor and use Preview supported route, Apply or Cancel. Applied routes follow saved supports and report failed support changes. Manual bend edits clear automatic tracking. See [Supported routing](ROUTING.md) for geometry constraints and verification.
+
 For named projects, copies, saved versions and portable backups, see [Saving and retrieving projects](SAVING.md).
 
 For coloured fault callouts, the full diagnostics panel and optional one-at-a-time fixes, see [Sandbox warnings and optional fixes](DIAGNOSTICS.md). Electrically wrong sandbox setups remain allowed.
@@ -57,3 +61,17 @@ Click a labelled 3D terminal or a terminal-strip button to attach voltmeter prob
 ## Compact arrays and banks
 
 Select a grouped node or its diagram button for settings. Expand/Collapse changes the schematic, Extract separates chosen members without disconnecting them, and Ungroup keeps all real equipment. Add matching parallel branch copies a complete series/protected branch after review confirmation. Multi-selection can create a compact array/bank. Copy and delete operate on real members, with independent identities on paste and confirmation before deletion. See [GROUPS.md](GROUPS.md).
+
+## Designer and interaction improvements
+
+- Cable route length is optional. Blank means measured terminal-to-terminal routing; generated house runs use vertical wall drops and horizontal wall/ceiling runs. Cable schedules include measured routes, specified minimums and balancing slack.
+- Panel wattage, quantity and string count can be set independently or left automatic. Sourced panel/MPPT combinations still have to satisfy energy, cold-voltage, hot-voltage, current and power limits.
+- Generated projects with unresolved placement/routing failures are rejected with the affected items. The app checks full-sun and battery-only startup with ngspice before opening a generated project. These are operating-point checks, not proof of all possible operating conditions or installation compliance.
+- Long motor starts size continuous inverter power. Startup current also sizes battery capacity/current paths and protection.
+- Building preferences can choose rooms and walls by equipment category, individual scheduled appliance, or existing equipment. Wall numbers appear on the plan. Lower floors appear as optional dashed guides with junction snapping.
+- Compass north is measured clockwise from plan up. Automatic panel placement ranks available roof slopes toward the equator, then fills fitting spaces. Hemisphere is explicit. This is an orientation heuristic; annual weather, shading and financial yield optimisation are not included.
+- Obstructing walls, roofs and panels fade with the camera and allow equipment clicks through them. Selecting a structure keeps it solid for editing. The optional roof visibility control remains available.
+- Hold Ctrl while panning or zooming in 3D for four times normal speed. Release Ctrl or leave the window to restore normal speed.
+- Trip findings retain the measured overload, duration, rating and adjacent equipment after the path opens. Generated-system trip/overload findings offer a previewed rebuild from saved requirements; manual modifications are replaced by that rebuild. The separate trip reset keeps time and stored charge.
+
+Run `npm run ui:improvements` for the opaque/faded selection comparison, rendered fade check, Ctrl zoom and retained-trip diagnostics. Screenshots and results are written to `artifacts/`.

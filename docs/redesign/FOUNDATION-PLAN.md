@@ -1,5 +1,7 @@
 # Expanded WiSim foundation objective - 13 November 2026
 
+The current execution order is recorded in [ORDERED-PLAN.md](ORDERED-PLAN.md), dated 17 November 2026. It adds the optional home/compartment editor and supersedes the earlier priorities below.
+
 This incorporates the user's latest requirements and preserves the unfinished electrical/sandbox/designer objective. Detailed manufacturer device artwork follows the working foundation. Source-backed real products and useful rating comparisons are part of that foundation.
 
 The user cancelled the prior tracked goal and explicitly started a rewritten goal. The new tracked objective is active. Desktop mouse/keyboard behaviour, working live calculations, designer and 3D functionality take priority over touch/small-screen refinements. The desktop UI review includes terminal-detail component switching, reuse of available full 3D geometry and more refined schematic arrangement. Existing mobile checks remain regression evidence, not the primary development target.

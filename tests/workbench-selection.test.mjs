@@ -1,3 +1,4 @@
+import {simulationReady} from '../src/workbench/catalog-readiness.ts'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {selectionProject,pasteSelection} from '../src/workbench/selection.ts'
@@ -26,7 +27,7 @@ test('nearest alternatives remain available outside exact power, battery voltage
  for(const kind of ['pv','battery','inverter','mppt']){
   const d=makeDevice(kind,0,0);d.spec.watts=100000;d.spec.capacityAh=10000;d.spec.rating=100000
   const options=productOptions(d,CATALOG_RECORDS)
-  assert.ok(options.length,kind);assert.ok(options.every(o=>o.differences.length>0&&o.record.status==='verified'))
+  assert.ok(options.length,kind);assert.ok(options.every(o=>o.differences.length>0&&simulationReady(o.record)))
   assert.equal(matchingProducts(d,CATALOG_RECORDS).length,0)
  }
 })

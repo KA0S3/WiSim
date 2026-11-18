@@ -1,5 +1,6 @@
 import database from './catalog-data.json' with { type: 'json' }
 import type { SimulationNode, Terminal } from './simulation'
+import type {BatteryLimits} from './workbench/engineering-model'
 
 export type CatalogKind = SimulationNode['kind']
   | 'inverter-charger'
@@ -47,6 +48,7 @@ export type CatalogPrice = {
 }
 
 export type CatalogRecord = {
+  simulation?:{version:1;source:string;checked:string;dimensions:[number,number,number];geometry:'approximate'|'placeholder';assumptions:string[];resistanceOhm?:number;cutoffV?:number;idleW?:number;inputMinV?:number;inputMaxV?:number;continuous40W?:number;deratePerC?:number;chargeVoltage?:number;acVoltage?:number;acFrequency?:number;batteryLimits?:BatteryLimits};
   id: string
   name: string
   brand?: string

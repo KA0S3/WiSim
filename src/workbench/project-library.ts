@@ -2,7 +2,7 @@ import {validateProject,type Project} from './model'
 
 export const WORKING_PROJECT_KEY='wisim-workbench-v4'
 export const WORKING_PROJECT_TIME_KEY='wisim-workbench-v4-saved-at'
-export type SavedProject={id:string;name:string;createdAt:number;updatedAt:number;devices:number;wires:number;project:Project}
+export type SavedProject={id:string;name:string;createdAt:number;updatedAt:number;devices:number;wires:number;folder?:string;training?:boolean;project:Project}
 export type ProjectVersion={id:string;projectId:string;savedAt:number;label:string;project:Project}
 let opening:Promise<IDBDatabase>|undefined
 function database():Promise<IDBDatabase>{
@@ -23,7 +23,7 @@ export async function saveLibraryProject(project:Project,label?:string):Promise<
   const tx=db.transaction(['projects','versions'],'readwrite'),projects=tx.objectStore('projects'),versions=tx.objectStore('versions')
   tx.oncomplete=()=>resolve();tx.onabort=()=>reject(tx.error??new Error('Project save was interrupted.'));tx.onerror=()=>{}
   const previous=projects.get(copy.id)
-  previous.onsuccess=()=>projects.put({id:copy.id,name:copy.name,createdAt:previous.result?.createdAt??now,updatedAt:now,devices:copy.devices.length,wires:copy.wires.length,project:copy} satisfies SavedProject)
+  previous.onsuccess=()=>projects.put({id:copy.id,name:copy.name,createdAt:previous.result?.createdAt??now,folder:previous.result?.folder,updatedAt:now,devices:copy.devices.length,wires:copy.wires.length,project:copy} satisfies SavedProject)
   if(label){
    const id=crypto.randomUUID();versions.put({id,projectId:copy.id,savedAt:now,label,project:copy} satisfies ProjectVersion)
    const request=versions.index('projectId').getAll(copy.id)
@@ -37,9 +37,31 @@ async function read<T>(store:string,key?:string,index?:string):Promise<T>{
 }
 export async function listLibraryProjects():Promise<Omit<SavedProject,'project'>[]>{
  const records=await read<SavedProject[]>('projects')
- return records.filter(r=>r&&validateProject(r.project)).map(({project,...summary})=>summary).sort((a,b)=>b.updatedAt-a.updatedAt)
+ return records.filter(r=>r&&validateProject(r.project)).map(({project,...summary})=>({...summary,training:!!project.learn})).sort((a,b)=>b.updatedAt-a.updatedAt)
 }
 export async function loadLibraryProject(id:string):Promise<Project>{const record=await read<SavedProject|undefined>('projects',id);if(!record)throw new Error('This project was not found.');return valid(record.project)}
 export async function findLibraryProject(id:string):Promise<SavedProject|undefined>{const record=await read<SavedProject|undefined>('projects',id);if(record)valid(record.project);return record}
 export async function listProjectVersions(projectId:string):Promise<Omit<ProjectVersion,'project'>[]>{return (await read<ProjectVersion[]>('versions',projectId,'projectId')).filter(v=>v&&validateProject(v.project)).sort((a,b)=>b.savedAt-a.savedAt).map(({project,...summary})=>summary)}
 export async function loadProjectVersion(id:string):Promise<Project>{const record=await read<ProjectVersion|undefined>('versions',id);if(!record)throw new Error('This saved version was not found.');return valid(record.project)}
+
+export async function moveLibraryProject(id:string,folder:string):Promise<void>{
+ const db=await database()
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction('projects','readwrite'),store=tx.objectStore('projects'),request=store.get(id)
+  request.onsuccess=()=>{if(request.result)store.put({...request.result,folder:folder.trim()||undefined})}
+  tx.oncomplete=()=>resolve()
+  tx.onabort=()=>reject(tx.error??new Error('Could not move the project.'))
+ })
+}
+
+export async function deleteLibraryProject(id:string):Promise<void>{
+ const db=await database()
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(['projects','versions'],'readwrite')
+  tx.objectStore('projects').delete(id)
+  const versions=tx.objectStore('versions'),request=versions.index('projectId').getAllKeys(id)
+  request.onsuccess=()=>{for(const key of request.result)versions.delete(key)}
+  tx.oncomplete=()=>resolve()
+  tx.onabort=()=>reject(tx.error??new Error('Could not delete the project.'))
+ })
+}

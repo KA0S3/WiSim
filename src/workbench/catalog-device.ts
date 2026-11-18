@@ -1,19 +1,23 @@
 import type {CatalogRecord} from '../catalog'
 import {definitions,type Device} from './model'
 import {applyPhysicalProfile,physicalProfile} from './profiles'
+import {simulationReadiness,catalogKind} from './catalog-readiness'
 
 /** Map ratings by their electrical meaning; nominal battery voltage is not PV Vmp or AC output voltage. */
 export function applyCatalogRecord(device:Device,record:CatalogRecord):Device{
- if(record.status!=='verified'||record.kind!==device.kind)throw new Error('This record is not verified for this equipment type')
- let d:Device={...device,name:record.name,model:record.id,physicalProfile:undefined,ports:structuredClone(definitions[device.kind].ports),spec:{...device.spec}}
- const s=d.spec
+ const readiness=simulationReadiness(record)
+ if(!readiness.ready||catalogKind(record)!==device.kind)throw new Error('This record is not simulation-ready for this equipment type: '+readiness.missing.join(' '))
+ let d:Device={...device,name:record.name,model:record.id,physicalProfile:undefined,ports:[...structuredClone(definitions[device.kind].ports),...device.ports.filter(p=>p.id==='pe')],spec:{...device.spec}}
+ const s=d.spec,profile=record.simulation!
+ Object.assign(s,{width:profile.dimensions[0],height:profile.dimensions[1],depth:profile.dimensions[2]})
+ if(profile.resistanceOhm!==undefined)s.resistance=profile.resistanceOhm
  if(record.power)s.watts=record.power
  switch(d.kind){
   case 'pv':
    if(record.moduleVmp)s.voltage=record.moduleVmp;if(record.moduleVoc)s.voc=record.moduleVoc;if(record.moduleIsc)s.isc=record.moduleIsc
    s.mppCurrent=record.moduleImp;s.vocTemperatureCoefficientPerC=record.moduleVocTemperatureCoefficientPerC;s.powerTemperatureCoefficientPerC=record.modulePowerTemperatureCoefficientPerC;s.iscTemperatureCoefficientPerC=record.moduleIscTemperatureCoefficientPerC;s.maxSeriesFuseA=record.maxSeriesFuseA
    break
-  case 'battery':if(record.voltage)s.voltage=record.voltage;if(record.capacityAh)s.capacityAh=record.capacityAh;if(record.maxDischargeCurrentA)s.rating=record.maxDischargeCurrentA;break
+  case 'battery':if(record.voltage)s.voltage=record.voltage;if(record.capacityAh)s.capacityAh=record.capacityAh;if(record.maxDischargeCurrentA)s.rating=record.maxDischargeCurrentA;d.batteryLimits=structuredClone(profile.batteryLimits);if(d.batteryLimits&&device.batteryLimits?.control==='external')d.batteryLimits.externalConnected=device.batteryLimits.externalConnected;break
   case 'mppt':{
    const desired=(device.spec.chargeVoltage??60)/1.2
    const nominal=record.supportedBatteryVoltages?.find(v=>Math.abs(v-desired)/v<.1)??record.voltage??12
@@ -28,10 +32,10 @@ export function applyCatalogRecord(device:Device,record:CatalogRecord):Device{
   case 'inverter':
    if(record.acVoltage)s.voltage=record.acVoltage;if(record.acFrequency)s.frequency=record.acFrequency
    if(record.surge)s.rating=record.surge
-   s.cutoff=(record.voltage??51.2)*44/51.2
-   if(record.id==='victron-phoenix-12-1200-230v'){s.cutoff=9.3;s.efficiency=.91;s.idleWatts=10}
+   s.cutoff=profile.cutoffV!;s.efficiency=record.maximumEfficiencyPercent!/100;s.idleWatts=profile.idleW
    break
-  case 'fuse':if(record.current)s.rating=record.current;break
+  case 'charger':s.voltage=profile.acVoltage!;s.frequency=profile.acFrequency!;s.rating=record.chargeCurrent!;s.chargeVoltage=profile.chargeVoltage!;s.efficiency=record.maximumEfficiencyPercent!/100;s.idleWatts=profile.idleW;break
+  case 'fuse':if(record.current)s.rating=record.current;d.protection={domain:'dc',voltage:record.maxVoltageDC!,breakingA:record.maxInterruptCurrentA!,source:profile.source};break
  }
  if(physicalProfile(record.id))d=applyPhysicalProfile(d,record.id)
  if(d.physicalProfile&&record.terminalLayout){

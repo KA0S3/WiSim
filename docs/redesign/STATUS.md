@@ -1,8 +1,10 @@
 ﻿# Current WiSim status - 13 November 2026
 
-The rewritten desktop-first tracked goal is active after the user cancelled the prior goal. The full objective remains unfinished. FOUNDATION-PLAN.md incorporates the expanded requirements; IMPLEMENTATION.md retains detailed history. Reliable live calculations and working PC designer/3D features take precedence over touch refinements.
+The active goal follows [ORDERED-PLAN.md](ORDERED-PLAN.md), dated 17 November 2026. Scope includes curved walls, all three electrical regions and existing catalogue completion first. Sections 1–3.5 have focused verification. The new building editor, room/roof fitting, clipped multi-floor roofs, cascade and generated Learn rooms are integrated. Twelve building, 13 routing/mounting and one real-solver building cases pass, with TypeScript. Section 4 visual/UI review is in progress. Existing Learn changes are preserved. Broad verification evidence below describes earlier revisions.
 
 ## Implemented
+
+Current goal verification boundary, 17 November 2026 — sections 1–4 have focused evidence. Six isolated Edge scenarios now verify the new gestures, construction, supported routes/Undo, independent building edits and phone controls, with screenshots and no page errors. TypeScript passes. Section 5 is in progress. Section 6 and final broad verification remain pending. Vite needs approved bundler access in this sandbox. Changes are in the working tree and new feature docs are tracked. No commit has been made.
 
 - ngspice/WASM worker simulation, terminal networks, conductor resistance/losses, DC/AC/three-phase sources, passive components and generic battery, solar controller, inverter, motor and AC charger models.
 - Schematic editing, local persistence, validated JSON import/export, undo/redo, voltage probes, scope, parts CSV and routed PDF drawing.
@@ -59,3 +61,15 @@ Current priority follows FOUNDATION-PLAN.md: math, sandbox, designer, saving/ret
 
 Existing open-source solver, graph/layout and Three.js/Drei controls remain in use; see UPSTREAM.md for source archives and notices.
 
+
+
+## Run closeout, 18 November 2026
+
+The user cleared the goal and requested this run finish after cleanup/docs and final checks. All ordered sections have implementation, with bounded electrical coverage as documented in ENGINEERING.md. Section 6 currently has 63 simulation-ready profiles among 131 records, including 41 partially verified profiles, readiness-filtered sidebar insertion, sourced dimensions/specifications, and whole-bank/array replacement preserving collector connections. Existing source records were prioritised. No claim of full regional compliance or exact manufacturer firmware is made.
+
+Final catalogue validation and production build passed. The full automated test run reported 10 failures (artifacts/final-tests.log): stale catalogue/status/revision assertions, external-BMS solver fixtures, a malformed-terminal validation crash and a diagram-routing regression. The validation crash was corrected and its focused regressions pass. Remaining failures have not been resolved; final acceptance is incomplete. Three engineering browser scenarios passed earlier; the final rerun is recorded in artifacts/engineering-ui-check.json. Broad UI suites were not all rerun. No commit was made. The goal is cleared and must not be recreated without a new user request.
+
+
+### Electrical and routing follow-up, 18 November 2026
+
+User prioritised electrical operation and automatic routing over catalogue cleanup. Corrected BMS nonlinear startup with a numerical nodeset estimate (directional limits remain active), connected external BMS explicitly in operational solver fixtures, and expanded generated diagram columns for longer PV strings. All 77 combined real-solver, engineering, designer, building, supported-route and drawing-routing tests pass (artifacts/electrical-routing-final.log). Two malformed-import regressions also pass. Final designer UI results are in artifacts/designer-ui-check.json; engineering UI passed three scenarios without page errors. Catalogue-only stale assertions remain outside this follow-up. The goal remains cleared.

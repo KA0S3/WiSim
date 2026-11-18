@@ -2,6 +2,8 @@
 
 These are generic behavioural models solved together in ngspice. Applying catalogue ratings does not provide manufacturer firmware, protection curves or a validated chemistry model. The sandbox permits wiring/rating mistakes and reports the checks it actually performs. Automatic design remains provisional until the open items in STATUS.md are finished.
 
+Section 5 adds optional regional ampacity/protection/earthing inputs and checks, exact selected end-hardware compatibility, real chassis PE ports/source bonds and directional BMS pack equivalents. See [ENGINEERING.md](ENGINEERING.md) for sources, model behaviour and boundaries. BMS voltage inhibits latch at the next solver segment and clear on simulation reset. MPPTs now use configured startup/run headroom and retained tracking state; the search/taper algorithm remains generic.
+
 ## Solar source
 
 The generic PV assumption is `I = Isc × sunlight × exposure × (1 - exp((V - Voc) / a))`, where `a = max(1 V, 0.065 × Voc)`. Temperature adjusts Voc with the existing generic -0.29%/degree coefficient. This does not replace a sourced panel-specific temperature/yield model.
@@ -37,3 +39,8 @@ This fixes a reproduced 60 Hz battery/display imbalance caused by comparing a fi
 Real-ngspice regressions cover full charging, output current limiting, taper, full/mismatched targets, reverse supply, switched-off controller, night and insufficient PV voltage. They independently balance PV-source power against controller input plus conductor losses, controller input against output and efficiency, and controller output against battery absorption plus conductor losses. Curve regressions vary sunlight and load. A disconnected illuminated panel is tested alongside a running AC/storage network across motor startup.
 
 The browser suite checks input readings, curtailment after changing the target and charging restoration after Undo. The user's unchanged project is separately imported, observed through continuing frames and reloaded. See IMPLEMENTATION.md for counts and artifacts. Passing these cases establishes those behaviours; it does not establish all manufacturer or installation constraints.
+# Instrument and retained-energy update, 17 November 2026
+
+The workbench multimeter now exposes voltage/current AC and DC modes, sampled frequency, equipment active power and de-energised linear resistance/continuity. See DIAGNOSTICS.md for probe semantics and limits. The sparse DC test solve includes cable/contact resistance and supported passive paths. It rejects active sources, unresolved stored energy and connected nonlinear/dynamic elements.
+
+Frames report stored reactive energy. Isolating capacitors, inductors, motors and chargers preserves their retained state. Previously interpretation replaced an isolated device's retained state with its disconnected terminal reading. A real-ngspice regression verifies that an isolated 10 V / 1 mF capacitor retains 0.05 J and blocks resistance testing. This correction supports the new meter's retained-energy check.

@@ -1,6 +1,7 @@
 import type {Device,Finding,Project} from './model'
 import {pvVocAtTemperature} from './pv-ratings'
 import {pvNetwork} from './pv-network'
+import {faultFindings} from './fault-checks'
 
 const key=(id:string,port:string)=>JSON.stringify([id,port])
 /** Wire/fuse/bus nets, then source-voltage constraints. Loads and converter sides never collapse into one net. */
@@ -8,7 +9,7 @@ function sourceNetwork(project:Project,kind:'battery'|'pv',cold=false){
  const parent=new Map<string,string>()
  const root=(k:string):string=>{const p=parent.get(k);if(!p){parent.set(k,k);return k}if(p===k)return k;const r=root(p);parent.set(k,r);return r}
  const join=(a:string,b:string)=>{const x=root(a),y=root(b);if(x!==y)parent.set(x,y)}
- for(const d of project.devices){for(const p of d.ports)root(key(d.id,p.id));if(d.on&&['bus','fuse','switch'].includes(d.kind))for(const p of d.ports.slice(1))join(key(d.id,d.ports[0].id),key(d.id,p.id))}
+ for(const d of project.devices){for(const p of d.ports)root(key(d.id,p.id));if(d.on&&['bus','fuse','switch'].includes(d.kind))for(const p of d.ports.filter(p=>p.domain!=='earth').slice(1))join(key(d.id,d.ports[0].id),key(d.id,p.id))}
  for(const w of project.wires)join(key(w.from,w.fromPort),key(w.to,w.toPort))
  type Edge={to:string;voltage:number;id:string}
  const graph=new Map<string,Edge[]>(),add=(from:string,to:string,voltage:number,id:string)=>graph.set(from,[...(graph.get(from)??[]),{to,voltage,id}])
@@ -28,13 +29,14 @@ function sourceNetwork(project:Project,kind:'battery'|'pv',cold=false){
    while(paths.length&&steps++<10000){const path=paths.pop()!;if(path.node===end){totals.push(path.value);continue}for(const edge of graph.get(path.node)??[])if(!path.seen.has(edge.to))paths.push({node:edge.to,value:path.value+edge.voltage,seen:new Set([...path.seen,edge.to])})}
    incomplete=paths.length>0;if(totals.length)voltage=Math.max(...totals)
   }
-  return {voltage,sources:[...sources],conflict,incomplete,shorted:start===end&&sources.size>0}
+  return {voltage,span:Math.max(...values.values())-Math.min(...values.values()),sources:[...sources],conflict,incomplete,shorted:start===end&&sources.size>0}
  }
 }
+export function batteryNetwork(project:Project,id:string,positive='p',negative='n'){const device=project.devices.find(d=>d.id===id);return device?sourceNetwork(project,'battery')(device,positive,negative):{voltage:undefined,span:0,sources:[],conflict:false,incomplete:false,shorted:false}}
 
 export type ConnectionFinding=Finding&{related:string[]}
 export function connectionFindings(project:Project):ConnectionFinding[]{
- const battery=sourceNetwork(project,'battery'),pv=sourceNetwork(project,'pv',true),findings:ConnectionFinding[]=[]
+ const battery=sourceNetwork(project,'battery'),pv=sourceNetwork(project,'pv',true),findings:ConnectionFinding[]=faultFindings(project)
  for(const wire of project.wires){
   const a=project.devices.find(d=>d.id===wire.from),b=project.devices.find(d=>d.id===wire.to),from=a?.ports.find(p=>p.id===wire.fromPort),to=b?.ports.find(p=>p.id===wire.toPort),passive=['resistor','capacitor','inductor','diode','switch','fuse','bus']
   // A generic passive's default drawing domain does not restrict it to DC.

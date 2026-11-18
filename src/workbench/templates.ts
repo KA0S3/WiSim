@@ -1,6 +1,12 @@
 import {assertDesignConnections} from './connection-checks'
 import { blankProject, connect, makeDevice, type Project, type Requirements } from './model'
 import {buildDesignTopology} from './design-topology'
+import {resolvedRequirements} from './appliances'
+import {selectArray} from './design-options'
+import {designPhases} from './design-phases'
+import {applyBuilding} from './building-fit'
+import {sizePlacedDesign,type DesignSizingPath} from './design-sizing'
+import {synchronizeLengths} from './geometry'
 
 export function solarProject(): Project {
   const p = blankProject(); p.name = 'The everyday energy system'
@@ -43,29 +49,38 @@ export function threePhaseProject(): Project {
   p.wires = loads.flatMap((l, i) => [connect(g, 'abc'[i], l, 'p', 2.5, 10), connect(g, 'n', l, 'n', 2.5, 10)])
   return p
 }
-export const defaultRequirements: Requirements = { context: 'home', region: 'ZA', dailyKwh: 8, peakW: 2400, autonomyHours: 12, sunHours: 4.5, cableLength: 3, reserve: 20, priority: 'cost', phases: 'single' }
+export const defaultRequirements: Requirements = { context: 'home', region: 'ZA', dailyKwh: 8, peakW: 2400, autonomyHours: 12, sunHours: 4.5, cableLength: undefined, reserve: 20, priority: 'cost', phases: 'single' }
 
 export function designSystem(r: Requirements): Project {
-  if (![r.dailyKwh, r.peakW, r.autonomyHours, r.sunHours, r.cableLength, r.reserve].every(Number.isFinite) || r.dailyKwh <= 0 || r.peakW <= 0 || r.autonomyHours <= 0 || r.sunHours <= 0 || r.cableLength <= 0) throw new Error('Enter positive demand, autonomy, sunlight and route values.')
+  r=resolvedRequirements(r)
+  if (![r.dailyKwh, r.peakW, r.autonomyHours, r.sunHours, r.cableLength ?? 0, r.reserve].every(Number.isFinite) || r.dailyKwh <= 0 || r.peakW <= 0 || r.autonomyHours <= 0 || r.sunHours <= 0 || (r.cableLength ?? 0) < 0) throw new Error('Enter positive demand, autonomy, sunlight and route values.')
   if (r.reserve < 0 || r.reserve > 100) throw new Error('Capacity reserve must be between 0% and 100%.')
   if (r.sunHours > 24) throw new Error('Equivalent peak sun hours cannot exceed 24 hours per day.')
   if (r.dailyKwh * 1000 > r.peakW * 24) throw new Error('Daily energy exceeds what the simultaneous running demand could consume in 24 hours. Check both demand inputs.')
   if (!['ZA','GB','US'].includes(r.region) || !['home','mobile','workshop'].includes(r.context) || !['cost','headroom'].includes(r.priority)) throw new Error('Choose a supported region, installation context and design priority.')
-  if (r.phases !== 'single') throw new Error('Automatic multi-phase equipment selection is not yet validated. Use the three-phase sandbox template to explore those networks.')
-  let p = blankProject(); p.name = `${r.context === 'mobile' ? 'Mobile' : r.context === 'workshop' ? 'Workshop' : 'Home'} energy · ${r.region}`; p.requirements = { ...r }
   const margin = 1 + r.reserve / 100 + (r.priority === 'headroom' ? .2 : 0)
-  const inverterW = [1000, 2000, 3000, 5000, 8000, 12000].find(w => w >= r.peakW * margin)
-  if (!inverterW) throw new Error('This demand exceeds the current 12 kW design library. Reduce demand or build a custom system in the sandbox.')
+  const option = selectArray(r), phases = designPhases(r)
   const capacityWh = r.dailyKwh * 1000 * (r.autonomyHours / 24) / (.8 * .94) * margin
-  const modules = Math.max(2, Math.ceil(r.dailyKwh * 1000 / (r.sunHours * .78) * margin / 400 / 2) * 2)
-  const pvW = modules * 400
-  const current = (inverterW / .94 + 8) / 44
-  const controllerCurrent = Math.ceil(pvW * .96 / 44 / 10) * 10
-  // Generic pack assumption: 100 A continuous charge and discharge per pack.
-  const packs = Math.max(1, Math.ceil(capacityWh / 5120), Math.ceil(Math.max(current, controllerCurrent) / 100))
-  if (![capacityWh, packs, modules, controllerCurrent].every(Number.isFinite)) throw new Error('The requested system exceeds numerical sizing limits.')
-  const name=p.name;p=buildDesignTopology(r,modules,packs,inverterW,controllerCurrent);p.name=name
-  p.designNotes=['Sized for '+r.dailyKwh+' kWh/day and '+r.autonomyHours+' hours of average-load autonomy.',packs+' individual 5.12 kWh battery packs; '+packs*5.12+' kWh nominal storage, 80% usable capacity and 94% inverter efficiency assumed.',modules+' individual generic 400 W panels in '+modules/2+' parallel two-panel series strings, with individual string protection.', 'PV string/collector cable drops target 0.5%/1.5% at 80 V. Battery branch/main paths target 0.5%/1.5% at 44 V minimum input. Controller output targets 1.5%; AC output targets 1% at inverter rated output. Contacts and ambient conductor resistance are included.', 'Parallel battery branches use equal outgoing/return loop lengths and equal cross-sections; each pack has separate generic protection. Battery count meets energy and generic continuous charge/discharge limits of 100 A per pack.', 'Cable lengths follow physical terminal positions plus saved slack; the requested battery route is a minimum one-way main run. Actual geometry can require longer cables.', 'Provisional engineering design: regional ampacity, protection coordination, earthing, equipment compatibility and terminations require verification.','Generic equipment specifications; no manufacturer suitability or installed-price optimum is claimed.']
+  const current = phases.reduce((sum, phase) => sum + (Math.max(phase.inverterW,phase.startupW) / .94 + 8) / 44, 0)
+  const packs = Math.max(1, Math.ceil(capacityWh / 5120), Math.ceil(Math.max(current, option.chargeCurrent) / 100))
+  const sizingPaths:DesignSizingPath[]=[]
+  let p = buildDesignTopology(r, option, packs, phases,sizingPaths)
+  if(r.building)p=synchronizeLengths(sizePlacedDesign(applyBuilding(p,r.building,true),sizingPaths))
+  if(p.fitIssues?.length)throw new Error(`The design cannot be placed and routed: ${p.fitIssues.join(' ')}`)
+  p.name = `${r.context === 'mobile' ? 'Mobile' : r.context === 'workshop' ? 'Workshop' : 'Home'} energy · ${r.region}`
+  p.designNotes = [
+    `Sized for ${r.dailyKwh.toFixed(2)} kWh/day, ${r.peakW.toFixed(0)} W simultaneous demand and ${r.autonomyHours} hours of average-load autonomy.`,
+    `${packs} individual 5.12 kWh battery packs. Assumptions include 80% usable storage, 94% inverter efficiency and 100 A charge/discharge per generic pack.`,
+    `${option.modules} individual ${option.panel.name} modules, ${option.strings} strings of ${option.series} modules and ${option.controllers} independent ${option.controller.name} controllers.`,
+    `Module temperatures ${r.coldTemperature ?? -10} to ${r.hotTemperature ?? 70} °C. String cold Voc ${option.coldVoc.toFixed(1)} V and estimated hot Vmp ${option.hotVmp.toFixed(1)} V. Hot Vmp uses Pmax/Isc coefficients as an approximation.`,
+    `PV input current uses 1.25 × hot Isc as a design allowance. Controller nameplate power and full output current at 44 V constrain string assignment. Panel footprint ${option.area.toFixed(2)} m² excludes access gaps and roof-shape packing.`,
+    'Ranking minimises module count plus three units per controller, then excess nameplate power and footprint. This is an equipment-count objective. Installed prices are unavailable.',
+    `${r.phases} output with phase angles ${phases.map(phase => phase.angle).join('/')} degrees. Generic inverters require manufacturer-supported coordination before equipment selection.`,
+    'PV string/collector voltage-drop targets are 0.5%/1.5% at estimated hot Vmp. Battery branch/main and controller paths target 0.5%/1.5% at 44 V. AC branches target 1% at rated phase output. Physical cable lengths, contacts and ambient resistance are included.',
+    'Balanced parallel battery branches use equal loop lengths/areas and individual protection. Controller outputs and inverter supplies have independent protection.',
+    'Daily appliance schedules control loads at the selected schedule hour. Startup demand sizes each phase inverter. Autonomy uses average daily energy. Weather, seasonal yield and time-series battery dispatch require further modelling.',
+    'Provisional engineering proposal. Regional ampacity uses the saved cable construction and installation assumptions. Review fault ratings, protection selectivity, earthing, battery/BMS limits and exact end hardware in Electrical engineering.',
+  ]
   assertDesignConnections(p)
   return p
 }

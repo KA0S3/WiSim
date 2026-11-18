@@ -1,3 +1,4 @@
+import {designSystem} from './templates'
 import {connectionFindings} from './connection-checks'
 import {synchronizeLengths} from './geometry'
 import {validateProject,type Finding,type Project} from './model'
@@ -6,14 +7,25 @@ export type SuggestedFix={label:string;detail:string;project:Project}
 /** Explicit one-at-a-time sandbox edits. No repair runs without the user's Apply action. */
 export function suggestedFix(project:Project,finding:Finding):SuggestedFix|null{
  const known=connectionFindings(project).find(f=>f.id===finding.id),device=project.devices.find(d=>d.id===finding.target)
- if(!known)return null
+ if(!known){
+  if(device&&project.requirements&&(finding.id.startsWith('trip-')||finding.id.startsWith('overload-'))){
+   try{const next=designSystem(project.requirements);return {label:'Rebuild and resize this generated system',detail:'Regenerates the system from its saved demand, startup, panel and building requirements. Manual equipment and wiring edits are replaced. Apply, then reset simulation to clear trips. Undo restores the previous design.',project:{...next,id:project.id,name:project.name}}}catch{return null}
+  }
+  return null
+ }
  const offer=(label:string,detail:string,change:(p:Project)=>Project):SuggestedFix|null=>{
   const next=synchronizeLengths(change(structuredClone(project)))
   if(!validateProject(next)||connectionFindings(next).some(f=>f.id===finding.id))return null
   return {label,detail,project:next}
  }
+ if(device&&finding.id.startsWith('short-')&&finding.severity==='fault')return offer(`Isolate ${device.name}`,`Switches off ${device.name} so this source stops energising the short. Review and repair the bypass path before reconnecting.`,p=>({...p,devices:p.devices.map(d=>d.id===device.id?{...d,on:false}:d)}))
+ if(device&&finding.id.startsWith('ac-source-conflict-'))return offer(`Isolate ${device.name}`,`Switches off this AC source. Review transfer isolation and manufacturer synchronisation requirements before reconnecting.`,p=>({...p,devices:p.devices.map(d=>d.id===device.id?{...d,on:false}:d)}))
+ if(device&&finding.id.startsWith('protection-bypass-')){
+  const bridge=project.wires.find(w=>w.from===device.id&&w.to===device.id&&w.fromPort!==w.toPort)
+  if(bridge)return offer('Remove the direct protection bridge',`Removes conductor ${bridge.reference??bridge.id} joining both sides of this protection. Review other feeds after applying.`,p=>({...p,wires:p.wires.filter(w=>w.id!==bridge.id)}))
+ }
  if(finding.id.startsWith('domain-mismatch-')&&finding.severity==='fault')return offer('Remove this AC/DC crossover conductor','Removes only the highlighted conductor. This may leave open-terminal notes; all other wiring and equipment stay in place.',p=>({...p,wires:p.wires.filter(w=>w.id!==finding.target)}))
- if(device&&(finding.id.startsWith('bank-polarity-')||finding.id.startsWith('pv-polarity-'))&&['inverter','mppt','charger'].includes(device.kind)){
+ if(device&&!known.title.includes('shorted')&&(finding.id.startsWith('bank-polarity-')||finding.id.startsWith('pv-polarity-'))&&['inverter','mppt','charger'].includes(device.kind)){
   const [positive,negative]=finding.id.startsWith('pv-')?['pv+','pv-']:device.kind==='inverter'?['dc+','dc-']:['bat+','bat-']
   const swap=(port:string)=>port===positive?negative:port===negative?positive:port
   return offer('Swap this input’s positive and negative connections','Swaps the terminal attachments at this equipment only, preserving conductor identities and routes. Recheck remaining voltage and current warnings afterwards.',p=>({...p,wires:p.wires.map(w=>({...w,fromPort:w.from===device.id?swap(w.fromPort):w.fromPort,toPort:w.to===device.id?swap(w.toPort):w.toPort}))}))
