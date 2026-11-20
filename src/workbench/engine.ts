@@ -7,7 +7,7 @@ import {staticFindings} from './static-findings'
 import {solverReferences} from './solver-references'
 import {withSchedules} from './appliances'
 import {batteryPermission,engineeringFindings} from './engineering'
-import { emptyState, wireResistance, type Device, type Finding, type Frame, type Project, type RuntimeState } from './model'
+import { acSourceKinds, emptyState, wireResistance, type Device, type Finding, type Frame, type Project, type RuntimeState } from './model'
 
 export const terminalKey = (id: string, port: string) => `${id}:${port}`
 // SPICE identifiers are case-insensitive. Encode, rather than normalize, so
@@ -67,7 +67,7 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
           `Ipv_${id} ${n('n')} ${internal} ${Math.max(0,isc-saturation)}`,
           `Dpv_${id} ${internal} ${n('n')} Dpv_${id} temp=27`, `${sense} ${internal} ${n('p')} 0`); break
       }
-      case 'grid': source(`${s.voltage * Math.SQRT2}*sin(2*pi*${s.frequency}*(time+${state.time}))`); break
+      case 'grid': case 'generator': source(`${s.voltage * Math.SQRT2}*sin(2*pi*${s.frequency}*(time+${state.time}))`); break
       case 'three-phase': {
         for (const [i, phase] of ['a', 'b', 'c'].entries()) {
           lines.push(`Bsrc_${id}_${phase} src_${id}_${phase} ${n('n')} V=${s.voltage * Math.SQRT2}*sin(2*pi*${s.frequency}*(time+${state.time})-${i * 2 * Math.PI / 3})`, `Rsrc_${id}_${phase} src_${id}_${phase} int_${id}_${phase} ${Math.max(.001, s.resistance)}`, `${i === 0 ? sense : `${sense}_${phase}`} int_${id}_${phase} ${n(phase)} 0`)
@@ -103,7 +103,9 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
           'Dbridge4_'+id+' '+minus+' '+n('n')+' Dgeneric',
           'Clink_'+id+' '+plus+' '+minus+' '+Math.max(1e-6,s.capacitance)+' IC='+(state.capacitors[d.id]??0),
           'Rbleed_'+id+' '+plus+' '+minus+' 1e6',
-          'Rreference_'+id+' '+minus+' '+n('n')+' 1e9',
+          // Weak, symmetric bleeders establish the link's common mode when the bridge diodes are off.
+          'RreferenceP_'+id+' '+plus+' '+n('n')+' 1e6',
+          'RreferenceN_'+id+' '+minus+' '+n('n')+' 1e6',
           'Bcharge_'+id+' '+n('bat-')+' '+internal+' I='+s.rating+'*max(0,min(1,('+(s.chargeVoltage??14.4)+'-'+battery+')/.5))*'+enable,
           sense+' '+internal+' '+n('bat+')+' 0',
           'Coutput_'+id+' '+n('bat+')+' '+n('bat-')+' .0001 IC='+(state.capacitors[d.id+':output']??0),
@@ -136,7 +138,7 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
     const from = nodeName(w.from, w.fromPort), to = nodeName(w.to, w.toPort), mid = `wire_${safe(w.id)}`
     lines.push(`${wireSensor(w.id)} ${from} ${mid} 0`, `Rwire_${safe(w.id)} ${mid} ${to} ${Math.max(1e-7, wireResistance(w, project.ambient))}`)
   }
-  for(const id of project.engineering?.earthing?.neutralBondIds??[]){const d=project.devices.find(d=>d.id===id);if(d?.ports.some(p=>p.id==='pe')&&['inverter','grid','three-phase'].includes(d.kind))lines.push(`Rbond_${safe(id)} ${nodeName(id,'n')} ${nodeName(id,'pe')} .001`)}
+  for(const id of project.engineering?.earthing?.neutralBondIds??[]){const d=project.devices.find(d=>d.id===id);if(d?.ports.some(p=>p.id==='pe')&&acSourceKinds.has(d.kind))lines.push(`Rbond_${safe(id)} ${nodeName(id,'n')} ${nodeName(id,'pe')} .001`)}
   const preferred=project.devices.flatMap(d=>d.ports.filter(p=>['n','pv-','bat-','dc-'].includes(p.id)).map(p=>nodeName(d.id,p.id)))
   const {references,offsets}=solverReferences(lines,preferred,state.nodes)
   lines.push(...references)
@@ -162,7 +164,7 @@ export function compileCircuit(project: Project, state: RuntimeState = emptyStat
   for(const signal of signals)lines.push('.save '+signal)
   // Algebraic DC networks do not need 500 repeated samples per window.
   // Keep fine sampling whenever an AC source or stored-energy device is present.
-  const dynamic=project.devices.some(d=>['grid','three-phase','inverter','charger','capacitor','inductor','motor'].includes(d.kind)),step=dynamic?.0002:seconds
+  const dynamic=project.devices.some(d=>acSourceKinds.has(d.kind)||['charger','capacitor','inductor','motor'].includes(d.kind)),step=dynamic?.0002:seconds
   lines.push(`.tran ${step} ${seconds} 0 ${step}${state.time ? ' uic' : ''}`, '.end')
   return { netlist: lines.join('\n'), findings }
 }
@@ -253,12 +255,13 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
       if(d.on&&s.dcMaxCurrent&&Math.abs(reading.inputCurrent)>s.dcMaxCurrent)findings.push({id:'inverter-dc-current-'+d.id,severity:'warning',title:'Inverter DC input current exceeds its rating',detail:`${Math.abs(reading.inputCurrent).toFixed(1)} A at the input exceeds the configured ${s.dcMaxCurrent} A maximum. Review demand, battery voltage and inverter sizing.`,target:d.id})
       if (d.on && vdc < s.cutoff + 2) { reading.state = 'warning'; findings.push({ id: `low-dc-${d.id}`, severity: 'fault', title: 'Inverter input voltage is low', detail: `${vdc.toFixed(1)} V at the input; cutoff is ${s.cutoff} V. Check the battery and both DC conductors.`, target: d.id }) }
     }
-    if (d.kind === 'fuse' || d.kind === 'inverter') {
-      const ratio = d.kind === 'fuse' ? average(current, times, cut, true) / Math.max(1, s.rating) : Math.abs(power) / Math.max(1, s.watts)
+    if (d.kind === 'fuse' || d.kind === 'inverter' || d.kind === 'generator') {
+      const apparentPower = Math.abs(reading.voltage * reading.current)
+      const ratio = d.kind === 'fuse' ? average(current, times, cut, true) / Math.max(1, s.rating) : d.kind === 'generator' ? apparentPower / Math.max(1, s.rating) : Math.abs(power) / Math.max(1, s.watts)
       next.overloadSeconds[d.id] = ratio > 1 ? (state.overloadSeconds[d.id] ?? 0) + end : 0
-      const tripTime = d.kind === 'fuse' ? 5 / Math.max(.01, ratio * ratio - 1) : Math.abs(power) > s.rating ? .1 : 2
+      const tripTime = d.kind === 'fuse' ? 5 / Math.max(.01, ratio * ratio - 1) : d.kind === 'inverter' && Math.abs(power) > s.rating ? .1 : 2
       if (ratio > 1) findings.push({ id: `overload-${d.id}`, severity: 'warning', title: `${d.name} is overloaded`, detail: `${ratio.toFixed(2)} × rating. Generic protection delay ${tripTime.toFixed(2)} s; not a manufacturer curve.`, target: d.id })
-      if (next.overloadSeconds[d.id] >= tripTime && !next.trips.includes(d.id)) { next.trips.push(d.id); next.tripCauses ??= {}; next.tripCauses[d.id] = `${d.kind==='fuse'?`${average(current,times,cut,true).toFixed(1)} A exceeded ${s.rating} A`:`${Math.abs(power).toFixed(0)} W exceeded ${s.watts} W continuous (${s.rating} W surge)`} for ${next.overloadSeconds[d.id].toFixed(2)} s. Connected equipment: ${project.devices.filter(other=>project.wires.some(w=>w.from===d.id&&w.to===other.id||w.to===d.id&&w.from===other.id)).map(other=>other.name).join(', ')}.` }
+      if (next.overloadSeconds[d.id] >= tripTime && !next.trips.includes(d.id)) { next.trips.push(d.id); next.tripCauses ??= {}; next.tripCauses[d.id] = `${d.kind==='fuse'?`${average(current,times,cut,true).toFixed(1)} A exceeded ${s.rating} A`:d.kind==='generator'?`${apparentPower.toFixed(0)} VA exceeded ${s.rating} VA`:`${Math.abs(power).toFixed(0)} W exceeded ${s.watts} W continuous (${s.rating} W surge)`} for ${next.overloadSeconds[d.id].toFixed(2)} s. Connected equipment: ${project.devices.filter(other=>project.wires.some(w=>w.from===d.id&&w.to===other.id||w.to===d.id&&w.from===other.id)).map(other=>other.name).join(', ')}.` }
       if (next.trips.includes(d.id)) { reading.state = 'tripped'; findings.push({ id: `trip-${d.id}`, severity: 'fault', title: `${d.name} has tripped`, detail: `${next.tripCauses?.[d.id] ?? 'The original trip measurement is unavailable for this older simulation state.'} Reduce connected demand or correct the circuit, then reset the simulation to clear the latched trip.`, target: d.id }) }
     }
     if (d.kind === 'mppt') {
@@ -279,7 +282,7 @@ export function interpret(project: Project, raw: ResultType, state: RuntimeState
   const engineeringIds=new Set(engineering.map(f=>f.id))
   for(let index=findings.length-1;index>=0;index--)if(engineeringIds.has(findings[index].id))findings.splice(index,1)
   findings.push(...engineering)
-  const conflictingSources=project.devices.filter(d=>d.on&&['grid','three-phase','inverter'].includes(d.kind)&&frame.measurements?.[d.id]?.ac&&frame.measurements[d.id].frequency===null)
+  const conflictingSources=project.devices.filter(d=>d.on&&acSourceKinds.has(d.kind)&&frame.measurements?.[d.id]?.ac&&frame.measurements[d.id].frequency===null)
   for (const d of project.devices) {
     const s = d.spec, reading = frame.devices[d.id]
     if (d.kind === 'capacitor') reading.storedEnergyJ = .5 * s.capacitance * (next.capacitors[d.id] ?? 0) ** 2

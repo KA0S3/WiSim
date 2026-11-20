@@ -1,3 +1,4 @@
+import {StringPreflight} from './StringPreflight'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, CircleHelp, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { CATALOG_RECORDS } from '../catalog'
@@ -12,6 +13,7 @@ import {randomDemoRequirements} from './demo-design'
 
 export function SystemDesigner({ requirements: r, onChange, onDesign, error, children }: { requirements: Requirements; onChange: (requirements: Requirements) => void; onDesign: () => void | Promise<void>; error: string; children?: React.ReactNode }) {
   const [usageUnit,setUsageUnit]=useState<'watts'|'units'>('watts'),[peakHours,setPeakHours]=useState(1),[demoFilled,setDemoFilled]=useState(false)
+  const [randomizeACInput,setRandomizeACInput]=useState(true)
   const errorPanel=useRef<HTMLDivElement>(null)
   useEffect(()=>{if(error)errorPanel.current?.scrollIntoView({behavior:'smooth',block:'center'})},[error])
   const guidance=useMemo(()=>designGuidance(r,error),[r,error])
@@ -32,7 +34,12 @@ export function SystemDesigner({ requirements: r, onChange, onDesign, error, chi
   const updateAppliance = (id: string, patch: Partial<Appliance>) => change({ appliances: r.appliances?.map(item => item.id === id ? { ...item, ...patch } : item) })
   return <>
     <div className="design-intro"><span className="design-icon"><Sparkles size={24}/></span><p className="eyebrow">FROM AN IDEA TO A CONNECTED SYSTEM</p><h2>Tell us what you need.</h2><p>Size your system, compare solar layouts and place the connected equipment.</p></div>
-    <button className="secondary-button demo-design-button" disabled={generating} onClick={()=>{onChange(randomDemoRequirements());setDemoFilled(true)}}><Sparkles size={16}/>Random demo house and system</button>
+    <div className="design-fields">
+      <label className="field"><span>AC input</span><select aria-label="AC input" aria-describedby="ac-input-description" value={r.acInput ?? 'none'} onChange={event => onChange({...r,acInput:event.target.value as Requirements['acInput']})}><option value="none">No AC input</option><option value="shore">Grid / shore power</option><option value="generator">Portable generator</option></select></label>
+      <label className="building-enable"><input type="checkbox" checked={randomizeACInput} onChange={event=>setRandomizeACInput(event.target.checked)}/>Randomize AC input for demo systems</label>
+    </div>
+    <p id="ac-input-description" className="usage-explanation">Grid / shore power and the generator feed a dedicated battery charger. The inverter continues to supply the loads.</p>
+    <button className="secondary-button demo-design-button" disabled={generating} onClick={()=>{onChange(randomDemoRequirements(Math.random,randomizeACInput?undefined:r.acInput??'none'));setDemoFilled(true)}}><Sparkles size={16}/>Random demo house and system</button>
     {demoFilled&&<p className="demo-design-note" role="status">Fresh demo ready with {r.building?.floors.length} floor(s), connected stairs and a matching energy brief. Click Generate my system to watch it build.</p>}
     {guidance&&<div ref={errorPanel} className="design-guidance" role="alert"><strong>Check your design</strong><p>{guidance.message}</p>{guidance.fixes.map(fix=><div key={fix.label}><button className="secondary-button" onClick={()=>onChange({...r,...fix.patch})}>{fix.label}</button><p>{fix.detail}</p></div>)}</div>}
     <div className="design-context">{(['home', 'mobile', 'workshop'] as const).map(context => <button className={r.context === context ? 'active' : ''} key={context} onClick={() => change({ context })}>{context[0].toUpperCase() + context.slice(1)}</button>)}</div>
@@ -69,6 +76,7 @@ export function SystemDesigner({ requirements: r, onChange, onDesign, error, chi
         <label className="field"><span>Panel area constraint</span><select aria-label="Panel area constraint" value={r.maxPanelArea === undefined ? 'none' : 'limited'} onChange={event => change({ maxPanelArea: event.target.value === 'none' ? undefined : 20 })}><option value="none">No area limit</option><option value="limited">Limit available panel footprint</option></select></label>
         {r.maxPanelArea !== undefined && <NumberField label="Available panel footprint" unit="m²" value={r.maxPanelArea} min={.1} onChange={maxPanelArea => change({ maxPanelArea })}/>}</div>
       <p>Ranked by module count plus three units per controller, then excess power and area. Area excludes packing gaps. Hot Vmp is estimated from temperature coefficients. Prices and annual weather yield remain separate inputs.</p>
+      <details><summary>Inspect string sizing margins</summary><StringPreflight requirements={r}/></details>
       {!preview.options.length ? null : <label className="field"><span>Panel and controller layout</span><select aria-label="Panel and controller layout" value={r.arrayOptionId ?? preview.options[0]?.id} onChange={event => change({ arrayOptionId: event.target.value })}>{preview.options.map(option => <option key={option.id} value={option.id}>{option.modules} × {option.panel.power} W · {option.strings} strings × {option.series} panels · {option.controllers} × {option.controller.productModel} · {option.area.toFixed(1)} m²</option>)}</select></label>}
     </details>
     <details className="detail-fold building-fold"><summary>Design home/compartment · optional</summary><label className="building-enable"><input type="checkbox" checked={!!r.building} onChange={event=>change({building:event.target.checked?{...defaultBuilding(r.context==='mobile'),solarHemisphere:r.region==='ZA'?'south':'north'}:undefined})}/>Include a {r.context==='mobile'?'compartment':'home'} layout</label>{r.building&&<BuildingEditor equipmentChoices={r.appliances?.map(item=>({key:`appliance:${item.id}`,label:item.name}))} value={{...r.building,solarHemisphere:r.building.solarHemisphere??(r.region==='ZA'?'south':'north')}} onChange={building=>change({building})}/>}</details>

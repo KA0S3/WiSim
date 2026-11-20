@@ -6,5 +6,12 @@ import type {Project} from './model'
 
 export function BuildingDialog({project,onApply}:{project:Project;onApply:(layout:BuildingLayout,refit:boolean)=>void}) {
   const [layout,setLayout]=useState(()=>structuredClone(project.building??defaultBuilding(project.requirements?.context==='mobile'))),[refit,setRefit]=useState(false),[error,setError]=useState('')
+  const mobile=project.requirements?.context==='mobile'
+  const [source,setSource]=useState({id:project.id,building:project.building,mobile})
+  if(source.id!==project.id||source.building!==project.building||source.mobile!==mobile){
+    setSource({id:project.id,building:project.building,mobile})
+    setLayout(structuredClone(project.building??defaultBuilding(mobile)))
+    setError('')
+  }
   return <><h2>Design home/compartment</h2><BuildingEditor equipmentChoices={project.devices.filter(d=>d.kind!=='pv').map(d=>({key:d.applianceId?`appliance:${d.applianceId}`:d.id,label:d.name}))} value={layout} onChange={setLayout}/><label className="building-enable"><input type="checkbox" checked={refit} onChange={event=>setRefit(event.target.checked)}/>Refit existing equipment into the selected room and roof</label>{error&&<p className="form-error" role="alert">{error}</p>}<button className="primary-button design-submit" onClick={()=>{try{onApply(layout,refit)}catch(cause){setError(cause instanceof Error?cause.message:String(cause))}}}>Apply building{refit?' and refit equipment':''}</button></>
 }

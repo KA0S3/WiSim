@@ -16,6 +16,43 @@ const engine=new Simulation()
 async function solve(p,state=emptyState(),seconds=.1) { await engine.start();state=prepareState(p,state);const compiled=compileCircuit(p,state,seconds);engine.setNetList(compiled.netlist);const raw=await engine.runSim();return interpret(p,raw,state,1,0,compiled.findings,seconds) }
 const near=(actual,expected,tolerance,label='value')=>assert.ok(Math.abs(actual-expected)<=tolerance,`${label}: expected ${expected} ± ${tolerance}, got ${actual}`)
 
+test('optional AC inputs power the separate charger and leave inverter output live after loss of supply',async()=>{
+ const offGrid=designSystem({...defaultRequirements,acInput:'none'})
+ assert.ok(!offGrid.devices.some(d=>['grid','generator','charger'].includes(d.kind)))
+ for(const [acInput,kind] of [['shore','grid'],['generator','generator']])for(const [region,voltage,frequency] of [['ZA',230,50],['US',120,60]]){
+  const p=designSystem({...defaultRequirements,region,acInput})
+  assert.ok(validateProject(p))
+  assert.ok(!validateProject({...p,requirements:{...p.requirements,acInput:'invalid'}}))
+  p.sun=0
+  const source=p.devices.find(d=>d.kind===kind),charger=p.devices.find(d=>d.kind==='charger'),load=p.devices.find(d=>d.kind==='load')
+  assert.equal(p.requirements.acInput,acInput)
+  assert.equal(source.spec.frequency,frequency)
+  let run=await solve(p)
+  near(run.frame.devices[source.id].voltage,voltage,2,'Source terminal RMS')
+  assert.equal(run.frame.measurements[charger.id+':l'].frequency,frequency)
+  assert.ok(run.frame.devices[charger.id].inputPower>450)
+  assert.ok(run.frame.devices[charger.id].power>450)
+  assert.ok(!run.frame.findings.some(f=>f.severity==='fault'||f.id.startsWith('overload-')))
+  source.on=false
+  run=await solve(p,run.state,.5)
+  assert.ok(Math.abs(run.frame.devices[charger.id].inputPower)<.01)
+  run=await solve(p,run.state,.5)
+  assert.ok(Math.abs(run.frame.devices[charger.id].power)<.01)
+  assert.ok(Math.abs(run.frame.devices[load.id].power)>1000)
+ }
+})
+
+test('generator overload uses apparent power and latches the AC source open',async()=>{
+ const p=blankProject(),source=makeDevice('generator',0,0),load=makeDevice('load',300,0)
+ source.spec.rating=250
+ p.devices=[source,load];p.wires=[connect(source,'p',load,'p'),connect(source,'n',load,'n')]
+ const run=await solve(p,emptyState(),2.1)
+ assert.ok(run.state.trips.includes(source.id))
+ assert.match(run.state.tripCauses[source.id],/VA exceeded 250 VA/)
+ const tripped=await solve(p,run.state)
+ assert.ok(Math.abs(tripped.frame.devices[load.id].voltage)<.01)
+})
+
 test('directional BMS equivalent limits current, inhibits cold charging and preserves discharge',async()=>{
  const p=blankProject(),b=makeDevice('battery',0,0),load=makeDevice('resistor',300,0);load.spec.resistance=1;p.devices=[b,load];p.wires=[connect(b,'p',load,'p',16,.1),connect(load,'n',b,'n',16,.1)]
  b.batteryLimits={chargeA:5,dischargeA:10,chargeMinC:5,chargeMaxC:50,dischargeMinC:-20,dischargeMaxC:50,lowVoltage:5,highVoltage:60,minSoc:0,maxSoc:100,control:'internal',externalConnected:false,source:'test equivalent'}

@@ -1,4 +1,4 @@
-import {buildOrthogonalRoute,type RouteObstacle,type RoutePoint} from '../routing'
+﻿import {buildOrthogonalRoute,type RouteObstacle,type RoutePoint} from '../routing'
 
 export function clearLeader(points:RoutePoint[],obstacles:RouteObstacle[]):boolean{
  return points.slice(1).every((b,i)=>{

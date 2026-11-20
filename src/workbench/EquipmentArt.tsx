@@ -9,6 +9,15 @@ export function EquipmentArt({ kind, compact = false }: { kind: Kind; compact?: 
   if (kind === 'motor') return <svg {...common}><path d="M46 42h72v43H46z" fill="#758e91"/><ellipse cx="47" cy="63" rx="14" ry="22" fill="#afc2bd"/><ellipse cx="118" cy="63" rx="14" ry="22" fill="#55737e"/><path d="M130 61h20v7h-20" fill="#aeb4ad"/>{[0,1,2,3,4].map(i => <path key={i} d={`M${62+i*10} 44v38`} stroke="#a9bdb7" strokeWidth="3"/>)}<path d="M56 86v10h58V86" stroke="#566e73" strokeWidth="6"/><rect x="69" y="27" width="31" height="16" rx="3" fill="#7c9391"/></svg>
   if (kind === 'fuse' || kind === 'switch') return <svg {...common}><path d="M51 35h78v53H51z" fill="#d7d7ca"/><rect x="58" y="29" width="64" height="65" rx="4" fill="#f1f0e9" stroke="#bfc1b5"/><rect x="75" y="43" width="30" height="29" rx="3" fill={kind === 'fuse' ? '#c49c50' : '#5f7a78'}/><path d="M83 48v13m13-13v13" stroke="#f8ecd0" strokeWidth="3"/><path d="M68 29V18m43 11V18M68 94v12m43-12v12" stroke="#a3aaa3" strokeWidth="5"/><path d="M75 81h30" stroke="#bcbfb4" strokeWidth="2"/></svg>
   if (kind === 'grid' || kind === 'three-phase') return <svg {...common}><path d="M66 101 84 13h12l18 88M50 39h80M43 64h94M69 39l42 25M110 39 69 64M69 64l41 36M109 64l-40 36M65 102h50" stroke="#7b9293" strokeWidth="3" strokeLinejoin="round"/><path d="M49 40v11m81-11v11M43 65v11m94-11v11" stroke="#c39a66" strokeWidth="4"/></svg>
+  if (kind === 'generator') return <svg {...common}>
+    <path d="M68 28v-9q0-6 6-6h32q6 0 6 6v9" stroke="#333b3c" strokeWidth="7"/>
+    <rect x="35" y="27" width="110" height="67" rx="12" fill="#b37a40" stroke="#333b3c" strokeWidth="4"/>
+    <rect x="46" y="45" width="42" height="33" rx="4" fill="#624d38"/>
+    <path d="M55 53h24m-24 8h24m-24 8h24" stroke="#dab481" strokeWidth="3"/>
+    <rect x="97" y="43" width="37" height="38" rx="4" fill="#363e3e"/>
+    <circle cx="115.5" cy="61" r="10" fill="#717a73"/>
+    <path d="M112 57v5m7-5v5M49 94v6m82-6v6" stroke="#333b3c" strokeWidth="5" strokeLinecap="round"/>
+  </svg>
   if (kind === 'bus') return <svg {...common}><rect x="27" y="45" width="126" height="23" rx="3" fill="#bd8d65" stroke="#8f674a"/>{[44,74,104,136].map(x => <g key={x}><circle cx={x} cy="56" r="7" fill="#d3b89c" stroke="#896c52"/><path d={`M${x-3} 56h6`} stroke="#896c52"/></g>)}</svg>
   if (kind === 'capacitor') return <svg {...common}><path d="M28 57h56m12 0h56M84 32v50m12-50v50" stroke="#79739b" strokeWidth="5"/><path d="M65 31h10m-5-5v10" stroke="#aaa3c5" strokeWidth="2"/></svg>
   if (kind === 'inductor') return <svg {...common}><path d="M25 65h24c-10-40 24-40 14 0-10-40 24-40 14 0-10-40 24-40 14 0-10-40 24-40 14 0h47" stroke="#9b7b68" strokeWidth="4"/></svg>

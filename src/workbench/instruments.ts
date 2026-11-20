@@ -6,7 +6,7 @@ export type MeterMode = 'voltage' | 'dc-voltage' | 'ac-voltage' | 'current' | 'd
 export type MeterResult = { value?: number; unit: string; label: string; detail: string }
 type Edge = { a: string; b: string; resistance: number }
 const probeKey = (probe: Probe) => measurementKey(probe.id, probe.port)
-const sourceKinds = new Set(['battery', 'pv', 'grid', 'three-phase', 'inverter', 'mppt', 'charger'])
+const sourceKinds = new Set(['battery', 'pv', 'grid', 'generator', 'three-phase', 'inverter', 'mppt', 'charger'])
 
 /** A zero-mean AC component, retaining DC offset separately. */
 export function acComponent(values: ArrayLike<number>, times: Frame['times'], begin: number): number {

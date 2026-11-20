@@ -21,7 +21,7 @@ try{
   await expect.poll(()=>page.evaluate(()=>window.simulationTest.delayedAt),{timeout:30000}).toBeGreaterThan(0)
   await page.waitForTimeout(12500)
   expect(await page.evaluate(()=>window.simulationTest.workers)).toBe(1);await expect(page.locator('.calculation-progress')).toBeVisible();await expect(page.locator('.calculation-progress')).toContainText('no time limit')
-  await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:15000});await expect(page.locator('.scope path[clip-path]')).not.toHaveAttribute('d',/NaN/)
+  await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:15000});await page.getByRole('button',{name:'Advanced simulation readings',exact:true}).click();await expect(page.locator('.scope .trace-line')).not.toHaveAttribute('points',/NaN|Infinity/)
  })
  await check('real worker failures recover without discarding state, and an edit revives the failed circuit',async()=>{
   const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('wisim-workbench-v4'))),time=parseFloat(await page.locator('.sim-time').innerText())

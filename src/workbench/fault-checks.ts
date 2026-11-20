@@ -1,4 +1,4 @@
-import type { Project } from './model'
+import { acSourceKinds, type Project } from './model'
 import type { ConnectionFinding } from './connection-checks'
 
 /** Detect conductor/passive bypasses even when a short prevents a numerical solve. */
@@ -17,7 +17,7 @@ export function faultFindings(project: Project): ConnectionFinding[] {
     if (device.on && ['bus', 'switch', 'fuse'].includes(device.kind)) for (const port of device.ports.filter(p=>p.domain!=='earth').slice(1)) join(key(device.id, device.ports[0].id), key(device.id, port.id))
   }
   const findings: ConnectionFinding[] = []
-  const sources = project.devices.filter(device => device.on && ['grid', 'inverter', 'three-phase'].includes(device.kind))
+  const sources = project.devices.filter(device => device.on && acSourceKinds.has(device.kind))
   for (let i = 0; i < sources.length; i++) for (const other of sources.slice(i + 1)) {
     const device = sources[i]
     const livePorts = (kind: string) => kind === 'three-phase' ? ['a', 'b', 'c'] : kind === 'inverter' ? ['l'] : ['p']
@@ -28,10 +28,10 @@ export function faultFindings(project: Project): ConnectionFinding[] {
   }
   for (const device of project.devices) {
     if (!device.on) continue
-    const pairs = device.kind === 'inverter' ? [['l', 'n']] : device.kind === 'mppt' ? [['pv+', 'pv-'], ['bat+', 'bat-']] : device.kind === 'charger' ? [['l', 'n'], ['bat+', 'bat-']] : device.kind === 'three-phase' ? [['a', 'n'], ['b', 'n'], ['c', 'n'], ['a', 'b'], ['b', 'c'], ['a', 'c']] : ['battery', 'pv', 'grid', 'load', 'dc-load', 'motor', 'capacitor'].includes(device.kind) ? [['p', 'n']] : []
+    const pairs = device.kind === 'inverter' ? [['l', 'n']] : device.kind === 'mppt' ? [['pv+', 'pv-'], ['bat+', 'bat-']] : device.kind === 'charger' ? [['l', 'n'], ['bat+', 'bat-']] : device.kind === 'three-phase' ? [['a', 'n'], ['b', 'n'], ['c', 'n'], ['a', 'b'], ['b', 'c'], ['a', 'c']] : ['battery', 'pv', 'grid', 'generator', 'load', 'dc-load', 'motor', 'capacitor'].includes(device.kind) ? [['p', 'n']] : []
     for (const [a, b] of pairs) {
       if (root(key(device.id, a)) !== root(key(device.id, b))) continue
-      const source = ['battery', 'pv', 'grid', 'three-phase', 'inverter', 'mppt', 'charger'].includes(device.kind)
+      const source = acSourceKinds.has(device.kind) || ['battery', 'pv', 'mppt', 'charger'].includes(device.kind)
       findings.push({ id: `short-${device.id}-${a}-${b}`, target: device.id, related: [device.id], severity: source ? 'fault' : 'warning', title: source ? 'Source terminals are shorted' : 'Equipment is bypassed by a conductor path', detail: `${device.name} terminals ${a} and ${b} are joined through conductors and closed distribution components. ${source ? 'Isolate the source and inspect the outgoing and return paths.' : 'This path bypasses the equipment. Check the intended wiring.'}` })
     }
     if (device.kind === 'fuse') {

@@ -19,6 +19,7 @@ export function equipmentSpecification(d:Device):string{
   case 'capacitor':return `${s.capacitance} F; ${s.voltage} V configured rating`
   case 'inductor':return `${s.inductance} H; ${s.resistance} ohm`
   case 'resistor':case 'switch':return `${s.resistance} ohm`
+  case 'generator':return `${s.voltage} V; ${s.frequency} Hz; ${s.rating} VA`
   case 'grid':case 'three-phase':return `${s.voltage} V phase-neutral; ${s.frequency} Hz`
   default:return definitions[d.kind].description
  }

@@ -2307,7 +2307,17 @@
         }
       ],
       "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A",
-      "sourceChecked": "2026-10-20"
+      "sourceChecked": "2026-10-20",
+      "simulation": {
+        "version": 1,
+        "source": "https://www.bluesea.com/products/7184/285-Series_Circuit_Breaker_-_Surface_Mount_60A",
+        "checked": "2026-11-20",
+        "dimensions": [0.08128, 0.04813, 0.0315],
+        "assumptions": [
+          "Use the published DC voltage, interrupt capacity and continuous current ratings.",
+          "Enclosure dimensions come from the manufacturer's 285-Series surface-mount dimensioned drawing. The generic timed protection model approximates trips."
+        ]
+      }
     },
     {
       "id": "renogy-rover-li-40a",

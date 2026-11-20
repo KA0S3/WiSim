@@ -2,13 +2,13 @@ import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from '
 import { Copy, Hand, Maximize2, Minus, MousePointer2, Plus, Trash2, Undo2 } from 'lucide-react'
 import { uid } from './model'
 import type { BuildingLayout, FloorPlan, PlanPoint } from './building-model'
-import { addPlanWall, buildingRooms, normalizeFloor, planDistance, wallPoints } from './building-plan'
+import { addPlanWall, buildingRooms, normalizeFloor, planDistance, wallPoint, wallPoints } from './building-plan'
 import { availableRoofRooms,roomInterior } from './building-geometry'
 import { NumberField } from './NumberField'
 import {autoCirculation,roomFitsOpening} from './building-circulation'
 
 type Tool='select'|'wall'|'curve'|'pan'|'opening'|'stairs'
-type Drag={kind:'node'|'wall'|'control'|'pan'|'compass';id:string;start:PlanPoint;floor:FloorPlan;view:PlanPoint;screen?:PlanPoint}
+type Drag={kind:'node'|'wall'|'control'|'pan'|'compass';id:string;start:PlanPoint;floor:FloorPlan;view:PlanPoint;screen?:PlanPoint; compassAngle?:number; compassBearing?:number}
 export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentChoices?:Array<{key:string;label:string}>;value:BuildingLayout;onChange:(layout:BuildingLayout)=>void}) {
   const [floorIndex,setFloorIndex]=useState(0),[showLower,setShowLower]=useState(true),[tool,setTool]=useState<Tool>('wall'),[start,setStart]=useState<PlanPoint|null>(null),[selected,setSelected]=useState(''),[draft,setDraft]=useState<FloorPlan|null>(null),[grid,setGrid]=useState(.25),[span,setSpan]=useState(12),[centre,setCentre]=useState<PlanPoint>([0,0]),[aspect,setAspect]=useState(1.6)
   const [openingWidth,setOpeningWidth]=useState(1.2),[openingDepth,setOpeningDepth]=useState(4.4),[planMessage,setPlanMessage]=useState('')
@@ -29,6 +29,8 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
   useEffect(()=>{const element=svg.current;if(!element)return;const resize=new ResizeObserver(()=>setAspect(element.clientWidth/Math.max(1,element.clientHeight)));resize.observe(element);return()=>resize.disconnect()},[])
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.key==='Escape'){setStart(null);setDraft(null);drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setPlacementTarget(null)}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[])
   const coordinates=(event:PointerEvent<SVGSVGElement>):PlanPoint=>{
+    const matrix=svg.current?.getScreenCTM()
+    if(matrix){const point=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse());return [point.x,point.y]}
     const bounds=svg.current!.getBoundingClientRect()
     return [centre[0]+((event.clientX-bounds.left)/bounds.width-.5)*span*aspect,centre[1]+((event.clientY-bounds.top)/bounds.height-.5)*span]
   }
@@ -48,6 +50,7 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     return closest??aligned
   }
   const beginDrag=(event:PointerEvent<SVGElement>,kind:Drag['kind'],id:string)=>{
+    if(event.button!==0)return
     if(placementTarget){
       event.stopPropagation()
       const preference=value.equipmentPlacements?.[placementTarget],chosen=rooms.find(r=>r.id===preference?.roomId)
@@ -58,14 +61,21 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     event.stopPropagation();svg.current!.setPointerCapture(event.pointerId)
     drag.current={kind,id,start:coordinates(event as unknown as PointerEvent<SVGSVGElement>),floor:structuredClone(floor),view:centre};setSelected(id)
   }
+  const compassAngle=(point:PlanPoint)=>{
+    const dx=point[0]-(centre[0]+span*aspect/2-span*.09),dy=(centre[1]-span*.37)-point[1]
+    return Math.hypot(dx,dy)<span*.025?undefined:Math.atan2(dx,dy)*180/Math.PI
+  }
   const move=(event:PointerEvent<SVGSVGElement>)=>{
     const active=drag.current
     const point=coordinates(event)
     if(!active){if(start)setCursor(snap(point,[],tool==='wall'?start:undefined));return}
     if(active.kind==='compass'){
-      const origin:PlanPoint=[centre[0]+span*aspect/2-span*.09,centre[1]-span*.37]
-      const angle=(Math.atan2(point[0]-origin[0],origin[1]-point[1])*180/Math.PI+360)%360
-      pendingBearing.current=Math.round(angle)%360;setBearing(pendingBearing.current);return
+      const angle=compassAngle(point)
+      if(angle===undefined)return
+      active.compassAngle??=angle
+      pendingBearing.current=(Math.round((active.compassBearing??0)+angle-active.compassAngle)%360+360)%360
+      setBearing(pendingBearing.current)
+      return
     }
     if(active.kind==='pan'){setCentre([active.view[0]-(event.clientX-active.screen![0])*span*aspect/svg.current!.clientWidth,active.view[1]-(event.clientY-active.screen![1])*span/svg.current!.clientHeight]);return}
     let next=structuredClone(active.floor)
@@ -82,6 +92,7 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     pendingFloor.current=next;setDraft(next)
   }
   const end=(event:PointerEvent<SVGSVGElement>)=>{
+    if(event.button!==0)return
     if(drag.current){
       if(drag.current.kind==='compass'&&pendingBearing.current!==null)update({...value,northBearing:pendingBearing.current})
       else if(pendingFloor.current)updateFloor(normalizeFloor(pendingFloor.current))
@@ -114,22 +125,48 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     update({...value,floors,stairs:value.stairs?.filter(s=>s.floor<count-1),floorOpenings:value.floorOpenings?.filter(o=>o.floor<count)});setFloorIndex(Math.min(floorIndex,count-1))
   }
   const removeWall=()=>{if(wall){updateFloor(normalizeFloor({...floor,walls:floor.walls.filter(w=>w.id!==wall.id)}));setSelected('')}}
-  const bounds=[0,1].map(axis=>{const values=floor.nodes.map(n=>n.point[axis]);return values.length?[Math.min(...values),Math.max(...values)]:[0,0]})
-  const resize=(axis:number,length:number)=>{
-    const old=bounds[axis][1]-bounds[axis][0]
-    if(old<.01)return
-    const centre=(bounds[axis][0]+bounds[axis][1])/2,scale=(point:PlanPoint)=>point.map((value,i)=>i===axis?centre+(value-centre)*length/old:value) as PlanPoint
-    updateFloor({...floor,nodes:floor.nodes.map(n=>({...n,point:scale(n.point)})),walls:floor.walls.map(w=>w.control?{...w,control:scale(w.control)}:w)})
+  function lengthOf(w:NonNullable<typeof wall>){
+    const segments=w.control?64:1
+    let previous=wallPoint(shown,w,0),length=0
+    for(let i=1;i<=segments;i++){
+      const next=wallPoint(shown,w,i/segments)
+      length+=planDistance(previous,next)
+      previous=next
+    }
+    return length
+  }
+  const wallLength=wall?lengthOf(wall):0
+  function resizeWall(length:number){
+    if(!wall||wallLength<=0||!Number.isFinite(length)||length<.25||Math.abs(length-wallLength)<.0005)return
+    const anchor=wallPointAt(floor,wall.a),end=wallPointAt(floor,wall.b),factor=length/wallLength
+    const scale=(p:PlanPoint):PlanPoint=>[anchor[0]+(p[0]-anchor[0])*factor,anchor[1]+(p[1]-anchor[1])*factor]
+    const nextEnd=scale(end)
+    const dx=nextEnd[0]-end[0],dy=nextEnd[1]-end[1]
+    const next={...floor,nodes:floor.nodes.map(node=>node.id===wall.b?{...node,point:nextEnd}:node),
+      walls:floor.walls.map(w=>!w.control?w:w.id===wall.id?{...w,control:scale(w.control)}:
+        w.a===wall.b||w.b===wall.b?{...w,control:[w.control[0]+dx/2,w.control[1]+dy/2] as PlanPoint}:w)}
+    if(next.nodes.some(n=>n.point.some(v=>Math.abs(v)>10000))||next.walls.some(w=>w.control?.some(v=>Math.abs(v)>10000))){
+      setPlanMessage('That length would move a junction outside the plan.')
+      return
+    }
+    const normalized=normalizeFloor(next)
+    if(!normalized.walls.some(w=>w.id===wall.id)||normalized.walls.length!==floor.walls.length||
+       Math.abs(planDistance(nextEnd,anchor))<.001){
+      setPlanMessage('That length would split or merge walls. Move the junction directly to make that change.')
+      return
+    }
+    updateFloor(normalized)
+    setPlanMessage('')
   }
   return <div className="building-editor" onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();setStart(null);setDraft(null);drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setPlacementTarget(null)}if((event.ctrlKey||event.metaKey)&&event.key==='z'){event.preventDefault();event.stopPropagation();const previous=history.current.pop();if(previous)onChange(previous)}}}>
-    <div className="design-fields"><NumberField label="Number of floors" unit="floors" value={value.floors.length} min={1} max={100} onChange={setFloors}/><NumberField label="Floor height" unit="m" value={value.floorHeight} min={.2} max={10} onChange={floorHeight=>update({...value,floorHeight})}/><NumberField label="Wall thickness" unit="m" value={value.wallThickness} min={.05} max={1} onChange={wallThickness=>update({...value,wallThickness})}/><NumberField label="Layout width" unit="m" value={bounds[0][1]-bounds[0][0]} min={.25} onChange={length=>resize(0,length)}/><NumberField label="Layout depth" unit="m" value={bounds[1][1]-bounds[1][0]} min={.25} onChange={length=>resize(1,length)}/>
+    <div className="design-fields"><NumberField label="Number of floors" unit="floors" value={value.floors.length} min={1} max={100} onChange={setFloors}/><NumberField label="Floor height" unit="m" value={value.floorHeight} min={.2} max={10} onChange={floorHeight=>update({...value,floorHeight})}/><NumberField label="Wall thickness" unit="m" value={value.wallThickness} min={.05} max={1} onChange={wallThickness=>update({...value,wallThickness})}/>
       <label className="field"><span>Roof shape</span><select aria-label="Roof shape" value={value.roofShape} onChange={event=>update({...value,roofShape:event.target.value as BuildingLayout['roofShape']})}>{(['flat','gable','hip','shed'] as const).map(shape=><option key={shape} value={shape}>{({flat:'Flat - level',gable:'Gable - two slopes',hip:'Hip - four slopes',shed:'Shed - one slope'})[shape]}</option>)}</select></label><NumberField label="Roof pitch" unit="degrees" value={value.roofPitch} max={65} onChange={roofPitch=>update({...value,roofPitch})}/>
     </div>
     <div className="roof-options" role="group" aria-label="Roof type previews">{(['flat','gable','hip','shed'] as const).map(shape=><button key={shape} aria-label={`Choose ${shape} roof`} aria-pressed={value.roofShape===shape} onClick={()=>update({...value,roofShape:shape})}><svg viewBox="0 0 100 65" role="img" aria-label={`${shape} roof preview`}><path d="M15 33V55H85V33" fill="#e2e9de" stroke="#526b64" strokeWidth="3"/><path d={shape==='flat'?'M10 30H90V35H10Z':shape==='gable'?'M8 35L50 8L92 35Z':shape==='hip'?'M8 35L30 10H70L92 35Z':'M8 35L92 10V35Z'} fill="#87b2a0" stroke="#267663" strokeWidth="3"/>{shape==='hip'&&<path d="M30 10L42 35M70 10L58 35" stroke="#267663" strokeWidth="2"/>}</svg><span>{shape[0].toUpperCase()+shape.slice(1)}</span></button>)}</div><div className="plan-toolbar"><label>Floor<select aria-label="Plan floor" value={floorIndex} onChange={event=>setFloorIndex(+event.target.value)}>{value.floors.map((f,i)=><option key={f.id} value={i}>Floor {i+1}</option>)}</select></label>{([['select','Select',MousePointer2],['wall','Straight wall',Plus],['curve','Curved wall',Copy],['pan','Pan',Hand]] as const).map(([mode,label,Icon])=><button key={mode} aria-pressed={tool===mode} onClick={()=>{setTool(mode);setStart(null)}} title={label}><Icon size={15}/>{label}</button>)}<button aria-label="Undo floor plan edit" disabled={!history.current.length} onClick={()=>{const previous=history.current.pop();if(previous){onChange(previous);setDraft(null);setStart(null)}}}><Undo2 size={16}/></button></div>
     <div className="plan-toolbar"><button onClick={()=>{try{update(autoCirculation(value));setPlanMessage('Internal doorways added. Stairs connect overlapping floors.')}catch(error){setPlanMessage(error instanceof Error?error.message:String(error))}}}>Auto doors and stairs</button><button aria-pressed={tool==='opening'} onClick={()=>{setTool('opening');setStart(null)}}>Place floor opening</button><button disabled={floorIndex>=value.floors.length-1} aria-pressed={tool==='stairs'} onClick={()=>{setTool('stairs');setStart(null)}}>Place stairs to floor above</button></div>
     {(tool==='opening'||tool==='stairs')&&<div className="design-fields"><NumberField label="Opening width" unit="m" min={.7} max={5} value={openingWidth} onChange={setOpeningWidth}/><NumberField label="Opening length" unit="m" min={1} max={15} value={openingDepth} onChange={setOpeningDepth}/></div>}
     {planMessage&&<p className="plan-feedback" role="status">{planMessage}</p>}
-    <svg ref={svg} className="floor-plan" aria-label="Top-down building floor plan" role="application" tabIndex={0} viewBox={`${centre[0]-span*aspect/2} ${centre[1]-span/2} ${span*aspect} ${span}`} onPointerDown={event=>{event.currentTarget.focus();if(tool==='pan'){svg.current!.setPointerCapture(event.pointerId);drag.current={kind:'pan',id:'',start:coordinates(event),floor,view:centre,screen:[event.clientX,event.clientY]}}}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setDraft(null)}}>
+    <svg ref={svg} className="floor-plan" aria-label="Top-down building floor plan" role="application" tabIndex={0} viewBox={`${centre[0]-span*aspect/2} ${centre[1]-span/2} ${span*aspect} ${span}`} onContextMenu={event=>{if(tool==='wall'||tool==='curve'){event.preventDefault();setStart(null);setCursor(null)}}} onPointerDown={event=>{if(event.button!==0)return;event.currentTarget.focus();if(tool==='pan'){svg.current!.setPointerCapture(event.pointerId);drag.current={kind:'pan',id:'',start:coordinates(event),floor,view:centre,screen:[event.clientX,event.clientY]}}}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setDraft(null)}}>
       <defs><pattern id={pattern} width={grid} height={grid} patternUnits="userSpaceOnUse"><path d={`M${grid} 0H0V${grid}`} fill="none" stroke="#d5ded3" strokeWidth={span/1500}/></pattern></defs>
       <rect x={centre[0]-span*aspect/2} y={centre[1]-span/2} width={span*aspect} height={span} fill={`url(#${pattern})`}/>
       {rooms.filter(r=>r.floor===floorIndex).map(r=>{const p=roomInterior(r);return <g key={r.id} onPointerDown={event=>{if(tool==='select'){event.stopPropagation();setSelected(r.id)}}}><polygon points={r.polygon.map(p=>p.join(',')).join(' ')} fill={selected===r.id?'#c2ddca':'#e2e9de'} stroke="none"/><text x={p[0]} y={p[1]} textAnchor="middle" fontSize={span/26} fill="#416953" pointerEvents="none"><title>{r.name}</title>{r.name.replace(/^Floor \d+ room /,'Room ')}<tspan x={p[0]} dy={span/23}>{r.area.toFixed(1)} m²</tspan></text></g>})}
@@ -139,15 +176,21 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
       {shown.walls.map(w=><polyline key={w.id} aria-label={`Plan wall ${w.id}`} points={wallPoints(shown,w).map(p=>p.join(',')).join(' ')} fill="none" stroke={placementTarget&&rooms.find(r=>r.id===value.equipmentPlacements?.[placementTarget]?.roomId)?.walls.includes(w.id)?'#d08e45':selected===w.id?'#168578':'#526b64'} strokeWidth={Math.max(value.wallThickness,span/130)} strokeLinecap="round" onPointerDown={event=>beginDrag(event,'wall',w.id)}/>)}
       {tool==='select'&&shown.nodes.map(n=><circle key={n.id} cx={n.point[0]} cy={n.point[1]} r={span/90} fill="#fff" stroke="#238572" strokeWidth={span/450} onPointerDown={event=>beginDrag(event,'node',n.id)}/>)}
       {tool==='select'&&wall?.control&&<><line x1={wallPointAt(shown,wall.a)[0]} y1={wallPointAt(shown,wall.a)[1]} x2={wall.control[0]} y2={wall.control[1]} stroke="#68a291" strokeWidth={span/400} strokeDasharray={`${span/70} ${span/70}`}/><circle cx={wall.control[0]} cy={wall.control[1]} r={span/65} fill="#d08e45" onPointerDown={event=>beginDrag(event,'control',wall.id)}/></>}
-      <g aria-label="Plan compass" role="slider" tabIndex={0} aria-valuemin={0} aria-valuemax={359} aria-valuenow={bearing??value.northBearing??0} style={{cursor:'grab',touchAction:'none'}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();update({...value,northBearing:((value.northBearing??0)+(['ArrowLeft','ArrowDown'].includes(event.key)?-5:5)+360)%360})}}} onPointerDown={event=>{event.stopPropagation();svg.current!.setPointerCapture(event.pointerId);drag.current={kind:'compass',id:'',start:coordinates(event as unknown as PointerEvent<SVGSVGElement>),floor,view:centre}}} transform={`translate(${centre[0]+span*aspect/2-span*.09},${centre[1]-span*.37})`}><circle r={span*.08} fill="#f8fbf3" stroke="#b9cec0" strokeWidth={span/500}/><g transform={`rotate(${bearing??value.northBearing??0})`}><path d={`M0 ${-span*.05}L${-span*.018} ${span*.015}L0 0L${span*.018} ${span*.015}Z`} fill="#267663"/><text y={-span*.065} textAnchor="middle" fontSize={span*.035} fill="#267663">N</text></g></g>
-      {shown.walls.map((w,i)=>{const points=wallPoints(shown,w),a=points[0],b=points.at(-1)!;return <text key={w.id+'label'} x={(a[0]+b[0])/2} y={(a[1]+b[1])/2-span*.025} textAnchor="middle" fontSize={span*.025} fill="#6f5436" pointerEvents="none">Wall {i+1}</text>})}
+      <g aria-label="Plan compass" role="slider" tabIndex={0} aria-valuemin={0} aria-valuemax={359} aria-valuenow={bearing??value.northBearing??0} style={{cursor:'grab',touchAction:'none'}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();update({...value,northBearing:((value.northBearing??0)+(['ArrowLeft','ArrowDown'].includes(event.key)?-5:5)+360)%360})}}} onPointerDown={event=>{if(event.button!==0)return;event.stopPropagation();svg.current!.setPointerCapture(event.pointerId);const point=coordinates(event as unknown as PointerEvent<SVGSVGElement>);drag.current={kind:'compass',id:'',start:point,floor,view:centre,compassAngle:compassAngle(point),compassBearing:value.northBearing??0}}} transform={`translate(${centre[0]+span*aspect/2-span*.09},${centre[1]-span*.37})`}><circle r={span*.08} fill="#f8fbf3" stroke="#b9cec0" strokeWidth={span/500}/><g transform={`rotate(${bearing??value.northBearing??0})`}><path d={`M0 ${-span*.05}L${-span*.018} ${span*.015}L0 0L${span*.018} ${span*.015}Z`} fill="#267663"/><text y={-span*.065} textAnchor="middle" fontSize={span*.035} fill="#267663">N</text></g></g>
+      {shown.walls.map((w,i)=>{const points=wallPoints(shown,w),a=points[0],b=points.at(-1)!;return <text key={w.id+'label'} x={(a[0]+b[0])/2} y={(a[1]+b[1])/2-span*.025} textAnchor="middle" fontSize={span*.025} fill="#6f5436" pointerEvents="none">Wall {i+1}{selected===w.id?' · '+lengthOf(w).toFixed(2)+' m':''}</text>})}
       {shown.walls.filter(w=>w.door).map(w=>{const a=wallPointAt(shown,w.a),b=wallPointAt(shown,w.b);return <circle key={w.id+'door'} cx={(a[0]+b[0])/2} cy={(a[1]+b[1])/2} r={span/65} fill="#f5f7f0" stroke="#a67e48" strokeWidth={span/300} pointerEvents="none" aria-label="Plan doorway"/>})}
       {start&&cursor&&<line x1={start[0]} y1={start[1]} x2={cursor[0]} y2={cursor[1]} stroke="#27a78e" strokeWidth={span/160} strokeDasharray={`${span/60} ${span/90}`} pointerEvents="none"/>}{start&&<circle cx={start[0]} cy={start[1]} r={span/75} fill="#27a78e"/>}
     </svg>
     <label className="building-enable"><input type="checkbox" checked={showLower} onChange={e=>setShowLower(e.target.checked)}/>Show outline of floor below and snap to its junctions</label>
     <div className="plan-toolbar">{floorIndex>0&&<button onClick={()=>updateFloor({...copyFloor(value.floors[floorIndex-1]),id:floor.id})}>Copy layout from floor below</button>}<button aria-label="Zoom floor plan in" onClick={()=>setSpan(Math.max(1,span*.8))}><Plus size={16}/></button><button aria-label="Zoom floor plan out" onClick={()=>setSpan(Math.min(20000,span*1.25))}><Minus size={16}/></button><button onClick={fit}><Maximize2 size={15}/>Fit layout</button><label>Snap<select aria-label="Floor plan grid size" value={grid} onChange={event=>setGrid(+event.target.value)}>{[.1,.25,.5,1].map(step=><option key={step} value={step}>{step} m</option>)}</select></label>{wall&&<button onClick={removeWall}><Trash2 size={15}/>Remove wall</button>}</div>
-    <p className="plan-instructions">{placementTarget?'Click an amber wall to place the equipment.':tool==='opening'||tool==='stairs'?'Click the centre of the opening or staircase on the grid.':tool==='select'?'Drag a wall or junction to move it. Select a curved wall and drag its amber control.':tool==='pan'?'Drag the plan to pan. Use the zoom controls to change scale.':start?'Choose the next junction. Walls snap and connect at intersections. Escape ends the chain.':'Choose the first and second wall endpoints. Close a loop to create a room.'}</p>
+    <p className="plan-instructions">{placementTarget?'Click an amber wall to place the equipment.':tool==='opening'||tool==='stairs'?'Click the centre of the opening or staircase on the grid.':tool==='select'?'Drag a wall or junction to move it. Select a curved wall and drag its amber control.':tool==='pan'?'Drag the plan to pan. Use the zoom controls to change scale.':start?'Choose the next junction. Walls snap and connect at intersections. Right-click or press Escape to end the chain and start a new wall.':'Choose the first and second wall endpoints. Close a loop to create a room.'}</p>
     {wall&&!wall.control&&<label className="building-enable"><input type="checkbox" checked={!!wall.door} onChange={e=>updateFloor({...floor,walls:floor.walls.map(w=>w.id===wall.id?{...w,door:e.target.checked}:w)})}/>Doorway in selected wall</label>}
+    {wall&&<form className="selected-wall-dimensions" key={wall.id+':'+wallLength} onSubmit={event=>{
+      event.preventDefault()
+      const field=event.currentTarget.elements.namedItem('wallLength') as HTMLInputElement
+      resizeWall(field.valueAsNumber)
+    }}><label className="field"><span>Selected wall length (m)</span><input name="wallLength" aria-label="Selected wall length" type="number" min=".25" max="10000" step="any" defaultValue={Number(wallLength.toFixed(3))} required/></label>
+    <button type="submit" className="secondary-button">Apply wall length</button><small>Moves the end junction and keeps connected walls attached.</small></form>}
     {wall&&<label className="field"><span>Selected wall shape</span><select aria-label="Selected wall shape" value={wall.control?'curve':'straight'} onChange={event=>{const a=wallPointAt(floor,wall.a),b=wallPointAt(floor,wall.b);updateFloor(normalizeFloor({...floor,walls:floor.walls.map(w=>w.id===wall.id?{...w,control:event.target.value==='curve'?[(a[0]+b[0])/2-(b[1]-a[1])*.25,(a[1]+b[1])/2+(b[0]-a[0])*.25]:undefined}:w)}))}}><option value="straight">Straight</option><option value="curve">Curved</option></select></label>}
     {room&&<label className="field"><span>Room name</span><input aria-label="Selected room name" value={room.name} onChange={event=>update({...value,roomNames:{...value.roomNames,[room.id]:event.target.value}})}/></label>}
     <div className="design-fields"><NumberField label="Compass north bearing" unit="degrees clockwise from plan up" value={value.northBearing??0} max={359.99} onChange={northBearing=>update({...value,northBearing})}/><label className="field"><span>Solar hemisphere</span><select aria-label="Solar hemisphere" value={value.solarHemisphere??'south'} onChange={e=>update({...value,solarHemisphere:e.target.value as 'south'|'north'})}><option value="south">Southern - favour north-facing roof</option><option value="north">Northern - favour south-facing roof</option></select></label></div><p role="note">Compass: N {value.northBearing??0} degrees clockwise from the top of the plan. Panels fill the roof slopes facing the equator first.</p>

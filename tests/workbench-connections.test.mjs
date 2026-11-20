@@ -6,7 +6,6 @@ import {compileCircuit} from '../src/workbench/engine.ts'
 import {matchingProducts,productOptions} from '../src/workbench/product-matching.ts'
 import {applyCatalogRecord} from '../src/workbench/catalog-device.ts'
 import {CATALOG_RECORDS} from '../src/catalog.ts'
-import {warningLeader,clearLeader} from '../src/workbench/warning-route.ts'
 import {designSystem,defaultRequirements} from '../src/workbench/templates.ts'
 import {suggestedFix} from '../src/workbench/repairs.ts'
 
@@ -63,11 +62,6 @@ test('inverter closest products respect configured surge power and AC frequency'
  const d=makeDevice('inverter',0,0);Object.assign(d.spec,{cutoff:9.3,watts:900,rating:2000,frequency:50});assert.ok(matchingProducts(d,CATALOG_RECORDS).length)
  d.spec.rating=5000;assert.equal(matchingProducts(d,CATALOG_RECORDS).length,0);d.spec.rating=2000;d.spec.frequency=60;assert.equal(matchingProducts(d,CATALOG_RECORDS).length,0)
 })
-test('warning leaders avoid equipment rectangles rather than falling back through them',()=>{
- const obstacles=[{left:10,top:10,right:100,bottom:100},{left:130,top:20,right:230,bottom:90}],route=warningLeader([{x:100,y:50},{x:55,y:10}],{x:300,y:50},obstacles)
- assert.ok(route);assert.ok(clearLeader(route,obstacles));assert.ok(route.length>2)
- assert.equal(clearLeader([{x:100,y:50},{x:300,y:50}],obstacles),false)
-})
 test('optional polarity repair swaps only the affected terminal attachments without mutating the sandbox',()=>{
  const p=blankProject(),b=makeDevice('battery',0,0),i=makeDevice('inverter',300,0);p.devices=[b,i];p.wires=[connect(b,'p',i,'dc-'),connect(b,'n',i,'dc+')]
  const before=structuredClone(p),finding=connectionFindings(p).find(f=>f.id==='bank-polarity-'+i.id),fix=suggestedFix(p,finding)
@@ -82,4 +76,18 @@ test('generic voltage repair resolves the selected class mismatch while refusing
 test('AC/DC crossover repair removes one wire and leaves other equipment and connections intact',()=>{
  const p=blankProject(),g=makeDevice('grid',0,0),b=makeDevice('battery',300,0);p.devices=[g,b];p.wires=[connect(g,'p',b,'p'),connect(g,'n',b,'n')]
  const fix=suggestedFix(p,connectionFindings(p).find(f=>f.target===p.wires[0].id));assert.ok(fix);assert.equal(fix.project.wires.length,1);assert.equal(fix.project.wires[0].id,p.wires[1].id);assert.deepEqual(fix.project.devices.map(d=>d.spec),p.devices.map(d=>d.spec))
+})
+
+test('low inverter input can restore a unique switched-off battery without guessing at wiring',()=>{
+ const p=blankProject(),battery=makeDevice('battery',0,0),inverter=makeDevice('inverter',300,0)
+ battery.on=false
+ p.devices=[battery,inverter]
+ p.wires=[connect(battery,'p',inverter,'dc+'),connect(battery,'n',inverter,'dc-')]
+ const fault={id:'low-dc-'+inverter.id,target:inverter.id,severity:'fault',title:'Inverter input voltage is low',detail:'0 V input'}
+ const repair=suggestedFix(p,fault)
+ assert.equal(repair?.project.devices[0].on,true)
+ assert.equal(p.devices[0].on,false)
+ assert.deepEqual(repair?.project.wires,p.wires)
+ p.wires.pop()
+ assert.equal(suggestedFix(p,fault),null)
 })

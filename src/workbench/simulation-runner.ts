@@ -1,4 +1,4 @@
-import type {Frame,Project,RuntimeState} from './model'
+import {acSourceKinds,type Frame,type Project,type RuntimeState} from './model'
 type WorkerPort=Pick<Worker,'postMessage'|'terminate'|'onmessage'|'onerror'>
 type Timer=ReturnType<typeof setTimeout>
 type Clock={set:(fn:()=>void,ms:number)=>Timer;clear:(timer:Timer)=>void}
@@ -44,7 +44,7 @@ export class SimulationRunner{
  private failed(reason:string){
   this.stop();this.frame=null;this.slow=false
   if(this.attempts<(this.options.recoveries??2)){
-   this.attempts++;const longestCycle=Math.max(.02,...this.project.devices.filter(d=>d.on&&['grid','three-phase','inverter'].includes(d.kind)).map(d=>1/d.spec.frequency))
+   this.attempts++;const longestCycle=Math.max(.02,...this.project.devices.filter(d=>d.on&&acSourceKinds.has(d.kind)).map(d=>1/d.spec.frequency))
    this.seconds=Math.max(Math.min(.1,longestCycle),this.attempts===1?.04:.02);this.pending=true;this.recovering=true;this.error='';this.status=`Recovering calculation · attempt ${this.attempts} of ${this.options.recoveries??2}`
   }else{
    this.pending=false;this.running=false;this.recovering=false;this.error=`Live readings are paused because the calculator could not finish this circuit. Your project and last valid simulation state are preserved. Edit the circuit to try again, or choose Retry calculation. Details: ${reason}`;this.status='Calculation needs attention'

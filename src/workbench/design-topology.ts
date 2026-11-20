@@ -8,6 +8,10 @@ import type { PhaseDesign } from './design-phases'
 import { scheduleDemand } from './appliances'
 import {defaultInstallation,sizeAmpacity} from './ampacity'
 
+export function auxiliaryChargeCurrent(r: Requirements): number {
+  return r.acInput === 'shore' || r.acInput === 'generator' ? 10 : 0
+}
+
 export function buildDesignTopology(r: Requirements, option: ArrayOption, packs: number, phases: PhaseDesign[], paths:DesignSizingPath[]=[]): Project {
   if (!Number.isSafeInteger(packs) || packs < 1) throw new Error('Battery pack quantity must be a positive integer.')
   const sizePath=(wires:Wire[],current:number,voltage:number,fraction:number,temperature:number,label:string,minimumArea=1.5)=>{
@@ -81,12 +85,30 @@ export function buildDesignTopology(r: Requirements, option: ArrayOption, packs:
   }
   const branchLength = Math.max(1, ...branches.flatMap(path => [path[0].length + path[1].length, path[2].length]))
   const inputCurrent = phases.reduce((sum, phase) => sum + (Math.max(phase.inverterW,phase.startupW) / .94 + 8) / 44, 0)
+  const chargeCurrent = auxiliaryChargeCurrent(r)
   for (const path of branches) {
     minimumLength(path[1], branchLength - path[0].length); minimumLength(path[2], branchLength)
-    sizePath(path, Math.max(inputCurrent, option.chargeCurrent) / packs, 44, .005, p.ambient, 'Parallel battery branch', 10)
+    sizePath(path, Math.max(inputCurrent, option.chargeCurrent + chargeCurrent) / packs, 44, .005, p.ambient, 'Parallel battery branch', 10)
   }
   const neutral = phases.length > 1 ? add('bus', 6500, bankY + 900, 'AC shared neutral', [4, .5, 1]) : null
   const voltage = r.region === 'US' ? 120 : 230, frequency = r.region === 'US' ? 60 : 50
+  if (chargeCurrent > 0) {
+    const y = bankY + Math.max(packs, phases.length * 3) * 600 + 600
+    const generator = r.acInput === 'generator'
+    const source = add(generator ? 'generator' : 'grid', 650, y, generator ? 'Portable generator' : 'Grid / shore supply', [-2, 0, .1])
+    Object.assign(source.spec, { voltage, frequency })
+    const acFuse = add('fuse', 1300, y, 'AC input protection', [-1.3, .5, .1])
+    const charger = add('charger', 1950, y, '48 V auxiliary battery charger', [-.7, .5, .1])
+    Object.assign(charger.spec, { voltage, frequency, chargeVoltage: 57.6, rating: chargeCurrent })
+    // The rectifier draws pulsed AC current. Size this generic input with a 0.5 power factor allowance.
+    const acCurrent = (57.6 * chargeCurrent / charger.spec.efficiency + charger.spec.idleWatts!) / (voltage * .5)
+    acFuse.spec.rating = Math.ceil(acCurrent * 1.25 / 5) * 5
+    acFuse.ports = [{ ...acFuse.ports[0], label: 'L in' }, { ...acFuse.ports[1], label: 'L out' }]
+    sizePath([wire(source, 'p', acFuse, 'p'), wire(acFuse, 'n', charger, 'l', 0, '#a78053'), wire(source, 'n', charger, 'n')], acCurrent, voltage, .01, p.ambient, 'Auxiliary AC input')
+    const dcFuse = add('fuse', 2600, y, 'Auxiliary charger DC protection', [-.2, .5, .4])
+    dcFuse.spec.rating = Math.ceil(chargeCurrent * 1.25 / 5) * 5
+    sizePath([wire(charger, 'bat+', dcFuse, 'p'), wire(dcFuse, 'n', positive, 't', 0, positiveColor), wire(charger, 'bat-', negative, 't', 0, negativeColor)], chargeCurrent, 44, .015, p.ambient, 'Auxiliary charger output', 4)
+  }
   for (const [phaseIndex, phase] of phases.entries()) {
     const y = bankY + phaseIndex * 1500, z = 1 + phaseIndex * 1.2
     const protection = add('fuse', 4550, y, phases.length === 1 ? 'Main battery protection' : `Phase ${phase.name} battery protection`, [1, .5, z])

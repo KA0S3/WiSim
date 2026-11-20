@@ -6,7 +6,7 @@ Supported cable routing was added on 17 November 2026. In 3D, select a conductor
 
 For named projects, copies, saved versions and portable backups, see [Saving and retrieving projects](SAVING.md).
 
-For coloured fault callouts, the full diagnostics panel and optional one-at-a-time fixes, see [Sandbox warnings and optional fixes](DIAGNOSTICS.md). Electrically wrong sandbox setups remain allowed.
+For coloured fault markers, the diagnostics drawer and optional one-at-a-time fixes, see [Sandbox warnings and optional fixes](DIAGNOSTICS.md). Electrically wrong sandbox setups remain allowed.
 
 ## Schematic organisation and selection
 

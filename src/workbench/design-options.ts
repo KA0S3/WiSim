@@ -1,12 +1,29 @@
 import {simulationReady} from './catalog-readiness'
 import { CATALOG_RECORDS, type CatalogRecord } from '../catalog'
 import { applyCatalogRecord } from './catalog-device'
-import { makeDevice, type Requirements } from './model'
+import { makeDevice, type Requirements, type Spec } from './model'
 import { pvIscAtTemperature, pvVocAtTemperature } from './pv-ratings'
 
 export type ArrayOption = {
   id: string; panel: CatalogRecord; controller: CatalogRecord; series: number; strings: number; controllers: number;
   stringsPerController: number[]; modules: number; power: number; area: number; coldVoc: number; hotVmp: number; stringIsc: number; chargeCurrent: number
+}
+
+export function stringSizing(spec:Spec, controller:CatalogRecord, series:number, cold:number, hot:number) {
+  const coldVoc = pvVocAtTemperature(spec,cold)*series
+  // Estimate hot Vmp from the published Pmax and Isc temperature coefficients.
+  const hotVmp = series*spec.voltage*(1+(spec.powerTemperatureCoefficientPerC??0)*(hot-25))/(1+(spec.iscTemperatureCoefficientPerC??0)*(hot-25))
+  const stringIsc = pvIscAtTemperature(spec,hot)
+  const stringWatts = spec.watts*series
+  const maxVoc = Math.min(controller.pvVoc!,controller.pvMaxOperatingVoltage!)
+  const startup = 57.6+controller.pvStartHeadroomV!
+  const tracking = 57.6+controller.pvRunHeadroomV!
+  const inputCurrent = controller.maxPvShortCircuitCurrentA!
+  const inputPower = controller.nominalPvPowerWByBatteryVoltage!['48']
+  const chargeCurrent = controller.chargeCurrent!
+  const estimatedChargeCurrent = stringWatts*(controller.maximumEfficiencyPercent??96)/4400
+  const maxStrings = Math.floor(Math.min(inputCurrent/(stringIsc*1.25),inputPower/stringWatts,chargeCurrent/estimatedChargeCurrent))
+  return {coldVoc,hotVmp,stringIsc,stringWatts,maxVoc,startup,tracking,inputCurrent,inputPower,chargeCurrent,estimatedChargeCurrent,maxStrings}
 }
 
 export function arrayOptions(r: Requirements): ArrayOption[] {
@@ -22,14 +39,10 @@ export function arrayOptions(r: Requirements): ArrayOption[] {
   for (const panel of panels) {
     const device = applyCatalogRecord(makeDevice('pv', 0, 0), panel), spec = device.spec
     if (!spec.vocTemperatureCoefficientPerC || !spec.powerTemperatureCoefficientPerC || spec.iscTemperatureCoefficientPerC === undefined) continue
-    // Pmax/Isc coefficients provide an explicit Vmp estimate. Actual Vmp(T)
-    // curves and cell-temperature prediction remain manufacturer/model inputs.
-    const hotModuleVmp = spec.voltage * (1 + spec.powerTemperatureCoefficientPerC * (hot - 25)) / (1 + spec.iscTemperatureCoefficientPerC * (hot - 25))
     for (const controller of controllers) for (let series = 1; series <= 20; series++) {
-      const coldVoc = pvVocAtTemperature(spec, cold) * series, hotVmp = hotModuleVmp * series
-      if (coldVoc >= Math.min(controller.pvVoc!, controller.pvMaxOperatingVoltage!) || hotVmp <= 57.6 + controller.pvRunHeadroomV! || coldVoc <= 57.6 + controller.pvStartHeadroomV!) continue
-      const stringIsc = pvIscAtTemperature(spec, hot), stringPower = spec.watts * series
-      const maxStrings = Math.floor(Math.min(controller.maxPvShortCircuitCurrentA! / (stringIsc * 1.25), controller.nominalPvPowerWByBatteryVoltage!['48'] / stringPower, controller.chargeCurrent! * 44 / ((controller.maximumEfficiencyPercent ?? 96) / 100) / stringPower))
+      const sizing = stringSizing(spec,controller,series,cold,hot)
+      const {coldVoc,hotVmp,stringIsc,stringWatts:stringPower,maxStrings}=sizing
+      if (coldVoc>=sizing.maxVoc || hotVmp<=sizing.tracking || coldVoc<=sizing.startup) continue
       if (maxStrings < 1) continue
       const strings = r.stringCount ?? (r.panelCount !== undefined ? r.panelCount / series : Math.max(1, Math.ceil(target / stringPower))), count = Math.ceil(strings / maxStrings), modules = series * strings
       if (!Number.isSafeInteger(strings) || strings < 1 || r.panelCount !== undefined && modules !== r.panelCount || modules * spec.watts < target) continue

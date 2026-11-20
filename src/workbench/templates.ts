@@ -1,6 +1,6 @@
 import {assertDesignConnections} from './connection-checks'
-import { blankProject, connect, makeDevice, type Project, type Requirements } from './model'
-import {buildDesignTopology} from './design-topology'
+import { acInputOptions, blankProject, connect, makeDevice, type Project, type Requirements } from './model'
+import {auxiliaryChargeCurrent,buildDesignTopology} from './design-topology'
 import {resolvedRequirements} from './appliances'
 import {selectArray} from './design-options'
 import {designPhases} from './design-phases'
@@ -49,7 +49,7 @@ export function threePhaseProject(): Project {
   p.wires = loads.flatMap((l, i) => [connect(g, 'abc'[i], l, 'p', 2.5, 10), connect(g, 'n', l, 'n', 2.5, 10)])
   return p
 }
-export const defaultRequirements: Requirements = { context: 'home', region: 'ZA', dailyKwh: 8, peakW: 2400, autonomyHours: 12, sunHours: 4.5, cableLength: undefined, reserve: 20, priority: 'cost', phases: 'single' }
+export const defaultRequirements: Requirements = { context: 'home', region: 'ZA', dailyKwh: 8, peakW: 2400, autonomyHours: 12, sunHours: 4.5, cableLength: undefined, reserve: 20, priority: 'cost', phases: 'single', acInput: 'none' }
 
 export function designSystem(r: Requirements): Project {
   r=resolvedRequirements(r)
@@ -58,11 +58,12 @@ export function designSystem(r: Requirements): Project {
   if (r.sunHours > 24) throw new Error('Equivalent peak sun hours cannot exceed 24 hours per day.')
   if (r.dailyKwh * 1000 > r.peakW * 24) throw new Error('Daily energy exceeds what the simultaneous running demand could consume in 24 hours. Check both demand inputs.')
   if (!['ZA','GB','US'].includes(r.region) || !['home','mobile','workshop'].includes(r.context) || !['cost','headroom'].includes(r.priority)) throw new Error('Choose a supported region, installation context and design priority.')
+  if (r.acInput !== undefined && !acInputOptions.includes(r.acInput)) throw new Error('Choose a supported AC input option.')
   const margin = 1 + r.reserve / 100 + (r.priority === 'headroom' ? .2 : 0)
   const option = selectArray(r), phases = designPhases(r)
   const capacityWh = r.dailyKwh * 1000 * (r.autonomyHours / 24) / (.8 * .94) * margin
   const current = phases.reduce((sum, phase) => sum + (Math.max(phase.inverterW,phase.startupW) / .94 + 8) / 44, 0)
-  const packs = Math.max(1, Math.ceil(capacityWh / 5120), Math.ceil(Math.max(current, option.chargeCurrent) / 100))
+  const packs = Math.max(1, Math.ceil(capacityWh / 5120), Math.ceil(Math.max(current, option.chargeCurrent + auxiliaryChargeCurrent(r)) / 100))
   const sizingPaths:DesignSizingPath[]=[]
   let p = buildDesignTopology(r, option, packs, phases,sizingPaths)
   if(r.building)p=synchronizeLengths(sizePlacedDesign(applyBuilding(p,r.building,true),sizingPaths))
@@ -81,6 +82,10 @@ export function designSystem(r: Requirements): Project {
     'Daily appliance schedules control loads at the selected schedule hour. Startup demand sizes each phase inverter. Autonomy uses average daily energy. Weather, seasonal yield and time-series battery dispatch require further modelling.',
     'Provisional engineering proposal. Regional ampacity uses the saved cable construction and installation assumptions. Review fault ratings, protection selectivity, earthing, battery/BMS limits and exact end hardware in Electrical engineering.',
   ]
+  if (auxiliaryChargeCurrent(r)) {
+    p.designNotes.push(`${r.acInput === 'generator' ? 'Portable generator' : 'Grid / shore supply'} feeds a protected 10 A DC battery charger. The inverter supplies the loads from the DC bus in every operating mode.`)
+    if(r.acInput === 'generator' && r.building)p.designNotes.push('The outdoor generator leads use illustrative flexible cable lengths. Specify the actual exterior inlet and lead path for site-specific routing.')
+  }
   assertDesignConnections(p)
   return p
 }

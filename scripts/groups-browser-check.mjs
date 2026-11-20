@@ -9,9 +9,9 @@ page.on('pageerror',e=>errors.push(e.message))
 const saved=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('wisim-workbench-v4'))),check=async(name,fn)=>{await fn();checks.push(name);console.log('PASS '+name)}
 try{
  await page.goto(url,{waitUntil:'networkidle'});await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:30000})
- await page.getByRole('button',{name:'Design a system',exact:true}).click();await page.getByRole('button',{name:'Generate my system',exact:true}).click()
+ await page.getByRole('button',{name:'Auto design',exact:true}).click();await page.getByRole('button',{name:'Generate my system',exact:true}).click()
  await check('compact design shows eight nodes while solving all 23 real devices',async()=>{
-  await expect(page.locator('.react-flow__node')).toHaveCount(8);await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:30000});await expect.poll(async()=>(await saved()).devices.length).toBe(23)
+  await expect(page.locator('.react-flow__node')).toHaveCount(8,{timeout:30000});await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:30000});await expect.poll(async()=>(await saved()).devices.length).toBe(23)
   await expect.poll(async()=>parseFloat(await page.locator('.group-power').first().innerText())).toBeGreaterThan(0)
   await page.locator('.react-flow__node-bankArray').filter({hasText:'Solar array'}).locator('.node-name').click();await expect(page.locator('.group-inspector')).toContainText('6 panels');await expect(page.locator('.group-topology')).toContainText('3 parallel strings x 2 in series')
   const bounds=await page.locator('.react-flow__node').evaluateAll(nodes=>nodes.map(el=>{const b=el.getBoundingClientRect();return {width:b.width,height:b.height}}));expect(Math.min(...bounds.map(b=>b.width))).toBeGreaterThan(70)
@@ -49,11 +49,14 @@ try{
  await check('group metadata and live totals survive save and reload',async()=>{
   await expect.poll(async()=>(await saved()).groups.length).toBe(2);const before=await saved();await page.getByRole('button',{name:'Save project',exact:true}).click();await page.reload({waitUntil:'networkidle'});await expect(page.locator('.react-flow__node')).toHaveCount(8);await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:30000});expect((await saved()).groups).toEqual(before.groups);await expect.poll(async()=>parseFloat(await page.locator('.group-power').first().innerText())).toBeGreaterThan(0)
  })
- await check('faults inside a collapsed bank retain visible markers, callouts and individual inspection',async()=>{
+ await check('faults inside a collapsed bank retain visible markers and can be inspected from diagnostics',async()=>{
   const bad=await saved(),g=bad.groups.find(g=>g.kind==='battery-bank'),unit=bad.devices.find(d=>g.members.includes(d.id)&&d.kind==='battery');unit.spec.voltage=25.6
   await page.locator('input[type=file]').setInputFiles({name:'group-fault.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bad))})
-  const callout=page.locator(`[data-warning-target="${unit.id}"]`);await expect(callout).toBeVisible({timeout:15000});await expect(page.locator('.react-flow__node-bankArray').filter({hasText:'Battery bank'}).locator('.node-issue.fault')).toBeVisible()
-  await callout.getByRole('button',{name:'Locate problem',exact:true}).click();await expect(page.locator(`.react-flow__node[data-id="${unit.id}"]`)).toBeVisible();await expect(page.locator('.inspector-name')).toHaveText(unit.name);await expect(page.getByText('Physics engine connected',{exact:true})).toBeVisible({timeout:30000});await page.waitForTimeout(700);await page.screenshot({path:'artifacts/qa-group-fault.png'})
+  await expect(page.locator('.react-flow__node-bankArray').filter({hasText:'Battery bank'}).locator('.node-issue.fault')).toBeVisible()
+  await page.getByRole('button',{name:'System diagnostics',exact:true}).click()
+  const fault=page.getByRole('article',{name:'fault: Battery source voltages conflict',exact:true}).filter({has:page.getByRole('button',{name:`Inspect ${unit.name}`,exact:true})})
+  await fault.getByRole('button',{name:`Inspect ${unit.name}`,exact:true}).click()
+  await expect(page.locator(`.react-flow__node[data-id="${unit.id}"]`)).toBeVisible();await expect(page.locator('.inspector-name')).toHaveText(unit.name);await page.screenshot({path:'artifacts/qa-group-fault.png'})
  })
  expect(errors).toEqual([])
 }catch(e){await page.screenshot({path:'artifacts/groups-failure.png'});await writeFile('artifacts/groups-failure.txt',await page.locator('body').innerText());throw e}

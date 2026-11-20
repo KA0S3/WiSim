@@ -41,6 +41,9 @@ export function applyBuilding(input:Project,layout:BuildingLayout,refit:boolean)
   if((project.structures?.length??0)>5000)throw new Error('This workspace exceeds the 5000-surface capacity.')
   if(!refit)return synchronizeLengths(project)
   const occupied=new Map<string,Rectangle[]>(),issues:string[]=[]
+  const groundOutline=layout.floors[0].nodes.map(node=>node.point)
+  const outdoorX=Math.max(0,...groundOutline.map(point=>point[0]))+2
+  const outdoorZ=(Math.min(0,...groundOutline.map(point=>point[1]))+Math.max(0,...groundOutline.map(point=>point[1])))/2
   const attach=(device:Device,surface:Structure,face:Mount['face'],space:Rectangle,landscape=false)=>{
     project=mountDevice(project,device.id,surface.id,face)
     project={...project,devices:project.devices.map(d=>d.id===device.id?{...d,mount:{...d.mount!,offset:[space.x,space.y,.03],rotation:face==='back'?[0,Math.PI,0]:landscape?[0,0,Math.PI/2]:[0,0,0]}}:d)}
@@ -49,7 +52,11 @@ export function applyBuilding(input:Project,layout:BuildingLayout,refit:boolean)
   for(const device of [...project.devices].sort((a,b)=>b.spec.width*b.spec.height-a.spec.width*a.spec.height)){
     let placed=false
     const preference=layout.equipmentPlacements?.[device.id]??layout.equipmentPlacements?.[`appliance:${device.applianceId}`]??layout.equipmentPlacements?.[device.kind],equipmentRoom=rooms.find(r=>r.id===preference?.roomId)??defaultEquipmentRoom
-    if(device.kind==='pv'){
+    if(device.kind==='generator'){
+      const index=project.devices.filter(d=>d.kind==='generator').findIndex(d=>d.id===device.id)
+      project={...project,devices:project.devices.map(d=>d.id===device.id?{...d,mount:undefined,rotation:[0,-Math.PI/2,0],physical:[outdoorX+device.spec.depth/2,0,outdoorZ+index*(device.spec.width+.5)]}:d)}
+      placed=true
+    }else if(device.kind==='pv'){
       const candidates=project.structures!.filter(s=>s.kind==='roof'&&(!panelRoom||s.building?.roomId===panelRoom.id)).sort((a,b)=>{
         const desired=((layout.northBearing??0)+((layout.solarHemisphere??(input.requirements?.region==='GB'||input.requirements?.region==='US'?'north':'south'))==='north'?180:0))*Math.PI/180
         const score=(s:Structure)=>{const f=facing(s.rotation);return Math.sin(f.tilt*Math.PI/180)*Math.cos(f.azimuth*Math.PI/180-desired)}
@@ -82,8 +89,12 @@ export function applyBuilding(input:Project,layout:BuildingLayout,refit:boolean)
     }
     if(!placed)issues.push(`${device.name} could not fit in the selected ${device.kind==='pv'?'roof':'room'}. Its previous world placement is retained.`)
   }
-  project=synchronizeLengths(project)
+  const generators=new Set(project.devices.filter(d=>d.kind==='generator').map(d=>d.id))
+  // Portable generator leads are flexible runs, separate from fixed surface wiring.
+  const generatorLead=(wire:Project['wires'][number])=>generators.has(wire.from)||generators.has(wire.to)
+  project=synchronizeLengths({...project,wires:project.wires.map(wire=>generatorLead(wire)?{...wire,lengthMode:'physical',autoRoute:undefined,route3d:undefined}:wire)})
   for(const wire of project.wires){
+    if(generatorLead(wire))continue
     try{project=previewSupportedRoute(project,wire.id)}catch(cause){issues.push(`${wire.reference??wire.id} needs a supported route. ${cause instanceof Error?cause.message:String(cause)}`)}
   }
   return synchronizeLengths({...project,fitIssues:issues})

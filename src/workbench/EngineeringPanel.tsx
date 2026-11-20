@@ -2,7 +2,7 @@ import {useState} from 'react'
 import {ampacity,conductorChoices,defaultInstallation,engineeringSources} from './ampacity'
 import {engineeringFindings} from './engineering'
 import {TERMINATION_HARDWARE,terminationAssessment} from './terminations'
-import {validateProject,type Project} from './model'
+import {acSourceKinds,validateProject,type Project} from './model'
 import type {Region,Installation,BatteryLimits,Protection,Termination} from './engineering-model'
 
 function Numeric({label,value,onChange,unit='',min=0}:{label:string;value:number|undefined;onChange:(v:number|undefined)=>void;unit?:string;min?:number}){
@@ -10,6 +10,15 @@ function Numeric({label,value,onChange,unit='',min=0}:{label:string;value:number
 }
 export function EngineeringPanel({project,onApply,initialSelected}:{project:Project;initialSelected?:string;onApply:(p:Project)=>void}){
  const [draft,setDraft]=useState(()=>structuredClone(project)),[selected,setSelected]=useState(initialSelected??project.wires[0]?.id??project.devices[0]?.id??''),[error,setError]=useState('')
+ const [draftSource,setDraftSource]=useState(project)
+ if(draftSource!==project){
+  setDraftSource(project)
+  setDraft(structuredClone(project))
+  setError('')
+  if(!project.devices.some(d=>d.id===selected)&&!project.wires.some(w=>w.id===selected)){
+   setSelected(project.wires[0]?.id??project.devices[0]?.id??'')
+  }
+ }
  const update=(edit:(p:Project)=>void)=>setDraft(old=>{const next=structuredClone(old);next.engineering??={region:old.requirements?.region??'ZA'};edit(next);return next})
  const region=draft.engineering?.region??draft.requirements?.region??'ZA',wire=draft.wires.find(w=>w.id===selected),device=draft.devices.find(d=>d.id===selected),earthing=draft.engineering?.earthing
  const setRegion=(region:Region)=>update(p=>{p.engineering={...p.engineering,region}})
@@ -26,7 +35,7 @@ export function EngineeringPanel({project,onApply,initialSelected}:{project:Proj
  {([['voltage','Phase-to-earth voltage','V'],['loopOhm','Earth-fault loop impedance Zs','ohm'],['disconnectA','Guaranteed disconnection current Ia','A'],['electrodeOhm','Earth electrode resistance Ra','ohm'],['residualA','Residual operating current','A'],['touchVoltage','Touch-voltage criterion','V'],['faultA','Prospective earth-fault current','A'],['clearingSeconds','Verified fault clearing time','s'],['k','Adiabatic k factor','A sqrt(s)/mm2']] as const).map(([key,label,unit])=><Numeric key={key} label={label} unit={unit} value={earthing[key]} onChange={v=>update(p=>{p.engineering!.earthing![key]=v as number})}/>)}
  <label className="field"><span>Earthing calculation / test reference</span><input value={earthing.source} onChange={event=>update(p=>{p.engineering!.earthing!.source=event.target.value})}/></label>
  <p className="muted small">Bond declarations connect source neutral to its optional chassis PE terminal in the solver. Add a real PE conductor to an earth reference. Select only the intended active source bond.</p>
- {draft.devices.filter(d=>['inverter','grid','three-phase'].includes(d.kind)).map(d=><label className="building-enable" key={d.id}><input type="checkbox" checked={earthing.neutralBondIds.includes(d.id)} onChange={event=>update(p=>{const a=p.engineering!.earthing!;a.neutralBondIds=event.target.checked?[...a.neutralBondIds,d.id]:a.neutralBondIds.filter(id=>id!==d.id)})}/>{d.name} neutral–PE bond</label>)}</>}
+ {draft.devices.filter(d=>acSourceKinds.has(d.kind)).map(d=><label className="building-enable" key={d.id}><input type="checkbox" checked={earthing.neutralBondIds.includes(d.id)} onChange={event=>update(p=>{const a=p.engineering!.earthing!;a.neutralBondIds=event.target.checked?[...a.neutralBondIds,d.id]:a.neutralBondIds.filter(id=>id!==d.id)})}/>{d.name} neutral–PE bond</label>)}</>}
  </details>
  <label className="field"><span>Equipment or conductor</span><select aria-label="Engineering item" value={selected} onChange={event=>setSelected(event.target.value)}><optgroup label="Conductors">{draft.wires.map(w=><option value={w.id} key={w.id}>{w.reference??w.id} / {w.area.toFixed(3)} mm²</option>)}</optgroup><optgroup label="Equipment">{draft.devices.map(d=><option value={d.id} key={d.id}>{d.name}</option>)}</optgroup></select></label>
  {wire&&<section className="engineering-group"><h3>Cable construction and loading</h3><label className="field"><span>Installation method</span><select aria-label="Installation method" value={wire.installation?.method??''} onChange={event=>changeInstallation({method:event.target.value as Installation['method']})}><option value="" disabled>Choose actual cable / method</option>{region==='ZA'?<><option value="za-air">PVC SWA 3/4-core, shaded air</option><option value="za-duct">PVC SWA 3/4-core, buried duct</option><option value="za-ground">PVC SWA 3/4-core, direct buried</option></>:region==='GB'?<><option value="gb-B">Single-core PVC, method B conduit/trunking</option><option value="gb-C">Single-core PVC, method C clipped direct</option></>:<option value="us-raceway">Raceway/cable, NEC reference table</option>}</select></label>

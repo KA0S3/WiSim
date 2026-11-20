@@ -1,9 +1,9 @@
-import {uid,type Requirements} from './model'
+import {acInputOptions,uid,type ACInput,type Requirements} from './model'
 import type {BuildingLayout,FloorPlan,PlanPoint} from './building-model'
 import {addPlanWall,buildingRooms,pointInPolygon} from './building-plan'
 
 /** Generate one coherent house with shared stairs and a freshly sized client brief. */
-export function randomDemoRequirements(random:()=>number=Math.random):Requirements {
+export function randomDemoRequirements(random:()=>number=Math.random,acInput?:ACInput):Requirements {
   const width=12+Math.round(random()*60)/10,depth=9+Math.round(random()*50)/10
   const floorCount=1+Math.floor(random()*3),hallX=width/2-3.2
   const building:BuildingLayout={id:uid('building'),floors:[],floorHeight:(27+Math.round(random()*4))/10,wallThickness:.18,roofShape:(['flat','gable','hip','shed'] as const)[Math.floor(random()*4)],roofPitch:12+Math.floor(random()*24),northBearing:Math.floor(random()*360),solarHemisphere:'south',roomNames:{},stairs:[]}
@@ -28,5 +28,5 @@ export function randomDemoRequirements(random:()=>number=Math.random):Requiremen
   building.equipmentRoomId=equipmentRoom?.id
   building.roomNames=Object.fromEntries(rooms.map(room=>[room.id,pointInPolygon([hallX+1,0],room.polygon)?`Floor ${room.floor+1} ${floorCount>1?'stair hall':'entrance hall'}`:room.id===equipmentRoom?.id?'Utility room':`Floor ${room.floor+1} living space`]))
   const dailyKwh=4+Math.round(random()*60)/10
-  return {context:'home',region:'ZA',dailyKwh,peakW:1200+Math.floor(random()*18)*100,autonomyHours:4+Math.floor(random()*9),sunHours:4.2+Math.round(random()*10)/10,reserve:15+Math.floor(random()*16),priority:'cost',phases:'single',building}
+  return {context:'home',region:'ZA',dailyKwh,peakW:1200+Math.floor(random()*18)*100,autonomyHours:4+Math.floor(random()*9),sunHours:4.2+Math.round(random()*10)/10,reserve:15+Math.floor(random()*16),priority:'cost',phases:'single',building,acInput:acInput??acInputOptions[Math.floor(random()*acInputOptions.length)]}
 }

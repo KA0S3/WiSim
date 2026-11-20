@@ -1,6 +1,11 @@
 import {chromium,expect} from '@playwright/test'
 import {mkdir,writeFile} from 'node:fs/promises'
 import {spawn} from 'node:child_process'
+
+async function open3DMenu(page){
+ const button=page.getByRole('button',{name:'3D controls',exact:true})
+ if(await button.getAttribute('aria-pressed')==='false')await button.click()
+}
 const baseUrl=process.env.WISIM_URL??'http://127.0.0.1:4184/';let server
 await mkdir('artifacts',{recursive:true})
 if(!process.env.WISIM_URL){server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4184','--strictPort'],{stdio:'pipe',windowsHide:true});let ready=false;for(let i=0;i<80;i++){try{if((await fetch(baseUrl)).ok){ready=true;break}}catch{}await new Promise(r=>setTimeout(r,200))}if(!ready){server.kill();throw Error('Controls preview failed to start')}}
@@ -47,9 +52,9 @@ try{
  await fresh()
  await check('short-window 3D and settings panels reach their final positioning fields at normal zoom',async()=>{
   await page.getByRole('button',{name:'3D workbench',exact:true}).click();await expect(page.locator('.physical-view canvas')).toBeVisible()
-  await page.getByRole('button',{name:'Add roof',exact:true}).click();const field=page.getByRole('spinbutton',{name:'Structure rotation Z degrees',exact:true});await field.scrollIntoViewIfNeeded();await field.fill('15');await field.press('Tab')
+  await open3DMenu(page,'Build');await page.getByRole('button',{name:'Add roof',exact:true}).click();const field=page.getByRole('spinbutton',{name:'Structure rotation Z degrees',exact:true});await field.scrollIntoViewIfNeeded();await field.fill('15');await field.press('Tab')
   const box=await field.boundingBox(),panel=await page.locator('.physical-editor').boundingBox();expect(box.y).toBeGreaterThanOrEqual(panel.y);expect(box.y+box.height).toBeLessThanOrEqual(panel.y+panel.height+1)
-  await page.getByLabel('3D selection',{exact:true}).selectOption((await saved()).devices.find(d=>d.kind==='battery').id)
+  await open3DMenu(page,'Selection');await page.getByLabel('3D selection',{exact:true}).selectOption((await saved()).devices.find(d=>d.kind==='battery').id)
   await page.locator('.inspector-content').getByText('Physical dimensions',{exact:true}).click();const placement=page.getByRole('spinbutton',{name:'Placement Z',exact:true});await placement.scrollIntoViewIfNeeded();await expect(placement).toBeInViewport()
   expect(await page.evaluate(()=>({zoom:visualViewport.scale,overflow:document.documentElement.scrollWidth>innerWidth}))).toEqual({zoom:1,overflow:false})
   await page.screenshot({path:'artifacts/qa-short-window-controls.png'})
@@ -61,7 +66,7 @@ try{
   await page.getByLabel('Terminal detail component',{exact:true}).selectOption(load.id);await expect(page.locator('.terminal-hero h2')).toHaveText(load.name);await expect(page.locator('.terminal-live-readings')).toContainText('597');await expect(page.locator('.terminal-live-readings')).toBeInViewport()
   await page.getByLabel('Terminal detail component',{exact:true}).selectOption(battery.id);await expect(page.locator('.terminal-hero h2')).toHaveText(battery.name)
   const canvas=page.locator('.terminal-model canvas'),box=await canvas.boundingBox(),image=await canvas.screenshot();await page.mouse.move(box.x+box.width*.65,box.y+box.height*.4);await page.mouse.down();await page.mouse.move(box.x+box.width*.65+65,box.y+box.height*.4+35,{steps:12});await page.mouse.up();await page.waitForTimeout(300);expect(await canvas.screenshot()).not.toEqual(image)
-  await page.getByRole('button',{name:'Front view',exact:true}).click();await page.getByRole('button',{name:'3D probe +',exact:true}).click();await page.getByRole('button',{name:'3D probe −',exact:true}).click();await expect(page.locator('.meter-popover')).toBeVisible();await expect.poll(async()=>parseFloat(await page.locator('.meter-popover output').innerText())).toBeGreaterThan(50);await page.getByRole('button',{name:'Close voltmeter',exact:true}).click()
+  await page.getByRole('button',{name:'Front view',exact:true}).click();await page.getByRole('button',{name:'3D probe +',exact:true}).click();await page.getByRole('button',{name:'3D probe −',exact:true}).click();await expect(page.locator('.meter-popover')).toBeVisible();await expect.poll(async()=>parseFloat(await page.locator('.meter-popover output').innerText())).toBeGreaterThan(50);await page.getByRole('button',{name:'Voltmeter tool',exact:true}).click()
   await page.locator('.terminal-wire').first().click();await expect(page.getByLabel('Terminal detail component',{exact:true})).toHaveValue(battery.id);await expect(page.locator('.terminal-hero h2')).toHaveText(battery.name)
   await page.locator('.terminal-follow').first().click();await expect(page.getByLabel('Terminal detail component',{exact:true})).not.toHaveValue(battery.id)
   expect((await saved()).devices).toEqual(before.devices);expect((await saved()).wires).toEqual(before.wires)

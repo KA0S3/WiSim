@@ -4,7 +4,7 @@ There is no automatic wall-clock cutoff. A calculation taking more than 12 secon
 
 The editor stays available during a calculation. **Cancel calculation** explicitly stops the current worker. Editing the circuit cancels obsolete work and calculates the latest revision. **Retry calculation** keeps the last valid simulation time, battery charge, capacitor/inductor state and protection state. Only the existing **Reset simulation** action deliberately starts those conditions again.
 
-An actual worker crash or failed numerical result triggers bounded recovery from the last committed state, with shorter simulation windows where appropriate. Ordinary 50/60 Hz measurements still include a complete source cycle. If numerical recovery fails, the calculator pauses its readings and explains the error; project data remains saved and editable. This is separate from an electrical fault in the sandbox, which is permitted and shown with callouts/diagnostics.
+An actual worker crash or failed numerical result triggers bounded recovery from the last committed state, with shorter simulation windows where appropriate. Ordinary 50/60 Hz measurements still include a complete source cycle. If numerical recovery fails, the calculator pauses its readings and explains the error; project data remains saved and editable. This is separate from an electrical fault in the sandbox, which is permitted and shown with schematic markers and in System diagnostics.
 
 Large-network changes include selective ngspice signal export, transferable waveform buffers, fewer redundant samples for algebraic DC networks, indexed retained-node lookup and removal of state belonging to deleted equipment. AC sources and stored-energy models retain fine transient sampling.
 

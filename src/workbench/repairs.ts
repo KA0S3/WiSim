@@ -1,13 +1,66 @@
-import {designSystem} from './templates'
-import {connectionFindings} from './connection-checks'
+import {designSystem,solarProject} from './templates'
+import {batteryNetwork,connectionFindings} from './connection-checks'
 import {synchronizeLengths} from './geometry'
 import {validateProject,type Finding,type Project} from './model'
 
 export type SuggestedFix={label:string;detail:string;project:Project}
+
+/** Restore a deleted supply only on the identifiable, otherwise intact solar example. */
+function restoreExampleBattery(project:Project,inverterId:string):SuggestedFix|null{
+ if(project.devices.some(d=>d.kind==='battery')||project.requirements)return null
+ const example=solarProject()
+ const battery=example.devices.find(d=>d.kind==='battery')!
+ const remaining=example.devices.filter(d=>d!==battery)
+ if(project.devices.length!==remaining.length)return null
+ const devices=new Map<string,string>()
+ for(const original of remaining){
+  const matches=project.devices.filter(d=>d.name===original.name&&d.kind===original.kind)
+  if(matches.length!==1)return null
+  devices.set(original.id,matches[0].id)
+ }
+ if(devices.get(remaining.find(d=>d.kind==='inverter')!.id)!==inverterId)return null
+ devices.set(battery.id,battery.id)
+ const pair=(from:string,fromPort:string,to:string,toPort:string)=>[from+':'+fromPort,to+':'+toPort].sort().join('|')
+ const mapWire=(w:Project['wires'][number])=>pair(devices.get(w.from)!,w.fromPort,devices.get(w.to)!,w.toPort)
+ const existing=new Set(project.wires.map(w=>pair(w.from,w.fromPort,w.to,w.toPort)))
+ const intact=example.wires.filter(w=>w.from!==battery.id&&w.to!==battery.id)
+ if(existing.size!==intact.length||intact.some(w=>!existing.has(mapWire(w))))return null
+ const restored=example.wires.filter(w=>w.from===battery.id||w.to===battery.id)
+  .map(w=>({...w,from:devices.get(w.from)!,to:devices.get(w.to)!}))
+ const next=synchronizeLengths({...project,devices:[...project.devices,battery],wires:[...project.wires,...restored]})
+ const input=batteryNetwork(next,inverterId,'dc+','dc-')
+ if((input.voltage??0)<=project.devices.find(d=>d.id===inverterId)!.spec.cutoff+2||
+    !validateProject(next)||connectionFindings(next).some(f=>f.severity==='fault'))return null
+ return {
+  label:'Restore the example battery and connect four cables',
+  detail:'Adds the example’s generic 51.2 V Home battery. Connects battery + to Battery protection IN and Solar controller BAT+, and battery − to Hybrid inverter DC− and Solar controller BAT−. Existing equipment and cables are preserved.',
+  project:next
+ }
+}
+
 /** Explicit one-at-a-time sandbox edits. No repair runs without the user's Apply action. */
 export function suggestedFix(project:Project,finding:Finding):SuggestedFix|null{
  const known=connectionFindings(project).find(f=>f.id===finding.id),device=project.devices.find(d=>d.id===finding.target)
  if(!known){
+  if(device?.kind==='inverter'&&finding.id===`low-dc-${device.id}`){
+   const restoredExample=restoreExampleBattery(project,device.id)
+   if(restoredExample)return restoredExample
+   const supplyFaults=connectionFindings(project)
+   const cause=supplyFaults.find(f=>f.target===device.id&&['bank-voltage-','bank-polarity-','bank-conflict-'].some(prefix=>f.id.startsWith(prefix)))
+   if(cause)return suggestedFix(project,cause)
+   const supply=batteryNetwork(project,device.id,'dc+','dc-')
+   if(supply.voltage!==undefined||supply.conflict||supply.shorted)return null
+   const previousFaultIds=new Set(supplyFaults.filter(f=>f.severity==='fault').map(f=>f.id))
+   const fixes=project.devices.filter(d=>d.kind==='battery'&&!d.on&&!d.batteryLimits).flatMap(battery=>{
+    const next={...project,devices:project.devices.map(d=>d.id===battery.id?{...d,on:true}:d)}
+    const restored=batteryNetwork(next,device.id,'dc+','dc-')
+    if(restored.sources.length!==1||restored.sources[0]!==battery.id||restored.conflict||restored.shorted||
+       restored.voltage===undefined||restored.voltage<=device.spec.cutoff+2||
+       connectionFindings(next).some(f=>f.severity==='fault'&&!previousFaultIds.has(f.id)))return []
+    return [{label:`Switch on ${battery.name}`,detail:'Re-enables the one directly traceable battery supply. The solver will check the input voltage again under load.',project:next}]
+   })
+   return fixes.length===1?fixes[0]:null
+  }
   if(device&&project.requirements&&(finding.id.startsWith('trip-')||finding.id.startsWith('overload-'))){
    try{const next=designSystem(project.requirements);return {label:'Rebuild and resize this generated system',detail:'Regenerates the system from its saved demand, startup, panel and building requirements. Manual equipment and wiring edits are replaced. Apply, then reset simulation to clear trips. Undo restores the previous design.',project:{...next,id:project.id,name:project.name}}}catch{return null}
   }

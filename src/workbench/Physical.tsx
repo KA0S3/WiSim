@@ -1,3 +1,4 @@
+import {createPortal} from 'react-dom'
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type MutableRefObject } from 'react'
 import { Canvas, useThree,useFrame } from '@react-three/fiber'
 import { ContactShadows, Grid, OrbitControls, RoundedBox, Line } from '@react-three/drei'
@@ -63,7 +64,7 @@ function StructureBody({structure:s,selected,onSelect,active,axis,onPreview,onCo
 
 type Mode='camera'|'move'|'connect'
 type CameraCommand={view:string;sequence:number}
-type PhysicalProps={project:Project;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,p:Point3)=>void;onRoute:(id:string,route:Point3[])=>void;onConnect:(c:Connection)=>void;onProject:(p:Project)=>void;focusId?:string|null;onBuilding?:()=>void;buildSequence?:number;onBuildComplete?:()=>void;onReplay?:()=>void}
+type PhysicalProps={controlsHost:HTMLElement|null;project:Project;selected:string|null;onSelect:(id:string|null)=>void;onMove:(id:string,p:Point3)=>void;onRoute:(id:string,route:Point3[])=>void;onConnect:(c:Connection)=>void;onProject:(p:Project)=>void;focusId?:string|null;onBuilding?:()=>void;buildSequence?:number;onBuildComplete?:()=>void;onReplay?:()=>void}
 
 type BuildClock={active:boolean;start:number}
 function BuildReveal({clock,delay,children}:{clock:MutableRefObject<BuildClock>;delay:number;children:ReactNode}) {
@@ -113,8 +114,10 @@ function Scene({project,selected,onSelect,mode,axis,command,onPreview,onMove,onC
     if(focusedWire)bounds.makeEmpty()
     for(const w of focusedWire?[focusedWire]:command.view!=='focus'?project.wires:[])for(const point of physicalWirePoints(project,w))bounds.expandByPoint(new Vector3(...point))
     const target=bounds.isEmpty()?new Vector3(0,.4,0):bounds.getCenter(new Vector3()),radius=bounds.isEmpty()?2:Math.max(.25,bounds.getSize(new Vector3()).length()/2)
-    const distance=radius/Math.sin(Math.atan(Math.tan(20*Math.PI/180)*Math.min(1,size.width/size.height)))*1.15
+    const distance=radius/Math.sin(Math.atan(Math.tan(20*Math.PI/180)*Math.min(1,size.width/size.height)))*1.06
     const direction=command.view==='top'?new Vector3(0,1,.001):(command.view==='front'||command.view==='focus')?new Vector3(0,0,1):new Vector3(1,.8,1.2).normalize()
+    // Frame the system above the telemetry while keeping focused items centered.
+    if(command.view==='iso')target.addScaledVector(new Vector3(0,1,0).addScaledVector(direction,-direction.y).normalize(),-distance*.065)
     // Consume pending orbit/pan/dolly deltas before an explicit camera command.
     // Otherwise damping can pull the newly focused object away from the centre.
     const orbit=controls.current,damping=orbit?.enableDamping
@@ -132,7 +135,7 @@ function Scene({project,selected,onSelect,mode,axis,command,onPreview,onMove,onC
   const hiddenDevices=new Set(project.devices.filter(d=>!roofVisible&&d.kind==='pv').map(d=>d.id))
   const visibleWire=(w:Project['wires'][number])=>!w.autoRoute?.error&&!hiddenDevices.has(w.from)&&!hiddenDevices.has(w.to)
   const wire=project.wires.find(w=>w.id===selected)
-  return <><color attach="background" args={['#edf0e9']}/><ambientLight intensity={1.8}/><directionalLight position={[4,7,5]} intensity={2.5} castShadow/><directionalLight position={[-3,3,-2]} intensity={1}/>
+  return <><color attach="background" args={['#eef2f1']}/><ambientLight intensity={1.8}/><directionalLight position={[4,7,5]} intensity={2.5} castShadow/><directionalLight position={[-3,3,-2]} intensity={1}/>
     <Grid args={[20,20]} cellSize={.25} sectionSize={1} cellColor="#ccd3c8" sectionColor="#b8c4b7" fadeDistance={30} infiniteGrid/>
     {project.structures?.filter(s=>roofVisible||s.kind!=='roof').map((s,i)=><BuildReveal key={s.id} clock={clock} delay={schedule.get(s.id)??0}><StructureBody targets={targets} seeThrough={seeThrough} structure={s} selected={s.id===selected} onSelect={onSelect} active={mode==='move'&&s.id===selected} axis={axis} onPreview={p=>onStructurePreview(s.id,p)} onCommit={p=>onStructureMove(s.id,p)} onCancel={onCancel}/></BuildReveal>)}
     {project.devices.filter(d=>roofVisible||d.kind!=='pv').map((d,i)=><BuildReveal key={d.id} clock={clock} delay={schedule.get(d.id)??0}><Equipment targets={targets} seeThrough={seeThrough} device={d} planeNormal={d.mount?new Vector3(0,0,1).applyQuaternion(orientation(project.structures?.find(s=>s.id===d.mount!.structureId)?.rotation)).toArray() as Point3:undefined} selected={d.id===selected} onSelect={onSelect} mode={mode} axis={axis} onPreview={onPreview} onMove={onMove} onCancel={onCancel} onPort={onPort}/></BuildReveal>)}
@@ -143,9 +146,8 @@ function Scene({project,selected,onSelect,mode,axis,command,onPreview,onMove,onC
   </>
 }
 
-export default memo(function Physical({project,selected,onSelect,onMove,onRoute,onConnect,onProject,focusId,onBuilding,buildSequence,onBuildComplete,onReplay}:PhysicalProps) {
+export default memo(function Physical({controlsHost,project,selected,onSelect,onMove,onRoute,onConnect,onProject,focusId,onBuilding,buildSequence,onBuildComplete,onReplay}:PhysicalProps) {
   const [mode,setMode]=useState<Mode>('camera'),[axis,setAxis]=useState<Axis>('all'),[command,setCommand]=useState<CameraCommand>({view:'iso',sequence:0}),[draft,setDraft]=useState<Project|null>(null),[bend,setBend]=useState(0),[source,setSource]=useState<{id:string;port:string}|null>(null)
-  const [controlsOpen,setControlsOpen]=useState(true)
   const [roofVisible,setRoofVisible]=useState(true),[seeThrough,setSeeThrough]=useState(true)
   const [buildStage,setBuildStage]=useState('')
   useEffect(()=>{
@@ -189,8 +191,7 @@ export default memo(function Physical({project,selected,onSelect,onMove,onRoute,
   return <div className="physical-view" data-mode={mode} data-axis={axis}>
     {buildStage&&<div className="build-status" role="status"><span>{buildStage}</span><button onClick={onBuildComplete}>Take control</button></div>}
     <Canvas frameloop="demand" shadows camera={{position:[3.8,3.5,5],fov:40}} dpr={[1,1.7]} gl={{antialias:true}}><Suspense fallback={null}><Scene buildSequence={buildSequence} onBuildComplete={onBuildComplete} roofVisible={roofVisible} seeThrough={seeThrough} project={shown} selected={selected} onSelect={onSelect} mode={mode} axis={axis} command={command} onPreview={(id,p)=>setDraft(moveEquipment(project,id,p))} onMove={(id,p)=>{onMove(id,p);setDraft(null)}} onCancel={cancel} onRoutePreview={(id,points)=>setDraft(setWireRoute(project,id,points))} onRoute={routeCommit} onPort={port} bend={bend} setBend={setBend} onStructurePreview={(id,position)=>setDraft(synchronizeLengths(updateStructure(project,id,{position})))} onStructureMove={(id,position)=>{onProject(updateStructure(project,id,{position}));setDraft(null)}}/></Suspense></Canvas>
-    <button className="physical-controls-toggle" aria-expanded={controlsOpen} aria-controls="physical-editor" onClick={()=>setControlsOpen(v=>!v)}>{controlsOpen?'Hide 3D controls':'Show 3D controls'}</button>
-    <div id="physical-editor" className={`physical-editor ${controlsOpen?'':'is-collapsed'}`}>
+    {controlsHost&&createPortal(<div className="physical-editor docked-controls" id="physical-editor">
       <div className="physical-modes">{(['camera','move','connect'] as const).map((value,i)=><button key={value} title={value==='camera'?'V: left-drag to orbit. Right-drag pans; wheel zooms.':value==='move'?'W: drag the selected body or coloured arrows. Escape cancels; one Undo restores the movement.':'C: choose a source terminal, then select the destination equipment and terminal.'} aria-pressed={mode===value} onClick={()=>{setMode(value);setSource(null);cancel()}}>{value==='camera'?'Camera':value==='move'?'Move':'Connect'} <kbd>{['V','W','C'][i]}</kbd></button>)}</div>
       <label>Selection<select aria-label="3D selection" value={selected??''} onChange={e=>onSelect(e.target.value||null)}><option value="">Whole system</option>{project.structures?.map(s=><option key={s.id} value={s.id}>{s.name} (structure)</option>)}{project.devices.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}{project.wires.map((w,i)=><option key={w.id} value={w.id}>Wire {i+1} · {w.area} mm²</option>)}</select></label>
       {wire&&<section className="route-feedback" aria-label="Supported cable routing">
@@ -212,8 +213,8 @@ export default memo(function Physical({project,selected,onSelect,onMove,onRoute,
       {!!project.fitIssues?.length&&<details className="fit-issues"><summary>{project.fitIssues.length} placement/routing items</summary>{project.fitIssues.map((issue,i)=><p key={i}>{issue}</p>)}</details>}
       <SpaceEditor project={shown} selected={selected} onChange={onProject} onSelect={onSelect}/>
       <small>{mode==='camera'?'Left drag: orbit · ':''}Right drag: pan · Wheel: zoom · F: focus · Home: fit</small>
-    </div>
     <div className="physical-view-controls">{project.building&&onReplay&&<button onClick={onReplay}>Replay construction</button>}{[['iso','Perspective'],['front','Front'],['top','Top'],['focus','Focus selected']].map(([value,label])=><button key={value} onClick={()=>camera(value)} disabled={value==='focus'&&!selected}>{label}</button>)}</div>
+    </div>,controlsHost)}
     <div className="physical-note"><Ruler size={14}/><span>Metres · 1 m major grid · 25 cm subdivisions</span></div>
   </div>
 })
@@ -231,6 +232,12 @@ export function Equipment({ device:d,planeNormal,selected,onSelect,mode,axis,onP
     {d.kind === 'pv' && <>{[1,2,3].map(i => <mesh key={`v${i}`} position={[s.width * (i/4-.5), 0, s.depth / 2 + .002]}><boxGeometry args={[.004, s.height-.04, .003]}/><meshStandardMaterial color="#819fa6"/></mesh>)}{[1,2,3,4,5].map(i => <mesh key={`h${i}`} position={[0, s.height*(i/6-.5), s.depth/2+.002]}><boxGeometry args={[s.width-.04,.004,.003]}/><meshStandardMaterial color="#819fa6"/></mesh>)}</>}
     {!profile&&['motor','capacitor','inductor'].includes(d.kind)&&<mesh position={[0,0,s.depth*.52]} rotation={[Math.PI/2,0,0]} castShadow><cylinderGeometry args={[Math.min(s.width,s.height)*.36,Math.min(s.width,s.height)*.36,s.depth*.3,24]}/><meshStandardMaterial color={d.kind==='motor'?'#606b73':d.kind==='capacitor'?'#bdc8d5':'#ba7946'} metalness={.65} roughness={.35}/></mesh>}
     {!profile&&d.kind==='motor'&&<mesh position={[0,0,s.depth*.76]} rotation={[Math.PI/2,0,0]}><cylinderGeometry args={[s.width*.09,s.width*.09,s.depth*.3,16]}/><meshStandardMaterial color="#bcc4c8" metalness={.8}/></mesh>}
+    {d.kind==='generator'&&<>
+      {[-1,1].map(side=><mesh key={side} position={[side*s.width*.15,s.height*.46,0]}><boxGeometry args={[s.width*.04,s.height*.12,s.depth*.1]}/><meshStandardMaterial color="#303837"/></mesh>)}
+      <mesh position={[0,s.height*.52,0]}><boxGeometry args={[s.width*.34,s.height*.04,s.depth*.1]}/><meshStandardMaterial color="#303837"/></mesh>
+      <mesh position={[s.width*.22,0,s.depth*.51]}><boxGeometry args={[s.width*.27,s.height*.53,s.depth*.04]}/><meshStandardMaterial color="#303837"/></mesh>
+      {[-.13,0,.13].map(row=><mesh key={row} position={[-s.width*.19,s.height*row,s.depth*.52]}><boxGeometry args={[s.width*.35,s.height*.04,s.depth*.02]}/><meshStandardMaterial color="#59432f"/></mesh>)}
+    </>}
     {!profile&&['fuse','switch','grid','three-phase'].includes(d.kind)&&<mesh position={[0,0,s.depth/2+.006]}><boxGeometry args={[s.width*.55,s.height*.5,.012]}/><meshStandardMaterial color={d.kind==='fuse'?'#e4d2a3':d.kind==='switch'?(d.on?'#39725a':'#993e36'):'#303f4b'}/></mesh>}
     {!profile&&['resistor','diode'].includes(d.kind)&&[-1,1].map(sign=><mesh key={sign} position={[sign*s.width*.26,0,s.depth/2+.002]}><boxGeometry args={[s.width*.09,s.height*.9,.006]}/><meshStandardMaterial color={d.kind==='diode'?'#e9e6dc':'#59442f'}/></mesh>)}
     {!profile&&d.kind==='bus'&&[-1,0,1].map(offset=><mesh key={offset} position={[offset*s.width*.32,0,s.depth/2+.004]}><sphereGeometry args={[Math.min(s.height*.22,.012),12,12]}/><meshStandardMaterial color="#c4cbd1" metalness={.9}/></mesh>)}

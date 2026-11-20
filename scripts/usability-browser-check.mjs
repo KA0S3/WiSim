@@ -1,3 +1,7 @@
+async function open3DMenu(page){
+ const button=page.getByRole('button',{name:'3D controls',exact:true})
+ if(await button.getAttribute('aria-pressed')==='false')await button.click()
+}
 ﻿import {chromium,expect} from '@playwright/test'
 import {mkdir,writeFile} from 'node:fs/promises'
 import {spawn} from 'node:child_process'
@@ -6,8 +10,8 @@ import path from 'node:path'
 await mkdir('artifacts',{recursive:true})
 await mkdir('.cache/browser-temp',{recursive:true})
 process.env.TEMP=path.resolve('.cache/browser-temp');process.env.TMP=process.env.TEMP
-const url='http://127.0.0.1:4191/'
-const server=spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4191','--strictPort'],{stdio:'pipe',windowsHide:true})
+const url=process.env.WISIM_URL??'http://127.0.0.1:4191/'
+const server=process.env.WISIM_URL?undefined:spawn(process.execPath,['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port','4191','--strictPort'],{stdio:'pipe',windowsHide:true})
 let browser
 const checks=[],errors=[]
 try{
@@ -46,7 +50,7 @@ try{
   await expect.poll(async()=>(await saved()).devices.length).toBe(before+1)
  })
  await check('designer compass rotates and floors start empty with a lower-floor outline',async()=>{
-  await page.getByRole('button',{name:'Design a system',exact:true}).click()
+  await page.getByRole('button',{name:'Auto design',exact:true}).click()
   await page.locator('.building-fold>summary').click()
   await page.getByRole('checkbox',{name:'Include a home layout',exact:true}).check()
   await expect(page.getByRole('img',{name:/roof preview/})).toHaveCount(4)
@@ -104,7 +108,7 @@ try{
   await close()
  })
  await check('designer converts watts and electricity units and explains recoverable constraints',async()=>{
-  await page.getByRole('button',{name:'Design a system',exact:true}).click()
+  await page.getByRole('button',{name:'Auto design',exact:true}).click()
   await page.getByLabel('Usage input units',{exact:true}).selectOption('units')
   await page.getByRole('spinbutton',{name:'Daily energy use',exact:true}).fill('12')
   await page.getByRole('spinbutton',{name:'Peak usage duration',exact:true}).fill('2')
@@ -120,9 +124,13 @@ try{
   await close()
  })
  await check('random demo prefills a fresh connected house and replays construction',async()=>{
-  await page.getByRole('button',{name:'Design a system',exact:true}).click()
+  await page.getByRole('button',{name:'Auto design',exact:true}).click()
   const demo=page.getByRole('button',{name:'Random demo house and system',exact:true})
+  const acInput=page.getByLabel('AC input',{exact:true})
+  await page.getByRole('checkbox',{name:'Randomize AC input for demo systems',exact:true}).uncheck()
+  await acInput.selectOption('generator')
   await demo.click()
+  await expect(acInput).toHaveValue('generator')
   const values=()=>page.getByRole('dialog').locator('input').evaluateAll(inputs=>inputs.map(i=>i.value).join('|'))
   const first=await values();await demo.click();expect(await values()).not.toBe(first)
   const fold=page.locator('.building-fold');if(!await fold.evaluate(el=>el.open))await fold.locator('>summary').click()
@@ -136,23 +144,26 @@ try{
   await expect(page.locator('.build-status')).toBeHidden({timeout:35000})
   const project=await saved()
   expect(project.fitIssues).toEqual([])
+  expect(project.requirements.acInput).toBe('generator')
+  const generator=project.devices.find(d=>d.kind==='generator')
+  expect(generator.physical[0]).toBeGreaterThan(Math.max(...project.building.floors[0].nodes.map(n=>n.point[0])))
   expect(project.building.stairs).toHaveLength(project.building.floors.length-1)
-  await page.getByRole('button',{name:'Replay construction',exact:true}).click()
+  await open3DMenu(page,'View');await page.getByRole('button',{name:'Replay construction',exact:true}).click()
   await expect(page.locator('.build-status')).toContainText('Building walls')
   expect((await saved()).id).toBe(project.id)
   await page.getByRole('button',{name:'Take control',exact:true}).click()
   await page.setViewportSize({width:390,height:844})
   await expect(page.locator('.physical-view canvas')).toBeVisible()
-  await page.getByRole('button',{name:'Hide 3D controls',exact:true}).click()
+  await page.keyboard.press('Escape')
   await page.screenshot({path:'artifacts/qa-demo-mobile.png'})
   await page.setViewportSize({width:1440,height:900})
  })
- await check('learning shows a scrollable brief and starts empty',async()=>{
+ await check('learning shows a scrollable brief and starts with the client load',async()=>{
   await page.getByRole('button',{name:'Learn scenarios',exact:true}).click()
   await expect(page.getByLabel('Starting equipment',{exact:true})).toHaveCount(0)
   await page.evaluate(()=>Math.random=()=>0)
   await page.getByRole('button',{name:'Start training',exact:true}).click()
-  await expect.poll(async()=>(await saved()).devices.length).toBe(0)
+  await expect.poll(async()=>(await saved()).devices.map(d=>d.kind)).toEqual(['load'])
   await expect(page.getByLabel('Scenario brief and checks',{exact:true})).toContainText('Remote clinic')
   await expect(page.getByLabel('Scenario brief and checks',{exact:true})).toContainText('Client load (W)')
   const brief=page.getByLabel('Scenario brief and checks',{exact:true})
@@ -171,11 +182,12 @@ try{
   await page.setViewportSize({width:1440,height:900})
   await page.reload({waitUntil:'networkidle'})
   await expect(page.getByLabel('Scenario brief and checks',{exact:true})).toContainText('Remote clinic')
-  expect((await saved()).devices).toHaveLength(0)
+  expect((await saved()).devices.map(d=>d.kind)).toEqual(['load'])
  })
  await check('repair training assigns a faulty system and removes automatic fixes',async()=>{
   await page.getByRole('button',{name:'Learn scenarios',exact:true}).click()
   await page.getByRole('button',{name:'Intermediate',exact:true}).click()
+  page.once('dialog',dialog=>dialog.accept())
   await page.getByRole('button',{name:'Start training',exact:true}).click()
   await expect.poll(async()=>(await saved()).devices.length).toBe(5)
   await expect(page.getByLabel('Scenario brief and checks',{exact:true})).toContainText('Find and repair its faults')
@@ -183,7 +195,7 @@ try{
   expect((await saved()).devices.some(d=>d.kind==='inverter'&&!d.on)).toBe(true)
   expect((await saved()).wires).toHaveLength(7)
   await expect(page.locator('.fix-suggestion')).toHaveCount(0)
-  await expect(page.getByRole('button',{name:'Design a system',exact:true})).toBeHidden()
+  await expect(page.getByRole('button',{name:'Auto design',exact:true})).toBeHidden()
   await page.waitForTimeout(700)
   await page.screenshot({path:'artifacts/qa-repair-training.png'})
   await page.setViewportSize({width:390,height:844})
@@ -196,6 +208,7 @@ try{
   const name=(await saved()).name
   const current=page.getByRole('article',{name:`Saved project ${name}`,exact:true}).filter({hasText:'Current project'})
   await current.getByRole('button',{name:`Delete saved project ${name}`,exact:true}).click()
+  page.once('dialog',dialog=>dialog.accept())
   await current.getByRole('button',{name:'Confirm delete',exact:true}).click()
   await expect.poll(async()=>(await saved()).name).not.toBe(name)
   await projects()
@@ -206,5 +219,5 @@ try{
  expect(errors).toEqual([])
 }finally{
  await writeFile('artifacts/usability-check.json',JSON.stringify({checks,errors},null,2))
- await browser?.close();server.kill()
+ await browser?.close();server?.kill()
 }

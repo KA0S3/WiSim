@@ -7,7 +7,7 @@ export async function diagramPositions(project:Project,mode:'layered'|'compact'|
  if(!display.devices.length)return {}
  const {default:ELK}=await import('elkjs/lib/elk.bundled.js'),elk=new ELK()
  const height=(id:string)=>projection.groups.find(g=>g.group.id===id)?.height??180
- const stages:Partial<Record<Kind,number>>={pv:0,grid:0,'three-phase':0,mppt:2,charger:2,battery:4,inverter:6,load:8,'dc-load':8,motor:8}
+ const stages:Partial<Record<Kind,number>>={pv:0,grid:0,generator:0,'three-phase':0,mppt:2,charger:2,battery:4,inverter:6,load:8,'dc-load':8,motor:8}
  const neighbours=new Map(display.devices.map(d=>[d.id,new Set<string>()]))
  for(const wire of display.wires){neighbours.get(wire.from)?.add(wire.to);neighbours.get(wire.to)?.add(wire.from)}
  const ranks=new Map(display.devices.map(d=>[d.id,stages[d.kind]??4]))
@@ -23,7 +23,7 @@ export async function diagramPositions(project:Project,mode:'layered'|'compact'|
   }
   if(difference<.0001)break
  }
- const distance=new Map<string,number>(),queue=display.devices.filter(d=>['pv','battery','grid','three-phase'].includes(d.kind)).map(d=>d.id)
+ const distance=new Map<string,number>(),queue=display.devices.filter(d=>['pv','battery','grid','generator','three-phase'].includes(d.kind)).map(d=>d.id)
  queue.forEach(id=>distance.set(id,0))
  for(let i=0;i<queue.length;i++)for(const id of neighbours.get(queue[i])!)if(!distance.has(id)){distance.set(id,distance.get(queue[i])!+1);queue.push(id)}
  const order=(a:string,b:string)=>ranks.get(a)!-ranks.get(b)!||(distance.get(a)??0)-(distance.get(b)??0)||a.localeCompare(b)

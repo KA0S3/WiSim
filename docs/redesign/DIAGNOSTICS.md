@@ -19,21 +19,19 @@ Open the meter tool in Schematic, or place probes in Terminal detail, then choos
 
 Resistance/continuity require isolated sources. Pausing leaves sources connected. Reactive equipment also requires a current solved frame that verifies negligible retained energy. Switching equipment off preserves its stored state. The model does not simulate physical discharge of an isolated component. Discharge through an appropriate connected path or use the explicit simulation reset for a fresh initial state.
 
-Focused verification passed eight new instrument/fault cases, the 13 existing connection cases, three existing measurement cases and one real-ngspice retained-energy regression. TypeScript passed. The first focused run caught a missing shared window return field, which was corrected. The real-solver regression caught the isolated-energy state bug described above. Broad/browser regression is deferred until the ordered sections are complete.
+Focused verification passed eight new instrument/fault cases, the 13 existing connection cases, three existing measurement cases and one real-ngspice retained-energy regression. TypeScript passed. The first focused run caught a missing shared window return field, which was corrected. The real-solver regression caught the isolated-energy state bug described above. See the [current audit](AUDIT.md) for browser verification and open issues.
 
 - **Red** marks faults such as reversed supply polarity, incompatible battery/inverter voltage classes, direct AC/DC terminal crossovers, excessive PV Voc or a tripped path.
 - **Amber** marks warnings such as an unsuitable charging target, conductor drop, overload or a partially connected active device.
-- **Notes** include entirely unconnected newly placed equipment. They remain in the diagnostics panel without immediately filling the diagram with callouts.
+- **Notes** include entirely unconnected newly placed equipment. They remain in the diagnostics panel and can be found using the Notes filter.
 
-Affected schematic equipment has a coloured border and exclamation badge. Conductors retain their insulation colour with a severity halo. Floating callout cards occupy a separate margin beside the schematic; phones use a separate bottom strip. Boxes do not cover the diagram. Dashed leader lines are issue pointers, not electrical connections, and route around equipment rectangles.
-
-Multiple findings for one target share a callout. **Locate problem** centres the equipment or the conductor's endpoints. **Details & tips** opens the full panel. Offscreen targets or dense layouts without a clear leader rely on the severity marker and Locate action; the router never substitutes a line through equipment.
+Affected schematic equipment has a coloured border and exclamation badge. Conductors retain their insulation colour with a severity halo. In System diagnostics, choose **Inspect** on a finding to locate its equipment or conductor. For a grouped device, inspection opens the group so you can see the individual unit.
 
 **System diagnostics** in the left rail is available in every view and on phones. It includes all findings, severity counts, a severity filter, search, equipment/conductor links, next-step guidance and engine errors. The old five-item truncation is removed. Static connection checks remain available when the solver is recalculating or cannot solve a mistaken network.
 
 ## Apply fixes one at a time
 
-Where a supported repair is available, choose **Suggested fix…**. Read its proposed change, then choose **Apply this fix** or **Keep as is**. Nothing changes during the preview. Each application creates one project Undo step, updates measured cable lengths, and recalculates findings. Other faults can remain or become visible afterwards.
+Where a supported repair is available, choose **Auto-fix…**. Read its proposed change, then choose **Apply this fix** or **Keep as is**. Nothing changes during the preview. Each application creates one project Undo step, updates measured cable lengths, and recalculates findings. Other faults can remain or become visible afterwards.
 
 Current suggestions can remove a direct AC/DC crossover conductor, swap reversed converter input attachments, isolate a conflicting battery source, or adjust generic inverter/PV-input model settings to remove a specific voltage mismatch. Generic setting changes are labelled simulation assumptions; they do not upgrade real hardware. Named-product ratings are not silently rewritten to fit the circuit. Chemistry/charging profiles, arbitrary topology repairs, fuse coordination and conductor ampacity are not guessed; use the manual guidance for unsupported fixes.
 
@@ -44,3 +42,7 @@ Closest-product cards retain nearest verified alternatives even outside strict r
 Conflicting options show their reasons. Their Apply button remains usable in the sandbox so you can experiment. Programmatic compatible-match selection excludes those conflicts. Product presence, a clear diagnostics panel, or the absence of a warning does not establish firmware fidelity, complete compatibility or installation compliance.
 
 The PV check uses the generic temperature coefficient already used by the solver, examines series/parallel source paths within a bounded search, and reports when a complex topology exceeds that bound. Unequal parallel PV Voc produces a review warning rather than treating nonlinear panels as contradictory ideal voltage sources.
+
+A repair preview identifies the exact action, including any cable endpoints it will reconnect or whether it will rebuild a generated design. For the original solar example with its battery deleted and its other wiring intact, Auto-fix restores the generic Home battery and previews the four connections before applying them. In Learn, expand **Reveal repair assistance (spoiler)** to see an available repair.
+
+Auto design checks candidate systems under full sunlight, battery-only startup and auxiliary AC input where configured. If a candidate fails, it tries additional sizing headroom or alternative strings when allowed by the inputs. The saved notes identify a successful adjustment. If no checked candidate passes, the designer displays the failed check and leaves the open project in place.

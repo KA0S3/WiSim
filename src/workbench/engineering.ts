@@ -1,6 +1,6 @@
 import {ampacity,engineeringSources} from './ampacity'
 import {terminationAssessment} from './terminations'
-import type {Finding,Project,Frame,Device,RuntimeState} from './model'
+import {acSourceKinds,type Finding,type Project,type Frame,type Device,type RuntimeState} from './model'
 import {batteryNetwork} from './connection-checks'
 
 export function batteryPermission(project:Project,d:Device,state:RuntimeState){
@@ -64,7 +64,7 @@ export function engineeringFindings(project:Project,frame?:Pick<Frame,'wires'|'d
   for(const w of project.wires)link(`${w.from}:${w.fromPort}`,`${w.to}:${w.toPort}`)
   const reached=new Set([...grounds].map(id=>id+':p')),queue=[...reached];while(queue.length)for(const n of edges.get(queue.shift()!)??[])if(!reached.has(n)){reached.add(n);queue.push(n)}
   for(const d of project.devices.filter(d=>['inverter','charger','mppt','load','motor','pv'].includes(d.kind)))if(!d.ports.some(p=>p.id==='pe')||!reached.has(d.id+':pe'))add('bond-'+d.id,'warning','Equipment protective earth is unconnected','Add the optional chassis PE terminal and a conductor to the earth reference where the actual equipment requires bonding. Double-insulated equipment requires its own documented assessment.',d.id)
-  const validBonds=a.neutralBondIds.filter(id=>{const d=devices.get(id);return d&&['inverter','grid','three-phase'].includes(d.kind)&&d.ports.some(p=>p.id==='pe')&&reached.has(d.id+':pe')});if(a.scheme==='TN'&&validBonds.length!==1)add('neutral-bond','warning','Neutral-earth bond arrangement needs review',`${validBonds.length} connected source bonds. Specify the intended source bond and wire its chassis PE to earth; switching sources and separately derived systems need a dedicated assessment.`)
+  const validBonds=a.neutralBondIds.filter(id=>{const d=devices.get(id);return d&&acSourceKinds.has(d.kind)&&d.ports.some(p=>p.id==='pe')&&reached.has(d.id+':pe')});if(a.scheme==='TN'&&validBonds.length!==1)add('neutral-bond','warning','Neutral-earth bond arrangement needs review',`${validBonds.length} connected source bonds. Specify the intended source bond and wire its chassis PE to earth; switching sources and separately derived systems need a dedicated assessment.`)
   if(!a.source.trim())add('earthing-source','warning','Earthing inputs need evidence','Record the source/test evidence and required disconnection time. Input criteria do not certify installed continuity or touch safety.')
  }
  return out

@@ -36,17 +36,20 @@ test('designer recovery keeps the energy, peak demand and backup brief',()=>{
 })
 
 test('random houses produce different coherent geometry and viable systems across all floor counts',()=>{
- const signatures=new Set(),floorCounts=new Set()
+ const signatures=new Set(),floorCounts=new Set(),inputs=new Set()
  for(const seed of [1,2,3,5,7,12]){
   const r=randomDemoRequirements(seeded(seed)),layout=r.building
   assert.equal(validBuilding(layout),true)
   signatures.add(JSON.stringify([layout.floors.map(f=>f.nodes.map(n=>n.point)),layout.roofShape,r.dailyKwh,r.peakW]))
   floorCounts.add(layout.floors.length)
+  inputs.add(r.acInput)
   assert.equal(layout.stairs.length,layout.floors.length-1)
   const p=designSystem(r)
   assert.equal(validateProject(p),true)
   assert.deepEqual(p.fitIssues,[])
-  assert.ok(p.wires.every(w=>w.autoRoute&&!w.autoRoute.error))
+  const generator=p.devices.find(d=>d.kind==='generator')
+  if(generator)assert.ok(generator.physical[0]>Math.max(...layout.floors[0].nodes.map(node=>node.point[0])))
+  assert.ok(p.wires.every(w=>w.autoRoute&&!w.autoRoute.error||generator&&[w.from,w.to].includes(generator.id)&&w.lengthMode==='physical'))
   const schedule=constructionSchedule(p)
   for(const d of p.devices.filter(d=>d.kind!=='pv')){
    const floor=p.structures.find(s=>s.id===d.mount?.structureId)?.building?.floor??0
@@ -57,6 +60,8 @@ test('random houses produce different coherent geometry and viable systems acros
  }
  assert.equal(signatures.size,6)
  assert.deepEqual([...floorCounts].sort(),[1,2,3])
+ assert.deepEqual([...inputs].sort(),['generator','none','shore'])
+ for(const input of inputs)assert.equal(randomDemoRequirements(seeded(1),input).acInput,input)
 })
 
 test('stairs cut the upper floor and doorways leave a full-height walk-through opening',()=>{

@@ -1,3 +1,4 @@
+import {stringSizing} from '../src/workbench/design-options.ts'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {CATALOG_RECORDS} from '../src/catalog.ts'
@@ -12,11 +13,14 @@ const record=id=>CATALOG_RECORDS.find(r=>r.id===id)
 
 test('readiness separates complete partial profiles from research status and validates every insertable model',()=>{
  const ready=CATALOG_RECORDS.filter(simulationReady)
- assert.equal(ready.length,63);assert.ok(ready.filter(r=>r.status==='partially verified').length>=40)
+ assert.equal(ready.length,64);assert.ok(ready.filter(r=>r.status==='partially verified').length>=40)
  for(const r of ready){const p=blankProject(),d=applyCatalogRecord(makeDevice(catalogKind(r),0,0),r);p.devices=[d];assert.ok(validateProject(JSON.parse(JSON.stringify(p))),r.id);assert.deepEqual([d.spec.width,d.spec.height,d.spec.depth],r.simulation.dimensions,r.id)}
  const partial=record('victron-blue-smart-ip22-12-15');assert.ok(simulationReady(partial));const d=applyCatalogRecord(makeDevice('charger',0,0),partial);assert.equal(d.spec.voltage,230);assert.equal(d.spec.rating,15);assert.ok(Math.abs(d.spec.chargeVoltage-14.4)<1e-9)
  const incomplete=structuredClone(partial);delete incomplete.simulation.chargeVoltage;assert.equal(simulationReady(incomplete),false);assert.throws(()=>applyCatalogRecord(makeDevice('charger',0,0),incomplete),/not simulation-ready/)
  assert.equal(simulationReadiness(record('renogy-rover-li-40a')).ready,false)
+ const breaker=applyCatalogRecord(makeDevice('fuse',0,0),record('blue-sea-285-7184-60a'))
+ assert.equal(breaker.spec.rating,60)
+ assert.deepEqual([breaker.protection.domain,breaker.protection.voltage,breaker.protection.breakingA],['dc',48,3000])
 })
 test('sourced hardware revisions and restricted controller SKUs retain distinct limits',()=>{
  const legacy=applyCatalogRecord(makeDevice('inverter',0,0),record('victron-phoenix-12-1600')),current=applyCatalogRecord(makeDevice('inverter',0,0),record('victron-phoenix-24-1600'))
@@ -44,4 +48,17 @@ test('bank replacement rejects tapped/unequal strings and sourced configuration 
  const p=blankProject(),a=makeDevice('battery',0,0),b=makeDevice('battery',300,0),load=makeDevice('resistor',600,0);a.spec.voltage=b.spec.voltage=12.8;p.devices=[a,b,load];p.wires=[connect(a,'p',b,'n'),connect(a,'p',load,'p')]
  assert.throws(()=>applyBankProduct(p,a.id,record('victron-lithium-smart-12-8-100')),/midpoint/)
  a.spec.voltage=80;p.devices=[a];p.wires=[];assert.throws(()=>bankProductPlan(p,a.id,record('victron-lithium-smart-12-8-100')),/whole-unit|at most/)
+})
+
+test('BlueSolar 215 W and SmartSolar 250/60 match the manual string calculation',()=>{
+ const {spec}=applyCatalogRecord(makeDevice('pv',0,0),record('victron-bluesolar-215w-24v'))
+ const controller=record('victron-smartsolar-250-60')
+ const four=stringSizing(spec,controller,4,-10,70)
+ assert.equal(four.coldVoc.toFixed(2),'206.58')
+ assert.equal(four.maxVoc,245)
+ assert.equal(four.maxStrings,3)
+ assert.ok(four.hotVmp>four.tracking)
+ const five=stringSizing(spec,controller,5,-10,70)
+ assert.equal(five.coldVoc.toFixed(2),'258.23')
+ assert.ok(five.coldVoc>five.maxVoc)
 })

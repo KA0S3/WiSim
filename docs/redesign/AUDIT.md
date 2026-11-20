@@ -1,0 +1,44 @@
+# WiSim product audit
+
+19 November 2026. Scope covers the current workbench checkout, its automated checks, the production build and selected primary references for comparable workflows.
+
+## Confirmed findings
+
+- The previous handoff's solver and catalogue failures no longer reproduce. `npm run verify` passed typechecking, all 287 active automated tests, catalogue validation, the production build and all 13 Edge browser suites. Cleanup removed one test for the retired floating fault-card router. The production build required sandbox approval for Vite to resolve its configuration.
+- The large-system Edge checks produced live simulation frames at 100, 250 and 500 devices, including a separate 500-device solar, storage and AC fixture. All expected conductors rendered in those fixtures.
+- The production entry script is 1.84 MB before compression (490 kB gzip). The separate solver worker is 20.53 MB before compression. Measure the cold path from navigation to first valid reading on a throttled connection, including any parallel requests. Establish a budget before moving simulation startup or splitting shared 3D dependencies.
+- **Phone multimeter:** In Edge at 390 × 844, fit the schematic and open the multimeter. The drawer intercepts taps at all 18 on-screen terminal centers. Dragging the meter down by its grip detaches it and restores access to 16 terminals in the default example. Add a compact probe mode or a tap-to-detach control, then verify two terminal taps produce a reading. The existing phone test covers mode selection.
+- Schematic terminals use React Flow handles. React Flow has click-to-connect enabled, and the workbench presents drag instructions. The handles lack a keyboard activation path in the workbench. Add a focusable wire command for choosing two endpoints and run the same connection validation, including compact groups, cancel and Undo. Review pointer alternatives as well as keyboard operation on real devices. [W3C dragging movements](https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements.html)
+- Catalogue coverage is 63 supported simulation profiles out of 131 records. The selector filters by readiness. Expand coverage by device family and document which electrical ratings, protection behavior and dimensions are sourced. The remaining engineering limits include incomplete regional rule coverage, generic protection behavior and source-domain fault assumptions. [Engineering boundaries](ENGINEERING.md)
+- **Catalogue defaults:** The inspector exposes Restore catalogue defaults only for records with verified status and an exact kind match. The equipment library also accepts simulation-ready partially verified records, and maps catalogue `battery-charger` to workbench `charger`. In Edge, the Victron Blue Smart IP22 12/15 charger inserted successfully and its inspector offered no restore action. Use the library's readiness and kind mapping for restoring defaults.
+
+## What to build next
+
+| Priority | Opportunity | First useful version |
+| --- | --- | --- |
+| High | Clear equipment and wiring preflight | List the binding constraints and margins for each candidate string, including rejected alternatives. Preserve the existing hot/cold and multiple-MPPT checks. Add an independent datasheet worked example for each supported profile family. [Victron MPPT sizing calculator](https://professional.victronenergy.com/app/news/268) |
+| High | Weather and outage replay | Reuse the saved appliance schedule with an hourly weather file. Show battery state of charge, energy unserved, curtailment and the worst outage window. Save the data source, period and assumptions with the result. Validate grid-connected yield and off-grid availability against separate reference cases. [PVWatts V8](https://developer.nlr.gov/docs/solar/pvwatts/v8/), [PVGIS calculation methods](https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/general-information/data-sources-calculation-methods_en) |
+| Medium | Reviewable diagnostics | Allow an intentional open terminal or reviewed advisory to carry a note. Reopen the finding automatically if relevant wiring or ratings change. Export notes and assumptions alongside the existing findings. [KiCad electrical rules checker](https://docs.kicad.org/10.0/en/eeschema/eeschema.html) |
+| Medium | Design comparison and field labels | Compare two saved versions by topology, equipment quantities, cable length, assumptions and unresolved findings. Reuse stable conductor and terminal references to generate label sheets and drawing cross-references. [QElectroTech conductor numbering](https://download.qelectrotech.org/qet/manuals/html/users/schema/conductor/conductor_creation.html), [QElectroTech cross-references](https://download.qelectrotech.org/qet/manuals/html/users/project/properties/new_folio/cross_references.html) |
+| Medium | Portable project library | Export a single archive with all selected projects and their retained versions. Preview restore conflicts before importing into another browser. Named project backups currently travel as individual JSON files. |
+| Later | Fault replay and guided commissioning | Extend Learn with repeatable changes, including breaker trips, source loss and staged load starts. Show expected readings at specific terminals, and let learners export the measurement trace and repair sequence. |
+
+The [review checklist](REVIEW.md) covers physical-phone and assistive-technology workflows that still need manual verification. Add a smoke test in CI for a solved circuit, JSON round-trip and two-probe measurement. Run that smoke test in a second browser engine as well as the existing Edge suite.
+
+## Verification progress
+
+| Workflow | Evidence |
+| --- | --- |
+| Persistent sidebar and fault locators | Edge checks cover the collapsed default, panel persistence across dialogs and fault inspection, expandable explanations, repair previews and locator lines at desktop and phone widths. |
+| Phone probing and keyboard wiring | Edge and Firefox produce a two-probe battery reading at phone width. Both browsers also verify a docked multimeter reading with keyboard-selected terminals. They verify keyboard wiring, Escape and focus return, wiring to a compact group without expanding it, and Undo. These checks use desktop browsers with an emulated phone viewport. |
+| Catalogue restoration and coverage | The Blue Smart IP22 is restored after changing its charge current in Edge and Firefox. The restored device retains its ID, reference and placement. The Blue Sea 7184 adds a sourced DC protection profile and brings the total to 64. |
+| Engineering preflight and replay | The sizing panel and selected array use the same sizing calculation. The engineering notes document the worked string calculation and hourly energy reference cases. Edge and Firefox verify that the replay imports consecutive hours and exports the outage window. |
+| Diagnostic reviews | Edge and Firefox verify that notes survive reload, reopen after an electrical edit and export with the updated review status. |
+| Versions, labels and archive | The project library suite exercises version comparison and restore. Edge and Firefox download and reimport the project archive, including retained versions and conflict handling. Both pages of the 29-conductor A4 field-label PDF were rendered and reviewed for clipping and the conductor-end reference sequence. |
+| Commissioning | Edge and Firefox exercise staged load, protection trip, repair and source restoration against the live solver. |
+
+The full local verification run passed 291 automated tests and all 13 Edge browser suites, including the persistent engineering panel after Undo. A subsequent production build with the docked keyboard multimeter passed all 18 serial smoke checks across Edge and Firefox. Those checks cover the phone meter, keyboard wiring and cancellation, catalogue restore, diagnostic notes, weather replay, commissioning and the archive round trip. Physical-phone and assistive-technology review remain open. GitHub publication is on hold at the user's request.
+
+The local axe scan reported no violations in the WCAG 2.0 and 2.1 A and AA rules it ran on four Edge views. The views were the schematic, diagnostics drawer, project dialog and docked phone meter with the terminal chooser expanded. The fixes gave the icon-only phone Export control an accessible name, improved contrast on light controls and meter readings, and made the workspace inert while an app dialog is open. The keyboard regression checks initial focus, Tab wrapping, Escape and focus return. The scan output is in `artifacts/audit-accessibility.json`. Physical-phone and manual screen-reader checks remain open.
+
+The production build with these accessibility fixes passed all 20 smoke checks across Edge and Firefox, including dialog focus containment and return in both browsers.

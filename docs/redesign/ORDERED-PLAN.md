@@ -1,6 +1,6 @@
 # Ordered implementation plan
 
-Updated 17 November 2026. This plan records the current user request and supersedes earlier implementation priorities. The tracked goal covers all seven sections below in order.
+Updated 17 November 2026. This plan records the redesign scope and its original implementation order. See the [current audit](AUDIT.md) for checkout verification and proposed follow-up.
 
 ## Working agreement
 

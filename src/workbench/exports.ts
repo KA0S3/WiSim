@@ -80,3 +80,29 @@ export async function exportDiagram(input:Project){
  for(let page=1;page<=pages;page++){doc.setPage(page);doc.setTextColor('#6b7a6c');doc.setFontSize(8);doc.text('Concept design - verify equipment, ampacity, protection, earthing and terminations before installation.',15,height-12);doc.text(`${page} / ${pages}`,width-15,height-12,{align:'right'})}
  doc.save('wisim-wiring-diagram.pdf')
 }
+
+export async function exportFieldLabels(project: Project) {
+  const {connections, terminations} = exportData(project)
+  if (!connections.length) throw new Error('Connect a conductor before exporting field labels.')
+  const {jsPDF} = await import('jspdf')
+  const pdf = new jsPDF({unit: 'mm', format: 'a4'})
+  const perPage = 30
+  for (const [index, end] of terminations.entries()) {
+    const slot = index % perPage
+    if (index && !slot) pdf.addPage()
+    const x = 10 + (slot % 3) * 63
+    const y = 12 + Math.floor(slot / 3) * 27
+    const destination = terminations[index % 2 ? index - 1 : index + 1]
+    pdf.setDrawColor(180)
+    pdf.rect(x, y, 63, 27)
+    pdf.setFontSize(13)
+    pdf.text(end.reference, x + 3, y + 7)
+    const lines = [end.equipment + '.' + end.port, 'To ' + destination.equipment + '.' + destination.port]
+    for (const [row, line] of lines.entries()) {
+      pdf.setFontSize(10)
+      pdf.setFontSize(Math.min(10, 560 / Math.max(1, pdf.getTextWidth(line))))
+      pdf.text(line, x + 3, y + 14 + row * 6)
+    }
+  }
+  pdf.save('wisim-field-labels.pdf')
+}

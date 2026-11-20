@@ -17,6 +17,8 @@
     "ui:legacy": "node scripts/ui-check.mjs",
     "verify": "npm run typecheck && npm test && npm run catalog:check && npm run build && npm run ui:check && npm run ui:physical && npm run ui:touch && npm run ui:projects && npm run ui:diagnostics && npm run ui:recovery && npm run ui:large && npm run ui:controls && npm run ui:groups && npm run ui:designer && npm run ui:engineering && npm run ui:improvements && npm run ui:usability",
     "ui:physical": "node scripts/physical-browser-check.mjs",
+    "ui:smoke": "playwright test --config scripts/smoke.config.mjs",
+    "ui:startup": "node scripts/cold-start.mjs",
     "ui:performance": "node --loader ./scripts/ts-esbuild-loader.mjs scripts/workbench-performance.mjs",
     "ui:touch": "node scripts/workbench-touch-check.mjs",
     "ui:projects": "node scripts/project-library-browser-check.mjs",

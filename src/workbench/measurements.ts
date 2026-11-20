@@ -1,4 +1,4 @@
-import type {Project,RuntimeState,NumericSeries} from './model'
+import {acSourceKinds,type Project,type RuntimeState,type NumericSeries} from './model'
 
 export type Measurement = {ac:boolean;frequency:number|null;observationFrequency?:number|null}
 export const measurementKey=(id:string,port:string)=>`${id}:${port}`
@@ -16,7 +16,7 @@ export function networkMeasurements(project:Project,state:RuntimeState):Record<s
  }
  for(const w of project.wires)join(measurementKey(w.from,w.fromPort),measurementKey(w.to,w.toPort))
  for(const d of project.devices){
-  if(!d.on||state.trips.includes(d.id)||!['grid','three-phase','inverter'].includes(d.kind))continue
+  if(!d.on||state.trips.includes(d.id)||!acSourceKinds.has(d.kind))continue
   const port=d.kind==='inverter'?'l':d.kind==='three-phase'?'a':'p',key=root(measurementKey(d.id,port))
   const values=frequencies.get(key)??new Set<number>();values.add(d.spec.frequency);frequencies.set(key,values)
  }
