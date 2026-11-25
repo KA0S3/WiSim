@@ -149,3 +149,39 @@ test('adjacent rooms share a continuous roof plane clipped to the building footp
   near(world[1],layout.floorHeight+Math.min(world[2]-minZ,maxZ-world[2])*Math.tan(25*Math.PI/180))
  }
 })
+
+test('detached footprints get their own gable ridges and closed roof ends',()=>{
+ const layout=divided()
+ const detached=[[12,8],[16,8],[16,10],[12,10]]
+ for(const [i,point] of detached.entries())layout.floors[0]=addPlanWall(layout.floors[0],point,detached[(i+1)%detached.length])
+ const room=buildingRooms(layout).find(room=>room.polygon.every(([x])=>x>10))
+ const surfaces=buildingStructures(layout).filter(surface=>surface.building.roomId===room.id)
+ const roofs=surfaces.filter(surface=>surface.kind==='roof')
+ const caps=surfaces.filter(surface=>surface.kind==='wall'&&surface.building.stage==='roof')
+ assert.equal(roofs.length,2)
+ assert.equal(caps.length,2)
+ const top=(parts)=>Math.max(...parts.flatMap(surface=>surface.polygons.flatMap(poly=>poly.map(([x,y])=>transformPoint([x,y,0],surface.position,surface.rotation)[1]))))
+ near(top(roofs),layout.floorHeight+Math.tan(layout.roofPitch*Math.PI/180))
+ near(top(caps),top(roofs))
+ const allCaps=buildingStructures(layout).filter(surface=>surface.kind==='wall'&&surface.building.stage==='roof')
+ assert.ok(allCaps.every(surface=>Math.abs(surface.position[0])>1))
+})
+
+test('an L-shaped hip roof starts a valley at the inside eave and carries it into the ridge',()=>{
+ const layout=defaultBuilding()
+ layout.roofShape='hip'
+ const outline=[[0,0],[8,0],[8,2],[2,2],[2,6],[0,6]]
+ layout.floors[0]={id:uid('floor'),nodes:[],walls:[]}
+ for(const [i,point] of outline.entries())layout.floors[0]=addPlanWall(layout.floors[0],point,outline[(i+1)%outline.length])
+ const slope=Math.tan(layout.roofPitch*Math.PI/180)
+ for(const divided of [false,true]){
+  if(divided)layout.floors[0]=addPlanWall(layout.floors[0],[0,2],[2,2])
+  const parts=buildingStructures(layout)
+  const faces=parts.filter(part=>part.kind==='roof').flatMap(part=>part.polygons.map(poly=>poly.map(([x,y])=>transformPoint([x,y,0],part.position,part.rotation))))
+  assert.equal(parts.filter(part=>part.kind==='wall'&&part.building.stage==='roof').length,0)
+  near(faces.reduce((sum,face)=>sum+Math.abs(polygonArea(face.map(([x,,z])=>[x,z]))),0),24)
+  const valleyFaces=faces.filter(face=>face.some(([x,y,z])=>Math.hypot(x-2,z-2)<1e-6&&Math.abs(y-layout.floorHeight)<1e-6)&&
+    face.some(([x,y,z])=>Math.hypot(x-1,z-1)<1e-6&&Math.abs(y-layout.floorHeight-slope)<1e-6))
+  assert.ok(valleyFaces.length>=2)
+ }
+})

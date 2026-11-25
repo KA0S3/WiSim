@@ -1,8 +1,9 @@
+import {imageryCredit,type SiteSnapshot} from './site-snapshot'
 import {createPortal} from 'react-dom'
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type MutableRefObject } from 'react'
 import { Canvas, useThree,useFrame } from '@react-three/fiber'
 import { ContactShadows, Grid, OrbitControls, RoundedBox, Line } from '@react-three/drei'
-import { Vector3, Vector2, Shape, ExtrudeGeometry, Group, MOUSE, TOUCH, Box3, Mesh, MeshStandardMaterial, Raycaster, type Intersection } from 'three'
+import { TextureLoader, SRGBColorSpace, type Texture, Vector3, Vector2, Shape, ExtrudeGeometry, Group, MOUSE, TOUCH, Box3, Mesh, MeshStandardMaterial, Raycaster, type Intersection } from 'three'
 import { Ruler } from 'lucide-react'
 import { definitions, type Device, type Project, type Structure } from './model'
 
@@ -16,6 +17,20 @@ import { Translation, type Axis } from './Translation'
 import {previewSupportedRoute} from './surface-routing'
 import {constructionDelay,constructionTotal,constructionSchedule,constructionProgress,constructionStage} from './building-animation'
 import type { Connection } from '@xyflow/react'
+
+function SiteGround({site}:{site:SiteSnapshot}) {
+  const [texture,setTexture]=useState<Texture|null>(null)
+  useEffect(()=>{
+    let active=true
+    const loaded=new TextureLoader().load(site.image,map=>{
+      if(active){map.colorSpace=SRGBColorSpace;setTexture(map)}
+    })
+    return ()=>{active=false;loaded.dispose()}
+  },[site.image])
+  return texture&&<mesh position={[site.x,-.012,site.z]} rotation={[-Math.PI/2,0,0]} raycast={()=>{}}>
+    <planeGeometry args={[site.width,site.height]}/><meshBasicMaterial map={texture} toneMapped={false}/>
+  </mesh>
+}
 
 function portPosition(d: Device, portId: string): [number, number, number] {
   return terminalPosition(d,portId)
@@ -136,8 +151,8 @@ function Scene({project,selected,onSelect,mode,axis,command,onPreview,onMove,onC
   const visibleWire=(w:Project['wires'][number])=>!w.autoRoute?.error&&!hiddenDevices.has(w.from)&&!hiddenDevices.has(w.to)
   const wire=project.wires.find(w=>w.id===selected)
   return <><color attach="background" args={['#eef2f1']}/><ambientLight intensity={1.8}/><directionalLight position={[4,7,5]} intensity={2.5} castShadow/><directionalLight position={[-3,3,-2]} intensity={1}/>
-    <Grid args={[20,20]} cellSize={.25} sectionSize={1} cellColor="#ccd3c8" sectionColor="#b8c4b7" fadeDistance={30} infiniteGrid/>
-    {project.structures?.filter(s=>roofVisible||s.kind!=='roof').map((s,i)=><BuildReveal key={s.id} clock={clock} delay={schedule.get(s.id)??0}><StructureBody targets={targets} seeThrough={seeThrough} structure={s} selected={s.id===selected} onSelect={onSelect} active={mode==='move'&&s.id===selected} axis={axis} onPreview={p=>onStructurePreview(s.id,p)} onCommit={p=>onStructureMove(s.id,p)} onCancel={onCancel}/></BuildReveal>)}
+    {project.building?.siteSnapshot && project.building.siteSnapshot.visible!==false?<SiteGround site={project.building.siteSnapshot}/>:<Grid args={[20,20]} cellSize={.25} sectionSize={1} cellColor="#ccd3c8" sectionColor="#b8c4b7" fadeDistance={30} infiniteGrid/>}
+    {project.structures?.filter(s=>roofVisible||(s.kind!=='roof'&&s.building?.stage!=='roof')).map((s,i)=><BuildReveal key={s.id} clock={clock} delay={schedule.get(s.id)??0}><StructureBody targets={targets} seeThrough={seeThrough} structure={s} selected={s.id===selected} onSelect={onSelect} active={mode==='move'&&s.id===selected} axis={axis} onPreview={p=>onStructurePreview(s.id,p)} onCommit={p=>onStructureMove(s.id,p)} onCancel={onCancel}/></BuildReveal>)}
     {project.devices.filter(d=>roofVisible||d.kind!=='pv').map((d,i)=><BuildReveal key={d.id} clock={clock} delay={schedule.get(d.id)??0}><Equipment targets={targets} seeThrough={seeThrough} device={d} planeNormal={d.mount?new Vector3(0,0,1).applyQuaternion(orientation(project.structures?.find(s=>s.id===d.mount!.structureId)?.rotation)).toArray() as Point3:undefined} selected={d.id===selected} onSelect={onSelect} mode={mode} axis={axis} onPreview={onPreview} onMove={onMove} onCancel={onCancel} onPort={onPort}/></BuildReveal>)}
     <BuildReveal clock={clock} delay={constructionDelay('wire',0,0,floorCount)}>{project.wires.filter(visibleWire).map(w=><Line key={w.id} points={physicalWirePoints(project,w)} color={w.color} lineWidth={selected===w.id?5:2} transparent opacity={wire&&selected!==w.id? .25:1} onClick={e=>{e.stopPropagation();onSelect(w.id)}}/>)}</BuildReveal>
     {wire&&visibleWire(wire)&&wire.route3d?.map((point,index)=><Translation key={`${wire.id}-${index}`} position={point} active={mode==='move'&&bend===index} axis={axis} onPreview={p=>onRoutePreview(wire.id,wire.route3d!.map((v,i)=>i===index?p:v))} onCommit={p=>onRoute(wire.id,wire.route3d!.map((v,i)=>i===index?p:v))} onCancel={onCancel}><mesh onClick={e=>{e.stopPropagation();setBend(index)}}><sphereGeometry args={[.035,16,16]}/><meshStandardMaterial color={index===bend?'#267663':'#c17d43'} depthTest={false}/></mesh></Translation>)}
@@ -186,10 +201,12 @@ export default memo(function Physical({controlsHost,project,selected,onSelect,on
     };window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)
   },[mode,selected,axis,project,bend,onMove,onRoute,onProject])
   const shown=draft??project,wire=shown.wires.find(w=>w.id===selected),device=shown.devices.find(d=>d.id===selected)
+  const building=project.building, site=building?.siteSnapshot
   const port=(id:string,port:string)=>{if(!source){setSource({id,port});return}if(source.id!==id||source.port!==port)onConnect({source:source.id,sourceHandle:source.port,target:id,targetHandle:port});setSource(null)}
   const routeCommit=(id:string,points:Point3[])=>{onRoute(id,points);setDraft(null)}
   return <div className="physical-view" data-mode={mode} data-axis={axis}>
     {buildStage&&<div className="build-status" role="status"><span>{buildStage}</span><button onClick={onBuildComplete}>Take control</button></div>}
+    {shown.building?.siteSnapshot?.source==="esri"&&shown.building.siteSnapshot.visible!==false&&<small className="site-credit">{imageryCredit}</small>}
     <Canvas frameloop="demand" shadows camera={{position:[3.8,3.5,5],fov:40}} dpr={[1,1.7]} gl={{antialias:true}}><Suspense fallback={null}><Scene buildSequence={buildSequence} onBuildComplete={onBuildComplete} roofVisible={roofVisible} seeThrough={seeThrough} project={shown} selected={selected} onSelect={onSelect} mode={mode} axis={axis} command={command} onPreview={(id,p)=>setDraft(moveEquipment(project,id,p))} onMove={(id,p)=>{onMove(id,p);setDraft(null)}} onCancel={cancel} onRoutePreview={(id,points)=>setDraft(setWireRoute(project,id,points))} onRoute={routeCommit} onPort={port} bend={bend} setBend={setBend} onStructurePreview={(id,position)=>setDraft(synchronizeLengths(updateStructure(project,id,{position})))} onStructureMove={(id,position)=>{onProject(updateStructure(project,id,{position}));setDraft(null)}}/></Suspense></Canvas>
     {controlsHost&&createPortal(<div className="physical-editor docked-controls" id="physical-editor">
       <div className="physical-modes">{(['camera','move','connect'] as const).map((value,i)=><button key={value} title={value==='camera'?'V: left-drag to orbit. Right-drag pans; wheel zooms.':value==='move'?'W: drag the selected body or coloured arrows. Escape cancels; one Undo restores the movement.':'C: choose a source terminal, then select the destination equipment and terminal.'} aria-pressed={mode===value} onClick={()=>{setMode(value);setSource(null);cancel()}}>{value==='camera'?'Camera':value==='move'?'Move':'Connect'} <kbd>{['V','W','C'][i]}</kbd></button>)}</div>
@@ -209,6 +226,7 @@ export default memo(function Physical({controlsHost,project,selected,onSelect,on
       <SolarEditor project={shown} selected={selected} onChange={onProject}/>
       {onBuilding&&<button className="building-launch" onClick={onBuilding}>Design home/compartment</button>}
       <label className="building-enable"><input type="checkbox" checked={seeThrough} onChange={event=>setSeeThrough(event.target.checked)}/>Fade obstructing walls, roofs and panels - click through to equipment</label>
+      {building&&site&&<label className="building-enable"><input type="checkbox" checked={site.visible!==false} onChange={event=>{cancel();onProject({...project,building:{...building,siteSnapshot:{...site,visible:event.target.checked}}})}}/>Show site map in plan and 3D</label>}
       {project.building&&<label className="building-enable"><input type="checkbox" checked={roofVisible} onChange={event=>setRoofVisible(event.target.checked)}/>Show roof and panels</label>}
       {!!project.fitIssues?.length&&<details className="fit-issues"><summary>{project.fitIssues.length} placement/routing items</summary>{project.fitIssues.map((issue,i)=><p key={i}>{issue}</p>)}</details>}
       <SpaceEditor project={shown} selected={selected} onChange={onProject} onSelect={onSelect}/>

@@ -1,3 +1,5 @@
+import {SiteMapControl} from './SiteMapControl'
+import {imageryCredit} from './site-snapshot'
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { Copy, Hand, Maximize2, Minus, MousePointer2, Plus, Trash2, Undo2 } from 'lucide-react'
 import { uid } from './model'
@@ -9,23 +11,70 @@ import {autoCirculation,roomFitsOpening} from './building-circulation'
 
 type Tool='select'|'wall'|'curve'|'pan'|'opening'|'stairs'
 type Drag={kind:'node'|'wall'|'control'|'pan'|'compass';id:string;start:PlanPoint;floor:FloorPlan;view:PlanPoint;screen?:PlanPoint; compassAngle?:number; compassBearing?:number}
+type Selection={walls:Set<string>; openings:Set<string>; stairs:Set<NonNullable<BuildingLayout['stairs']>[number]>}
+function selectionBox(a:PlanPoint,b:PlanPoint){
+  return {x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),width:Math.abs(a[0]-b[0]),height:Math.abs(a[1]-b[1])}
+}
 export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentChoices?:Array<{key:string;label:string}>;value:BuildingLayout;onChange:(layout:BuildingLayout)=>void}) {
   const [floorIndex,setFloorIndex]=useState(0),[showLower,setShowLower]=useState(true),[tool,setTool]=useState<Tool>('wall'),[start,setStart]=useState<PlanPoint|null>(null),[selected,setSelected]=useState(''),[draft,setDraft]=useState<FloorPlan|null>(null),[grid,setGrid]=useState(.25),[span,setSpan]=useState(12),[centre,setCentre]=useState<PlanPoint>([0,0]),[aspect,setAspect]=useState(1.6)
   const [openingWidth,setOpeningWidth]=useState(1.2),[openingDepth,setOpeningDepth]=useState(4.4),[planMessage,setPlanMessage]=useState('')
+  const [selection,setSelection]=useState<Selection|null>(null)
+  const [box,setBox]=useState<ReturnType<typeof selectionBox>|null>(null)
+  const marquee=useRef<{start:PlanPoint; screen:PlanPoint; pointer:number; roomId:string}|null>(null)
   const svg=useRef<SVGSVGElement>(null),drag=useRef<Drag|null>(null),history=useRef<BuildingLayout[]>([]),pattern=useId().replace(/:/g,'')
   const pendingFloor=useRef<FloorPlan|null>(null),pendingBearing=useRef<number|null>(null)
   const [bearing,setBearing]=useState<number|null>(null),[placementTarget,setPlacementTarget]=useState<string|null>(null),[cursor,setCursor]=useState<PlanPoint|null>(null)
+  const site=value.siteSnapshot?.visible===false?undefined:value.siteSnapshot
   const floor=value.floors[Math.min(floorIndex,value.floors.length-1)],shown=draft??floor
   const rooms=useMemo(()=>buildingRooms({...value,floors:value.floors.map(f=>f.id===floor.id?shown:f)}),[value,shown,floor.id])
   const roofs=useMemo(()=>availableRoofRooms(value),[value]),wall=shown.walls.find(w=>w.id===selected),room=rooms.find(r=>r.id===selected)
-  const update=(next:BuildingLayout)=>{history.current=[...history.current.slice(-39),structuredClone(value)];onChange(next)}
+  const update=(next:BuildingLayout)=>{history.current=[...history.current.slice(-39),structuredClone(value)];setSelection(null);onChange(next)}
   const updateFloor=(next:FloorPlan)=>update({...value,floors:value.floors.map(f=>f.id===floor.id?next:f)})
+  const openings=(value.floorOpenings??[]).filter(opening=>opening.floor===floorIndex)
+  const stairs=(value.stairs??[]).filter(stair=>stair.floor===floorIndex||stair.floor+1===floorIndex)
+  const selectionCount=selection ? selection.walls.size+selection.openings.size+selection.stairs.size : 0
+  const wholeFloorSelected=selectionCount>0&&selectionCount===floor.walls.length+openings.length+stairs.length
+  function selectArea(area?:ReturnType<typeof selectionBox>){
+    const contains=([x,y]:PlanPoint)=>!area||(x>=area.x&&x<=area.x+area.width&&y>=area.y&&y<=area.y+area.height)
+    const containsRectangle=([x,y]:PlanPoint,width:number,depth:number)=>
+      contains([x-width/2,y-depth/2])&&contains([x+width/2,y+depth/2])
+    setSelected('')
+    setSelection({
+      walls:new Set(floor.walls.filter(wall=>!area||wallPoints(floor,wall).every(contains)).map(wall=>wall.id)),
+      openings:new Set(openings.filter(opening=>containsRectangle(opening.position,opening.width,opening.depth)).map(opening=>opening.id)),
+      stairs:new Set(stairs.filter(stair=>containsRectangle(stair.position,stair.width,stair.run))),
+    })
+  }
+  function removeSelection(){
+    if(!selectionCount||!selection)return
+    const remaining=selection.walls.size?normalizeFloor({...floor,walls:floor.walls.filter(wall=>!selection.walls.has(wall.id))}):floor
+    const next={...value,floors:value.floors.map(candidate=>candidate.id===floor.id?remaining:candidate)}
+    const remainingRooms=selection.walls.size?buildingRooms(next).filter(room=>room.floor===floorIndex):null
+    const stillFits=(point:PlanPoint,width:number,depth:number)=>!remainingRooms||remainingRooms.some(room=>roomFitsOpening(room,point,width,depth))
+    next.floorOpenings=value.floorOpenings?.filter(opening=>!selection.openings.has(opening.id)&&
+      (opening.floor!==floorIndex||stillFits(opening.position,opening.width,opening.depth)))
+    next.stairs=value.stairs?.filter(stair=>!selection.stairs.has(stair)&&
+      (!stairs.includes(stair)||stillFits(stair.position,stair.width,stair.run)))
+    update(next)
+  }
+  function removeFloor(){
+    if(!wholeFloorSelected||value.floors.length<=1)return
+    const shiftedFloor=(index:number)=>index>floorIndex?index-1:index
+    update({
+      ...value,
+      floors:value.floors.filter(candidate=>candidate.id!==floor.id),
+      floorOpenings:value.floorOpenings?.filter(opening=>opening.floor!==floorIndex)
+        .map(opening=>({...opening,floor:shiftedFloor(opening.floor)})),
+      stairs:value.stairs?.filter(stair=>stair.floor!==floorIndex&&stair.floor+1!==floorIndex)
+        .map(stair=>({...stair,floor:shiftedFloor(stair.floor)})),
+    })
+  }
   const fit=()=>{
     const points=[...floor.nodes,...(showLower?value.floors.slice(Math.max(0,floorIndex-1),floorIndex).flatMap(f=>f.nodes):[])].map(n=>n.point)
     if(!points.length){setCentre([0,0]);setSpan(12);return}
     const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);setCentre([(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]);setSpan(Math.max(4,Math.max(...ys)-Math.min(...ys)+3,(Math.max(...xs)-Math.min(...xs)+3)/aspect))
   }
-  useEffect(()=>{setFloorIndex(index=>Math.min(index,value.floors.length-1));fit();setStart(null);setCursor(null);setSelected('');setDraft(null);pendingFloor.current=null;drag.current=null},[floor.id])
+  useEffect(()=>{setFloorIndex(index=>Math.min(index,value.floors.length-1));fit();setStart(null);setCursor(null);setSelected('');setSelection(null);setBox(null);marquee.current=null;setDraft(null);pendingFloor.current=null;drag.current=null},[floor.id])
   useEffect(()=>{const element=svg.current;if(!element)return;const resize=new ResizeObserver(()=>setAspect(element.clientWidth/Math.max(1,element.clientHeight)));resize.observe(element);return()=>resize.disconnect()},[])
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.key==='Escape'){setStart(null);setDraft(null);drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setPlacementTarget(null)}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key)},[])
   const coordinates=(event:PointerEvent<SVGSVGElement>):PlanPoint=>{
@@ -50,7 +99,7 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     return closest??aligned
   }
   const beginDrag=(event:PointerEvent<SVGElement>,kind:Drag['kind'],id:string)=>{
-    if(event.button!==0)return
+    if(event.button!==0||!event.isPrimary)return
     if(placementTarget){
       event.stopPropagation()
       const preference=value.equipmentPlacements?.[placementTarget],chosen=rooms.find(r=>r.id===preference?.roomId)
@@ -58,7 +107,8 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
       return
     }
     if(tool!=='select')return
-    event.stopPropagation();svg.current!.setPointerCapture(event.pointerId)
+    event.stopPropagation();svg.current!.focus();svg.current!.setPointerCapture(event.pointerId)
+    setSelection(null)
     drag.current={kind,id,start:coordinates(event as unknown as PointerEvent<SVGSVGElement>),floor:structuredClone(floor),view:centre};setSelected(id)
   }
   const compassAngle=(point:PlanPoint)=>{
@@ -66,6 +116,11 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     return Math.hypot(dx,dy)<span*.025?undefined:Math.atan2(dx,dy)*180/Math.PI
   }
   const move=(event:PointerEvent<SVGSVGElement>)=>{
+    const activeMarquee=marquee.current
+    if(activeMarquee){
+      if(activeMarquee.pointer===event.pointerId&&planDistance(activeMarquee.screen,[event.clientX,event.clientY])>=4)setBox(selectionBox(activeMarquee.start,coordinates(event)))
+      return
+    }
     const active=drag.current
     const point=coordinates(event)
     if(!active){if(start)setCursor(snap(point,[],tool==='wall'?start:undefined));return}
@@ -93,6 +148,15 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
   }
   const end=(event:PointerEvent<SVGSVGElement>)=>{
     if(event.button!==0)return
+    const activeMarquee=marquee.current
+    if(activeMarquee){
+      if(activeMarquee.pointer!==event.pointerId)return
+      marquee.current=null
+      setBox(null)
+      if(planDistance(activeMarquee.screen,[event.clientX,event.clientY])>=4)selectArea(selectionBox(activeMarquee.start,coordinates(event)))
+      else{setSelected(activeMarquee.roomId);setSelection(null)}
+      return
+    }
     if(drag.current){
       if(drag.current.kind==='compass'&&pendingBearing.current!==null)update({...value,northBearing:pendingBearing.current})
       else if(pendingFloor.current)updateFloor(normalizeFloor(pendingFloor.current))
@@ -158,32 +222,64 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     updateFloor(normalized)
     setPlanMessage('')
   }
-  return <div className="building-editor" onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();setStart(null);setDraft(null);drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setPlacementTarget(null)}if((event.ctrlKey||event.metaKey)&&event.key==='z'){event.preventDefault();event.stopPropagation();const previous=history.current.pop();if(previous)onChange(previous)}}}>
-    <div className="design-fields"><NumberField label="Number of floors" unit="floors" value={value.floors.length} min={1} max={100} onChange={setFloors}/><NumberField label="Floor height" unit="m" value={value.floorHeight} min={.2} max={10} onChange={floorHeight=>update({...value,floorHeight})}/><NumberField label="Wall thickness" unit="m" value={value.wallThickness} min={.05} max={1} onChange={wallThickness=>update({...value,wallThickness})}/>
-      <label className="field"><span>Roof shape</span><select aria-label="Roof shape" value={value.roofShape} onChange={event=>update({...value,roofShape:event.target.value as BuildingLayout['roofShape']})}>{(['flat','gable','hip','shed'] as const).map(shape=><option key={shape} value={shape}>{({flat:'Flat - level',gable:'Gable - two slopes',hip:'Hip - four slopes',shed:'Shed - one slope'})[shape]}</option>)}</select></label><NumberField label="Roof pitch" unit="degrees" value={value.roofPitch} max={65} onChange={roofPitch=>update({...value,roofPitch})}/>
-    </div>
-    <div className="roof-options" role="group" aria-label="Roof type previews">{(['flat','gable','hip','shed'] as const).map(shape=><button key={shape} aria-label={`Choose ${shape} roof`} aria-pressed={value.roofShape===shape} onClick={()=>update({...value,roofShape:shape})}><svg viewBox="0 0 100 65" role="img" aria-label={`${shape} roof preview`}><path d="M15 33V55H85V33" fill="#e2e9de" stroke="#526b64" strokeWidth="3"/><path d={shape==='flat'?'M10 30H90V35H10Z':shape==='gable'?'M8 35L50 8L92 35Z':shape==='hip'?'M8 35L30 10H70L92 35Z':'M8 35L92 10V35Z'} fill="#87b2a0" stroke="#267663" strokeWidth="3"/>{shape==='hip'&&<path d="M30 10L42 35M70 10L58 35" stroke="#267663" strokeWidth="2"/>}</svg><span>{shape[0].toUpperCase()+shape.slice(1)}</span></button>)}</div><div className="plan-toolbar"><label>Floor<select aria-label="Plan floor" value={floorIndex} onChange={event=>setFloorIndex(+event.target.value)}>{value.floors.map((f,i)=><option key={f.id} value={i}>Floor {i+1}</option>)}</select></label>{([['select','Select',MousePointer2],['wall','Straight wall',Plus],['curve','Curved wall',Copy],['pan','Pan',Hand]] as const).map(([mode,label,Icon])=><button key={mode} aria-pressed={tool===mode} onClick={()=>{setTool(mode);setStart(null)}} title={label}><Icon size={15}/>{label}</button>)}<button aria-label="Undo floor plan edit" disabled={!history.current.length} onClick={()=>{const previous=history.current.pop();if(previous){onChange(previous);setDraft(null);setStart(null)}}}><Undo2 size={16}/></button></div>
+  const cancelMarquee=()=>{marquee.current=null;setBox(null)}
+  const undo=()=>{
+    const previous=history.current.pop()
+    if(!previous)return
+    onChange(previous);setDraft(null);setStart(null);setSelected('');setSelection(null);cancelMarquee()
+  }
+  return <div className="building-editor" onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();cancelMarquee();setSelection(null);setStart(null);setDraft(null);drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setPlacementTarget(null)}if((event.ctrlKey||event.metaKey)&&event.key==='z'){event.preventDefault();event.stopPropagation();undo()}}}>
+    <SiteMapControl key={value.id} site={value.siteSnapshot} onChange={(siteSnapshot,frame)=>{
+      update({...value,siteSnapshot})
+      if(frame&&siteSnapshot){setCentre([siteSnapshot.x,siteSnapshot.z]);setSpan(Math.max(siteSnapshot.height,siteSnapshot.width/aspect));setStart(null)}
+    }}/>
+    {value.siteSnapshot&&<label className="building-enable"><input type="checkbox" checked={!!site} onChange={e=>update({...value,siteSnapshot:{...value.siteSnapshot!,visible:e.target.checked}})}/>Show site map in plan and 3D</label>}
+    <div className="plan-toolbar"><label>Floor<select aria-label="Plan floor" value={floorIndex} onChange={event=>setFloorIndex(+event.target.value)}>{value.floors.map((f,i)=><option key={f.id} value={i}>Floor {i+1}</option>)}</select></label>{([['select','Select',MousePointer2],['wall','Straight wall',Plus],['curve','Curved wall',Copy],['pan','Pan',Hand]] as const).map(([mode,label,Icon])=><button key={mode} aria-pressed={tool===mode} onClick={()=>{setTool(mode);setStart(null);setSelection(null);cancelMarquee()}} title={label}><Icon size={15}/>{label}</button>)}<button aria-label="Undo floor plan edit" disabled={!history.current.length} onClick={undo}><Undo2 size={16}/></button></div>
     <div className="plan-toolbar"><button onClick={()=>{try{update(autoCirculation(value));setPlanMessage('Internal doorways added. Stairs connect overlapping floors.')}catch(error){setPlanMessage(error instanceof Error?error.message:String(error))}}}>Auto doors and stairs</button><button aria-pressed={tool==='opening'} onClick={()=>{setTool('opening');setStart(null)}}>Place floor opening</button><button disabled={floorIndex>=value.floors.length-1} aria-pressed={tool==='stairs'} onClick={()=>{setTool('stairs');setStart(null)}}>Place stairs to floor above</button></div>
     {(tool==='opening'||tool==='stairs')&&<div className="design-fields"><NumberField label="Opening width" unit="m" min={.7} max={5} value={openingWidth} onChange={setOpeningWidth}/><NumberField label="Opening length" unit="m" min={1} max={15} value={openingDepth} onChange={setOpeningDepth}/></div>}
     {planMessage&&<p className="plan-feedback" role="status">{planMessage}</p>}
-    <svg ref={svg} className="floor-plan" aria-label="Top-down building floor plan" role="application" tabIndex={0} viewBox={`${centre[0]-span*aspect/2} ${centre[1]-span/2} ${span*aspect} ${span}`} onContextMenu={event=>{if(tool==='wall'||tool==='curve'){event.preventDefault();setStart(null);setCursor(null)}}} onPointerDown={event=>{if(event.button!==0)return;event.currentTarget.focus();if(tool==='pan'){svg.current!.setPointerCapture(event.pointerId);drag.current={kind:'pan',id:'',start:coordinates(event),floor,view:centre,screen:[event.clientX,event.clientY]}}}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setDraft(null)}}>
+    <svg ref={svg} className={site?"floor-plan mapped-plan":"floor-plan"} aria-label="Top-down building floor plan" role="application" tabIndex={0} viewBox={`${centre[0]-span*aspect/2} ${centre[1]-span/2} ${span*aspect} ${span}`} onContextMenu={event=>{if(tool==='wall'||tool==='curve'){event.preventDefault();setStart(null);setCursor(null)}}} onKeyDown={event=>{
+      if(event.target!==event.currentTarget||tool!=='select'||placementTarget)return
+      if((event.key==='Delete'||event.key==='Backspace')&&selectionCount){event.preventDefault();event.stopPropagation();removeSelection()}
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'){event.preventDefault();selectArea()}
+    }} onPointerDown={event=>{
+      if(event.button!==0||!event.isPrimary)return
+      event.currentTarget.focus()
+      if(tool==='pan'){
+        event.currentTarget.setPointerCapture(event.pointerId)
+        drag.current={kind:'pan',id:'',start:coordinates(event),floor,view:centre,screen:[event.clientX,event.clientY]}
+      }
+      if(tool==='select'&&!placementTarget){
+        event.currentTarget.setPointerCapture(event.pointerId)
+        const roomId=(event.target as Element).closest('[data-plan-room]')?.getAttribute('data-plan-room')??''
+        marquee.current={start:coordinates(event),screen:[event.clientX,event.clientY],pointer:event.pointerId,roomId}
+      }
+    }} onPointerMove={move} onPointerUp={end} onLostPointerCapture={event=>{if(marquee.current?.pointer===event.pointerId)cancelMarquee()}} onPointerCancel={()=>{cancelMarquee();drag.current=null;pendingFloor.current=null;pendingBearing.current=null;setBearing(null);setDraft(null)}}>
       <defs><pattern id={pattern} width={grid} height={grid} patternUnits="userSpaceOnUse"><path d={`M${grid} 0H0V${grid}`} fill="none" stroke="#d5ded3" strokeWidth={span/1500}/></pattern></defs>
-      <rect x={centre[0]-span*aspect/2} y={centre[1]-span/2} width={span*aspect} height={span} fill={`url(#${pattern})`}/>
-      {rooms.filter(r=>r.floor===floorIndex).map(r=>{const p=roomInterior(r);return <g key={r.id} onPointerDown={event=>{if(tool==='select'){event.stopPropagation();setSelected(r.id)}}}><polygon points={r.polygon.map(p=>p.join(',')).join(' ')} fill={selected===r.id?'#c2ddca':'#e2e9de'} stroke="none"/><text x={p[0]} y={p[1]} textAnchor="middle" fontSize={span/26} fill="#416953" pointerEvents="none"><title>{r.name}</title>{r.name.replace(/^Floor \d+ room /,'Room ')}<tspan x={p[0]} dy={span/23}>{r.area.toFixed(1)} m²</tspan></text></g>})}
-      {value.floorOpenings?.filter(o=>o.floor===floorIndex).map(o=><g key={o.id} pointerEvents="none" aria-label="Floor opening"><rect x={o.position[0]-o.width/2} y={o.position[1]-o.depth/2} width={o.width} height={o.depth} fill="#f5f7f0" stroke="#9c6b45" strokeWidth={span/300} strokeDasharray={span/80}/><text x={o.position[0]} y={o.position[1]} textAnchor="middle" fontSize={span/35}>Opening</text></g>)}
-      {value.stairs?.filter(stairs=>stairs.floor===floorIndex||stairs.floor+1===floorIndex).map((stairs,index)=><g key={index} pointerEvents="none" aria-label="Plan stairs"><rect x={stairs.position[0]-stairs.width/2} y={stairs.position[1]-stairs.run/2} width={stairs.width} height={stairs.run} fill="#e4d8c1" stroke="#9c805d" strokeWidth={span/350}/>{Array.from({length:12},(_,step)=><line key={step} x1={stairs.position[0]-stairs.width/2} x2={stairs.position[0]+stairs.width/2} y1={stairs.position[1]-stairs.run/2+stairs.run*step/12} y2={stairs.position[1]-stairs.run/2+stairs.run*step/12} stroke="#9c805d" strokeWidth={span/500}/>)}<text x={stairs.position[0]+stairs.width/2+span/40} y={stairs.position[1]} fontSize={span/35}>{stairs.floor===floorIndex?'Up':'Down'}</text></g>)}
+      {site&&<image aria-label="Site snapshot" href={site.image} x={site.x-site.width/2} y={site.z-site.height/2} width={site.width} height={site.height} pointerEvents="none"/>}
+      <rect opacity={site ? .13 : 1} x={centre[0]-span*aspect/2} y={centre[1]-span/2} width={span*aspect} height={span} fill={`url(#${pattern})`}/>
+      {rooms.filter(r=>r.floor===floorIndex).map(r=>{const p=roomInterior(r);return <g key={r.id} data-plan-room={r.id}><polygon fillOpacity={site ? .35 : 1} points={r.polygon.map(p=>p.join(',')).join(' ')} fill={selected===r.id?'#c2ddca':'#e2e9de'} stroke="none"/><text x={p[0]} y={p[1]} textAnchor="middle" fontSize={span/26} fill="#416953" pointerEvents="none"><title>{r.name}</title>{r.name.replace(/^Floor \d+ room /,'Room ')}<tspan x={p[0]} dy={span/23}>{r.area.toFixed(1)} m²</tspan></text></g>})}
+      {openings.map(o=><g key={o.id} pointerEvents="none" aria-label="Floor opening"><rect x={o.position[0]-o.width/2} y={o.position[1]-o.depth/2} width={o.width} height={o.depth} fill={selection?.openings.has(o.id)?'#bce9dc':'#f5f7f0'} stroke="#9c6b45" strokeWidth={span/300} strokeDasharray={span/80}/><text x={o.position[0]} y={o.position[1]} textAnchor="middle" fontSize={span/35}>Opening</text></g>)}
+      {stairs.map((stairs,index)=><g key={index} pointerEvents="none" aria-label="Plan stairs"><rect x={stairs.position[0]-stairs.width/2} y={stairs.position[1]-stairs.run/2} width={stairs.width} height={stairs.run} fill={selection?.stairs.has(stairs)?'#bce9dc':'#e4d8c1'} stroke="#9c805d" strokeWidth={span/350}/>{Array.from({length:12},(_,step)=><line key={step} x1={stairs.position[0]-stairs.width/2} x2={stairs.position[0]+stairs.width/2} y1={stairs.position[1]-stairs.run/2+stairs.run*step/12} y2={stairs.position[1]-stairs.run/2+stairs.run*step/12} stroke="#9c805d" strokeWidth={span/500}/>)}<text x={stairs.position[0]+stairs.width/2+span/40} y={stairs.position[1]} fontSize={span/35}>{stairs.floor===floorIndex?'Up':'Down'}</text></g>)}
       {showLower&&value.floors.slice(Math.max(0,floorIndex-1),floorIndex).map(below=><g key={below.id} aria-label={`Floor ${floorIndex} reference`} pointerEvents="none" opacity={.25}><title>Floor {floorIndex} below - snap guide</title>{below.walls.map(w=><polyline key={w.id} points={wallPoints(below,w).map(p=>p.join(',')).join(' ')} fill="none" stroke="#a66c35" strokeWidth={span/80} strokeDasharray={`${span/40} ${span/70}`}/>)}</g>)}
-      {shown.walls.map(w=><polyline key={w.id} aria-label={`Plan wall ${w.id}`} points={wallPoints(shown,w).map(p=>p.join(',')).join(' ')} fill="none" stroke={placementTarget&&rooms.find(r=>r.id===value.equipmentPlacements?.[placementTarget]?.roomId)?.walls.includes(w.id)?'#d08e45':selected===w.id?'#168578':'#526b64'} strokeWidth={Math.max(value.wallThickness,span/130)} strokeLinecap="round" onPointerDown={event=>beginDrag(event,'wall',w.id)}/>)}
+      {shown.walls.map(w=><polyline key={w.id} aria-label={`Plan wall ${w.id}`} points={wallPoints(shown,w).map(p=>p.join(',')).join(' ')} fill="none" stroke={placementTarget&&rooms.find(r=>r.id===value.equipmentPlacements?.[placementTarget]?.roomId)?.walls.includes(w.id)?'#d08e45':selection?.walls.has(w.id)?'#00ae94':selected===w.id?'#168578':site?'#ecffda':'#526b64'} strokeWidth={Math.max(value.wallThickness,span/130)} strokeLinecap="round" onPointerDown={event=>beginDrag(event,'wall',w.id)}/>)}
       {tool==='select'&&shown.nodes.map(n=><circle key={n.id} cx={n.point[0]} cy={n.point[1]} r={span/90} fill="#fff" stroke="#238572" strokeWidth={span/450} onPointerDown={event=>beginDrag(event,'node',n.id)}/>)}
       {tool==='select'&&wall?.control&&<><line x1={wallPointAt(shown,wall.a)[0]} y1={wallPointAt(shown,wall.a)[1]} x2={wall.control[0]} y2={wall.control[1]} stroke="#68a291" strokeWidth={span/400} strokeDasharray={`${span/70} ${span/70}`}/><circle cx={wall.control[0]} cy={wall.control[1]} r={span/65} fill="#d08e45" onPointerDown={event=>beginDrag(event,'control',wall.id)}/></>}
       <g aria-label="Plan compass" role="slider" tabIndex={0} aria-valuemin={0} aria-valuemax={359} aria-valuenow={bearing??value.northBearing??0} style={{cursor:'grab',touchAction:'none'}} onKeyDown={event=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();event.stopPropagation();update({...value,northBearing:((value.northBearing??0)+(['ArrowLeft','ArrowDown'].includes(event.key)?-5:5)+360)%360})}}} onPointerDown={event=>{if(event.button!==0)return;event.stopPropagation();svg.current!.setPointerCapture(event.pointerId);const point=coordinates(event as unknown as PointerEvent<SVGSVGElement>);drag.current={kind:'compass',id:'',start:point,floor,view:centre,compassAngle:compassAngle(point),compassBearing:value.northBearing??0}}} transform={`translate(${centre[0]+span*aspect/2-span*.09},${centre[1]-span*.37})`}><circle r={span*.08} fill="#f8fbf3" stroke="#b9cec0" strokeWidth={span/500}/><g transform={`rotate(${bearing??value.northBearing??0})`}><path d={`M0 ${-span*.05}L${-span*.018} ${span*.015}L0 0L${span*.018} ${span*.015}Z`} fill="#267663"/><text y={-span*.065} textAnchor="middle" fontSize={span*.035} fill="#267663">N</text></g></g>
       {shown.walls.map((w,i)=>{const points=wallPoints(shown,w),a=points[0],b=points.at(-1)!;return <text key={w.id+'label'} x={(a[0]+b[0])/2} y={(a[1]+b[1])/2-span*.025} textAnchor="middle" fontSize={span*.025} fill="#6f5436" pointerEvents="none">Wall {i+1}{selected===w.id?' · '+lengthOf(w).toFixed(2)+' m':''}</text>})}
       {shown.walls.filter(w=>w.door).map(w=>{const a=wallPointAt(shown,w.a),b=wallPointAt(shown,w.b);return <circle key={w.id+'door'} cx={(a[0]+b[0])/2} cy={(a[1]+b[1])/2} r={span/65} fill="#f5f7f0" stroke="#a67e48" strokeWidth={span/300} pointerEvents="none" aria-label="Plan doorway"/>})}
       {start&&cursor&&<line x1={start[0]} y1={start[1]} x2={cursor[0]} y2={cursor[1]} stroke="#27a78e" strokeWidth={span/160} strokeDasharray={`${span/60} ${span/90}`} pointerEvents="none"/>}{start&&<circle cx={start[0]} cy={start[1]} r={span/75} fill="#27a78e"/>}
+      {box&&<rect {...box} fill="#34ac91" fillOpacity={.23} stroke="#178674" strokeWidth={1.5} vectorEffect="non-scaling-stroke" strokeDasharray="5 3" pointerEvents="none"/>}
     </svg>
+    {tool==='select'&&!placementTarget&&<div className="plan-toolbar">
+      <button type="button" disabled={!floor.walls.length&&!openings.length&&!stairs.length} onClick={()=>selectArea()}>Select all on floor</button>
+      <button type="button" disabled={!selectionCount} onClick={removeSelection}><Trash2 size={15}/>{selectionCount? `Remove ${selectionCount} selected ${selectionCount===1?'item':'items'}`:'Remove selected items'}</button>
+      {wholeFloorSelected&&value.floors.length>1&&<button type="button" onClick={removeFloor}>Remove floor {floorIndex+1}</button>}
+    </div>}
+    {site&&<div className="site-caption"><span>{site.source==="esri"?imageryCredit:"Uploaded snapshot"}</span><button onClick={()=>{setCentre([site.x,site.z]);setSpan(Math.max(site.height,site.width/aspect))}}>Fit site</button></div>}
     <label className="building-enable"><input type="checkbox" checked={showLower} onChange={e=>setShowLower(e.target.checked)}/>Show outline of floor below and snap to its junctions</label>
     <div className="plan-toolbar">{floorIndex>0&&<button onClick={()=>updateFloor({...copyFloor(value.floors[floorIndex-1]),id:floor.id})}>Copy layout from floor below</button>}<button aria-label="Zoom floor plan in" onClick={()=>setSpan(Math.max(1,span*.8))}><Plus size={16}/></button><button aria-label="Zoom floor plan out" onClick={()=>setSpan(Math.min(20000,span*1.25))}><Minus size={16}/></button><button onClick={fit}><Maximize2 size={15}/>Fit layout</button><label>Snap<select aria-label="Floor plan grid size" value={grid} onChange={event=>setGrid(+event.target.value)}>{[.1,.25,.5,1].map(step=><option key={step} value={step}>{step} m</option>)}</select></label>{wall&&<button onClick={removeWall}><Trash2 size={15}/>Remove wall</button>}</div>
-    <p className="plan-instructions">{placementTarget?'Click an amber wall to place the equipment.':tool==='opening'||tool==='stairs'?'Click the centre of the opening or staircase on the grid.':tool==='select'?'Drag a wall or junction to move it. Select a curved wall and drag its amber control.':tool==='pan'?'Drag the plan to pan. Use the zoom controls to change scale.':start?'Choose the next junction. Walls snap and connect at intersections. Right-click or press Escape to end the chain and start a new wall.':'Choose the first and second wall endpoints. Close a loop to create a room.'}</p>
+    <p className="plan-instructions">{placementTarget?'Click an amber wall to place the equipment.':tool==='opening'||tool==='stairs'?'Click the centre of the opening or staircase on the grid.':tool==='select'?'Drag a box around items to select them. Drag a wall or junction to move it.':tool==='pan'?'Drag the plan to pan. Use the zoom controls to change scale.':start?'Choose the next junction. Walls snap and connect at intersections. Right-click or press Escape to end the chain and start a new wall.':'Choose the first and second wall endpoints. Close a loop to create a room.'}</p>
     {wall&&!wall.control&&<label className="building-enable"><input type="checkbox" checked={!!wall.door} onChange={e=>updateFloor({...floor,walls:floor.walls.map(w=>w.id===wall.id?{...w,door:e.target.checked}:w)})}/>Doorway in selected wall</label>}
     {wall&&<form className="selected-wall-dimensions" key={wall.id+':'+wallLength} onSubmit={event=>{
       event.preventDefault()
@@ -193,6 +289,11 @@ export function BuildingEditor({value,onChange,equipmentChoices=[]}:{equipmentCh
     <button type="submit" className="secondary-button">Apply wall length</button><small>Moves the end junction and keeps connected walls attached.</small></form>}
     {wall&&<label className="field"><span>Selected wall shape</span><select aria-label="Selected wall shape" value={wall.control?'curve':'straight'} onChange={event=>{const a=wallPointAt(floor,wall.a),b=wallPointAt(floor,wall.b);updateFloor(normalizeFloor({...floor,walls:floor.walls.map(w=>w.id===wall.id?{...w,control:event.target.value==='curve'?[(a[0]+b[0])/2-(b[1]-a[1])*.25,(a[1]+b[1])/2+(b[0]-a[0])*.25]:undefined}:w)}))}}><option value="straight">Straight</option><option value="curve">Curved</option></select></label>}
     {room&&<label className="field"><span>Room name</span><input aria-label="Selected room name" value={room.name} onChange={event=>update({...value,roomNames:{...value.roomNames,[room.id]:event.target.value}})}/></label>}
+    <h3 className="plan-section-title">Building dimensions</h3>
+    <div className="design-fields"><NumberField label="Number of floors" unit="floors" value={value.floors.length} min={1} max={100} onChange={setFloors}/><NumberField label="Floor height" unit="m" value={value.floorHeight} min={.2} max={10} onChange={floorHeight=>update({...value,floorHeight})}/><NumberField label="Wall thickness" unit="m" value={value.wallThickness} min={.05} max={1} onChange={wallThickness=>update({...value,wallThickness})}/>
+      <label className="field"><span>Roof shape</span><select aria-label="Roof shape" value={value.roofShape} onChange={event=>update({...value,roofShape:event.target.value as BuildingLayout['roofShape']})}>{(['flat','gable','hip','shed'] as const).map(shape=><option key={shape} value={shape}>{({flat:'Flat - level',gable:'Gable - two slopes',hip:'Hip - four slopes',shed:'Shed - one slope'})[shape]}</option>)}</select></label><NumberField label="Roof pitch" unit="degrees" value={value.roofPitch} max={65} onChange={roofPitch=>update({...value,roofPitch})}/>
+    </div>
+    <div className="roof-options" role="group" aria-label="Roof type previews">{(['flat','gable','hip','shed'] as const).map(shape=><button key={shape} aria-label={`Choose ${shape} roof`} aria-pressed={value.roofShape===shape} onClick={()=>update({...value,roofShape:shape})}><svg viewBox="0 0 100 65" role="img" aria-label={`${shape} roof preview`}><path d="M15 33V55H85V33" fill="#e2e9de" stroke="#526b64" strokeWidth="3"/><path d={shape==='flat'?'M10 30H90V35H10Z':shape==='gable'?'M8 35L50 8L92 35Z':shape==='hip'?'M8 35L30 10H70L92 35Z':'M8 35L92 10V35Z'} fill="#87b2a0" stroke="#267663" strokeWidth="3"/>{shape==='hip'&&<path d="M30 10L42 35M70 10L58 35" stroke="#267663" strokeWidth="2"/>}</svg><span>{shape[0].toUpperCase()+shape.slice(1)}</span></button>)}</div>
     <div className="design-fields"><NumberField label="Compass north bearing" unit="degrees clockwise from plan up" value={value.northBearing??0} max={359.99} onChange={northBearing=>update({...value,northBearing})}/><label className="field"><span>Solar hemisphere</span><select aria-label="Solar hemisphere" value={value.solarHemisphere??'south'} onChange={e=>update({...value,solarHemisphere:e.target.value as 'south'|'north'})}><option value="south">Southern - favour north-facing roof</option><option value="north">Northern - favour south-facing roof</option></select></label></div><p role="note">Compass: N {value.northBearing??0} degrees clockwise from the top of the plan. Panels fill the roof slopes facing the equator first.</p>
     {!!value.stairs?.length&&<details><summary>Stair connections</summary>{value.stairs.map((stairs,index)=><div className="plan-toolbar" key={index}><span>Floor {stairs.floor+1} to {stairs.floor+2}</span><button onClick={()=>update({...value,stairs:value.stairs?.filter((_,i)=>i!==index)})}>Remove stairs {index+1}</button></div>)}</details>}
     {!!value.floorOpenings?.length&&<details><summary>Floor openings</summary>{value.floorOpenings.map((opening,index)=><div className="plan-toolbar" key={opening.id}><span>Floor {opening.floor+1} / {opening.width} x {opening.depth} m</span><button onClick={()=>update({...value,floorOpenings:value.floorOpenings?.filter(o=>o.id!==opening.id)})}>Remove opening {index+1}</button></div>)}</details>}

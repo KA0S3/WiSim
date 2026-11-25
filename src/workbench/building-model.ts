@@ -1,3 +1,4 @@
+import {validSiteSnapshot,type SiteSnapshot} from './site-snapshot'
 export type PlanPoint = [number, number]
 export type PlanNode = { id: string; point: PlanPoint }
 export type PlanWall = { id: string; a: string; b: string; control?: PlanPoint; door?:boolean }
@@ -5,6 +6,7 @@ export type FloorPlan = { id: string; nodes: PlanNode[]; walls: PlanWall[] }
 export type BuildingLayout = {
   id: string; floors: FloorPlan[]; floorHeight: number; wallThickness: number;
   roofShape: 'flat' | 'gable' | 'hip' | 'shed'; roofPitch: number;
+  siteSnapshot?: SiteSnapshot
   northBearing?: number; solarHemisphere?: 'south' | 'north'; equipmentPlacements?: Record<string,{roomId:string;wallId?:string}>; roomNames: Record<string, string>; equipmentRoomId?: string; panelRoomId?: string
   stairs?:Array<{floor:number;position:PlanPoint;width:number;run:number}>
   floorOpenings?:Array<{id:string;floor:number;position:PlanPoint;width:number;depth:number}>
@@ -17,6 +19,7 @@ export function validBuilding(value: unknown): value is BuildingLayout {
   const id = (value: unknown) => typeof value === 'string' && /^[\w-]+$/.test(value) && !['__proto__', 'constructor', 'prototype'].includes(value)
   const point = (value: unknown): value is PlanPoint => Array.isArray(value) && value.length === 2 && value.every(n => Number.isFinite(n) && Math.abs(n) <= 10000)
   if (!id(b.id) || !Array.isArray(b.floors) || !b.floors.length || b.floors.length > 100 || !Number.isFinite(b.floorHeight) || b.floorHeight < .2 || b.floorHeight > 10 || !Number.isFinite(b.wallThickness) || b.wallThickness < .05 || b.wallThickness > 1 || !['flat', 'gable', 'hip', 'shed'].includes(b.roofShape) || !Number.isFinite(b.roofPitch) || b.roofPitch < 0 || b.roofPitch > 65 || !b.roomNames || typeof b.roomNames !== 'object' || Array.isArray(b.roomNames) || Object.values(b.roomNames).some(name => typeof name !== 'string') || b.equipmentRoomId !== undefined && !id(b.equipmentRoomId) || b.panelRoomId !== undefined && !id(b.panelRoomId)) return false
+  if(b.siteSnapshot!==undefined&&!validSiteSnapshot(b.siteSnapshot))return false
   if(b.northBearing!==undefined&&(!Number.isFinite(b.northBearing)||b.northBearing<0||b.northBearing>=360))return false
   if(b.solarHemisphere!==undefined&&!['south','north'].includes(b.solarHemisphere))return false
   if(b.equipmentPlacements!==undefined&&(!b.equipmentPlacements||typeof b.equipmentPlacements!=='object'||Object.values(b.equipmentPlacements).some(p=>!p||!id(p.roomId)||p.wallId!==undefined&&!id(p.wallId))))return false

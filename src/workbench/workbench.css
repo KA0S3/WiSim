@@ -652,3 +652,32 @@
 .building-editor .plan-toolbar button[aria-pressed="true"] {
   background:#e0f0e7; border-color:#618e80; color:#214f44;
 }
+
+.site-map-control { margin:12px 0; padding:12px 14px; border:1px solid #bdcec8; border-radius:10px; background:#f3f8f6; color:#233e36 }
+.site-map-control summary { display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:650 }
+.site-map-control summary small { margin-left:auto; font-size:11px; font-weight:500; text-align:right }
+.site-map-control summary::after { content:'+' }
+.site-map-control[open] summary::after { content:'−' }
+.site-map-control[open] summary { margin-bottom:14px }
+.site-map-control p,.site-caption { font-size:12px; line-height:1.5 }
+.site-upload { position:relative; overflow:hidden; cursor:pointer; padding:6px 10px; border:1px solid #b9cbc2; border-radius:5px }
+.site-upload input { position:absolute; inset:0; opacity:0; width:100%; cursor:pointer }
+.site-upload:focus-within { outline:2px solid #267663 }
+.site-caption { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 2px; color:#446254 }
+.site-caption button { white-space:nowrap; font-weight:600 }
+.mapped-plan text { paint-order:stroke; stroke:#f6faf5; stroke-width:3px; stroke-linejoin:round; vector-effect:non-scaling-stroke }
+.plan-section-title { font-size:14px; margin:20px 0 10px }
+.site-credit { position:absolute; bottom:4px; left:6px; z-index:1; pointer-events:none; background:#ffffffe0; color:#263d34; padding:2px 5px; font-size:10px }
+.site-map-control .property-search { background:#216957; border-color:#216957; color:white; font-weight:600 }
+.site-map-control .property-search:disabled { opacity:.55 }
+.site-alternatives { border-top:1px solid #cddbd4; margin-top:12px; padding-top:10px }
+.site-map-control .site-alternatives summary { justify-content:space-between; font-size:12px; font-weight:500 }
+.property-matches { display:grid; gap:5px; margin-bottom:10px; font-size:12px }
+.property-matches button { text-align:left; padding:8px; background:white; border:1px solid #cddbd4; border-radius:5px }
+.property-map { width:100%; height:clamp(250px,40vh,400px); border-radius:8px; isolation:isolate; background:#c9d6d2 }
+.property-picker { min-width:0; margin:12px 0 }
+.property-map .leaflet-control-attribution { max-width:100%; white-space:normal; font-size:9px }
+.property-matches { max-height:240px; overflow-y:auto; overscroll-behavior:contain; padding:2px }
+.property-matches button { display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:38px }
+.property-matches button small { font-size:10px; color:#456757 }
+.property-matches button:focus-visible { outline:2px solid #267663 }
